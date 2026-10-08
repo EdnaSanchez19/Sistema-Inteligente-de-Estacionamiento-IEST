@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Estacionamiento IEST",
+    "slug": "estacionamiento-iest",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": false },
+    "android": { "package": "mx.edu.iest.estacionamiento" }
+  }
+}

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+
+# Entorno y secretos
+.env
+mobile/.env
+
+# Modelos y datos pesados
+*.pt
+*.onnx
+datasets/
+runs/
+frames_baja_confianza/
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
