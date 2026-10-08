@@ -22,7 +22,7 @@ function Eventos() {
         items.map((e) => (
           <Card key={e.id} style={{ gap: 6 }}>
             <View style={s.row}>
-              <Badge text={e.tipo.replace('_', ' ')} color={eventoColor[e.tipo]} />
+              <Badge text={e.tipo.replace(/_/g, ' ')} color={eventoColor[e.tipo]} />
               <Text style={s.date}>{formatoFecha(e.fecha)}</Text>
             </View>
             <Text style={s.text}>{e.descripcion}</Text>
@@ -46,7 +46,7 @@ function Camaras() {
               </Text>
               <Badge text={c.estado === 'en_linea' ? 'En línea' : 'Desconectada'} color={c.estado === 'en_linea' ? colors.free : colors.occupied} />
             </View>
-            <Text style={s.date}>Última señal: {formatoFecha(c.ultimaSenal)}</Text>
+            <Text style={s.date}>Última señal: {c.ultimaSenal ? formatoFecha(c.ultimaSenal) : 'sin señal'}</Text>
           </Card>
         ))
       }

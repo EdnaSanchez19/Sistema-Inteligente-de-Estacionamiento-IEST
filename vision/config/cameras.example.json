@@ -1,0 +1,20 @@
+{
+  "model": "yolov8n.pt",
+  "imgsz": 960,
+  "pendant_model": null,
+  "save_low_confidence": false,
+  "cameras": [
+    {
+      "id": "CAM-01",
+      "source": "rtsp://${CAM01_USER}:${CAM01_PASS}@192.168.1.64:554/Streaming/Channels/101",
+      "interval_s": 2.0,
+      "conf": 0.35,
+      "occupied_ratio": 0.30,
+      "footprint": 0.6,
+      "spaces": [
+        { "id": "A-01", "polygon": [[100, 400], [220, 400], [230, 520], [90, 520]] },
+        { "id": "A-02", "polygon": [[225, 400], [345, 400], [360, 520], [235, 520]] }
+      ]
+    }
+  ]
+}

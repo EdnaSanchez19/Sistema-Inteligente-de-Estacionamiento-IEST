@@ -26,3 +26,7 @@ frames_baja_confianza/
 Thumbs.db
 .vscode/
 .idea/
+
+# Visión
+vision/config/cameras.json
+salida/

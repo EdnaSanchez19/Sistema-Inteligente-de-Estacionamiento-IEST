@@ -43,7 +43,7 @@ export interface Notificacion {
   leida: boolean;
 }
 
-export type TipoEvento = 'entrada' | 'salida' | 'cambio_ocupacion' | 'error_deteccion' | 'camara_desconectada';
+export type TipoEvento = 'entrada' | 'salida' | 'cambio_ocupacion' | 'error_deteccion' | 'camara_desconectada' | 'camara_restablecida';
 
 export interface Evento {
   id: number;
@@ -57,7 +57,7 @@ export interface AlertaCamara {
   camara: string;
   zona: string;
   estado: 'en_linea' | 'desconectada';
-  ultimaSenal: string; // ISO
+  ultimaSenal: string | null; // ISO
 }
 
 export const esAdmin = (u?: Usuario | null) => u?.rol === 'admin';
