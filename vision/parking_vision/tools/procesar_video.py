@@ -20,6 +20,7 @@ import cv2
 from ..config import CameraConfig, load_config
 from ..detector import VehicleDetector
 from ..draw import draw_result
+from ..estabilizar import Estabilizador, proyectar
 from ..occupancy import OccupancyTracker, compute_occupancy
 
 
@@ -46,7 +47,7 @@ def metricas(tp: int, fp: int, tn: int, fn: int) -> dict[str, float]:
     return {"exactitud": div(tp + tn, total), "precision": div(tp, tp + fp), "recall": div(tp, tp + fn), "n": total}
 
 
-def procesar(cam: CameraConfig, detector, video: Path, cada_s: float, salida: Path | None, csv_path: Path | None, etiquetas: dict | None, tolerancia: float, limite_s: float | None):
+def procesar(cam: CameraConfig, detector, video: Path, cada_s: float, salida: Path | None, csv_path: Path | None, etiquetas: dict | None, tolerancia: float, limite_s: float | None, estabilizar: bool = False):
     cap = cv2.VideoCapture(str(video))
     if not cap.isOpened():
         raise SystemExit(f"No se pudo abrir el video {video}")
@@ -59,6 +60,7 @@ def procesar(cam: CameraConfig, detector, video: Path, cada_s: float, salida: Pa
         writer = cv2.VideoWriter(str(salida), cv2.VideoWriter_fourcc(*"mp4v"), 1.0 / cada_s, (w, h))
 
     tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free)
+    estab = Estabilizador() if estabilizar else None
     filas, eventos = [], []
     tp = fp = tn = fn = 0
     idx = 0
@@ -70,8 +72,9 @@ def procesar(cam: CameraConfig, detector, video: Path, cada_s: float, salida: Pa
             t = idx / fps
             if limite_s and t > limite_s:
                 break
+            spaces = proyectar(cam.spaces, estab.update(frame)) if estab else cam.spaces
             dets = [d for d in detector.detect(frame) if d.conf >= cam.conf]
-            states = compute_occupancy(cam.spaces, dets, cam.occupied_ratio, cam.footprint)
+            states = compute_occupancy(spaces, dets, cam.occupied_ratio, cam.footprint)
             crudo = {s.id: s.occupied for s in states}
             for ch in tracker.update(crudo):
                 if ch.previous is not None:
@@ -88,9 +91,11 @@ def procesar(cam: CameraConfig, detector, video: Path, cada_s: float, salida: Pa
                         tn += (not confirmado) and (not real)
             if writer:
                 confirmed_states = [type(s)(s.id, tracker.state[s.id], s.confidence, s.detection_index) for s in states]
-                writer.write(draw_result(frame, cam.spaces, confirmed_states, dets))
+                writer.write(draw_result(frame, spaces, confirmed_states, dets))
         idx += 1
     cap.release()
+    if estab and estab.perdidos:
+        print(f"Aviso: no se pudo estimar el movimiento de la cámara en {estab.perdidos} fotogramas")
     if writer:
         writer.release()
     if csv_path:
@@ -115,6 +120,7 @@ def main() -> None:
     ap.add_argument("--etiquetas", type=Path, default=None, help="CSV t_seg,espacio,ocupado con la verdad (opcional)")
     ap.add_argument("--tolerancia", type=float, default=2.0, help="segundos máximos entre un fotograma y su etiqueta")
     # Para calibrar umbrales sin editar el JSON: prueba varios valores y compara las métricas.
+    ap.add_argument("--estabilizar", action="store_true", help="los cajones siguen el movimiento de la cámara (dron, viento, vibración)")
     ap.add_argument("--conf", type=float, default=None, help="sobrescribe la confianza mínima de la cámara")
     ap.add_argument("--ratio", type=float, default=None, help="sobrescribe occupied_ratio")
     ap.add_argument("--footprint", type=float, default=None, help="sobrescribe footprint")
@@ -131,7 +137,7 @@ def main() -> None:
     detector = VehicleDetector(args.model or cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes)
     etiquetas = cargar_etiquetas(args.etiquetas) if args.etiquetas else None
 
-    filas, eventos, (tp, fp, tn, fn) = procesar(cam, detector, args.video, args.cada, args.salida, args.csv, etiquetas, args.tolerancia, args.limite)
+    filas, eventos, (tp, fp, tn, fn) = procesar(cam, detector, args.video, args.cada, args.salida, args.csv, etiquetas, args.tolerancia, args.limite, args.estabilizar)
 
     n_inst = len({f[0] for f in filas})
     print(f"{n_inst} fotogramas procesados ({args.cada} s entre cada uno), {len(cam.spaces)} cajones")

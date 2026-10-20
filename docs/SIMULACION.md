@@ -23,6 +23,8 @@ Por eso el informe de 4.3 debe decir que el piloto fue **simulado con video** y 
 | `parking_vision.tools.etiquetar` | Marcar a mano qué cajones están ocupados en fotogramas del video (la verdad) |
 | `parking_vision.tools.procesar_video` | Procesa el video completo, genera video con cajones, línea de tiempo, eventos y métricas |
 | `parking_vision.tools.condiciones` | Degrada el video: `noche`, `lluvia`, `niebla`, `sol`, `ruido` |
+| `parking_vision.tools.comparar_condiciones` | Sin etiquetas: cuántos vehículos de la imagen original sigue encontrando el modelo en cada condición |
+| `procesar_video --estabilizar` | Los cajones acompañan el movimiento de la cámara (dron, viento, vibración) |
 | `scripts/simular_rtsp.py` | Publica el video por RTSP como una cámara IP, con caídas programables |
 | `scripts/simulate_cameras.py` | Publica ocupación aleatoria directo a la API (para demostrar la app) |
 | `scripts/crear_video_prueba.py` | Montaje sintético con verdad conocida, solo para probar las herramientas |
@@ -119,6 +121,47 @@ Lo que sí muestra: las herramientas funcionan de punta a punta, y la noche es l
 detección (recall 0.95 → 0.78). Los errores de la versión original son el retraso de 1–2 s por la confirmación de
 cambios, no fallos del modelo. La cadena RTSP → visión → API también se probó (el video publicado por mediamtx, el
 servidor de visión con YOLO y la API reflejando entradas y salidas), y la captura se reconecta sola tras una caída.
+
+## Resultados con el video generado con IA (Gemini)
+
+Video de 10 s, 1280×720, 24 fps: una toma **aérea que avanza** sobre un estacionamiento de centro comercial con
+unos 80 autos. Está **generado con IA**, no es una grabación real, y eso importa: la escena cambia mientras la
+cámara se mueve (a los 8 s ya no son los mismos autos en cada fila), no hay entradas ni salidas y casi todo está
+ocupado. Sirve para probar el detector en una escena densa y de aspecto real, pero **no** para medir la
+precisión que tendría el sistema con las cámaras del IEST.
+
+**Detección.** YOLOv8n (imgsz 1280) encuentra entre 72 y 86 vehículos por fotograma, prácticamente todos los
+visibles. Por el ángulo, los recuadros de autos vecinos se traslapan mucho; por eso cada vehículo se asigna a un
+solo cajón y se usa la parte inferior del recuadro (`footprint`).
+
+**Ocupación por cajón.** 8 cajones dibujados a ojo sobre el primer fotograma: 6 con auto y 2 sobre asfalto vacío
+como control negativo; la verdad es constante (se etiquetó a ojo, no con el modelo).
+
+| Tramo | Cajones fijos | Con `--estabilizar` |
+|---|---|---|
+| Primeros 2.5 s (toma casi estable) | **100 %** de exactitud (48 comparaciones), 0 eventos falsos | – |
+| Primeros 5 s | – | 87.5 % (2 falsas salidas) |
+| 10 s completos | – | 70.6 % (5 falsas salidas) |
+
+Los cajones se "pierden" porque la proyección se deforma al cambiar la toma, no porque el modelo deje de ver los
+autos (se comprobó en el video de salida). Con una **cámara fija real** este problema no existe. El estabilizador
+queda disponible para cámaras que vibran un poco, no para una toma de dron.
+
+**Condiciones adversas** (`comparar_condiciones`, 10 fotogramas, 792 vehículos de línea base; retención = fracción
+de los vehículos del video original que el modelo sigue encontrando):
+
+| Condición | Retención | Detecciones extra |
+|---|---|---|
+| Lluvia | 93.8 % | 4.0 % |
+| Sol de frente | 84.3 % | 5.1 % |
+| Ruido y compresión | 67.8 % | 3.9 % |
+| Noche | 63.8 % | 4.0 % |
+| Niebla | 54.7 % | 5.3 % |
+
+La retención se mide contra lo que el modelo detecta en la imagen limpia, no contra una verdad etiquetada, y los
+filtros solo aproximan el clima real. En esta escena muchos autos son pequeños y lejanos, que es lo primero que se
+pierde; con cámaras más cercanas a los cajones debería ser mejor, pero eso hay que comprobarlo. Si la noche y la
+niebla resultan críticas, habrá que probar un modelo mayor (yolov8s/m) y reentrenar con video nocturno real.
 
 ## Qué debería pedir el informe de validación (propuesta)
 

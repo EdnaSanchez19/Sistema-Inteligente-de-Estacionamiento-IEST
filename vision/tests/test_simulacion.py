@@ -50,3 +50,35 @@ def test_condiciones_cambian_la_imagen_sin_romper_el_formato():
         assert not np.array_equal(out, frame), nombre
     assert condiciones.noche(frame, rng).mean() < frame.mean() * 0.5  # la noche es mucho más oscura
     assert condiciones.sol_de_frente(frame, rng).mean() > frame.mean()  # el sol sobreexpone
+
+
+def test_comparar_condiciones_empareja_por_iou_sin_reutilizar_detecciones():
+    from parking_vision.occupancy import Detection
+    from parking_vision.tools.comparar_condiciones import emparejar, iou
+
+    base = [Detection(0, 0, 100, 100, 0.9), Detection(200, 0, 300, 100, 0.9)]
+    assert iou(base[0], base[0]) == 1.0 and iou(base[0], base[1]) == 0.0
+    # una detección desplazada 10 px sigue emparejando; la que no existe en la base cuenta como "extra"
+    otras = [Detection(10, 0, 110, 100, 0.8), Detection(500, 0, 600, 100, 0.8)]
+    assert emparejar(base, otras) == (1, 1)
+    # una sola detección no puede emparejar con dos vehículos de la base
+    assert emparejar([base[0], base[0]], [base[0]]) == (1, 0)
+
+
+def test_estabilizador_sigue_un_desplazamiento_de_camara():
+    import cv2
+
+    from parking_vision.estabilizar import Estabilizador, proyectar
+
+    rng = np.random.default_rng(1)
+    escena = np.full((480, 640, 3), 120, np.uint8)
+    for _ in range(250):  # textura con detalle para que haya puntos que seguir
+        x, y, r = int(rng.integers(0, 640)), int(rng.integers(0, 480)), int(rng.integers(3, 14))
+        cv2.circle(escena, (x, y), r, tuple(int(c) for c in rng.integers(0, 255, 3)), -1)
+    est = Estabilizador()
+    est.update(escena)
+    mov = cv2.warpAffine(escena, np.float32([[1, 0, 30], [0, 1, 12]]), (640, 480), borderMode=cv2.BORDER_REPLICATE)
+    H = est.update(mov)
+    assert abs(H[0, 2] - 30) < 2 and abs(H[1, 2] - 12) < 2
+    caja = proyectar([Space("A-01", rect(100, 100, 200, 200))], H)[0].polygon
+    assert abs(caja[0][0] - 130) < 2 and abs(caja[0][1] - 112) < 2  # el cajón acompaña a la cámara
