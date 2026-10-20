@@ -120,6 +120,16 @@ de esas corridas están en [`evidencias/`](evidencias). Como no hay acceso a las
 reales, la validación se hace con video: ver [`docs/SIMULACION.md`](docs/SIMULACION.md).
 Detalles del servidor de visión en [`vision/README.md`](vision/README.md) y de la base de datos en [`db/README.md`](db/README.md).
 
+## Evidencias
+
+Registros de pruebas, videos e imágenes de la simulación en [`evidencias/`](evidencias). Vista rápida (cajones sobre
+un video generado con IA, verde = libre, rojo = ocupado) y detalle completo en
+[`evidencias/README.md`](evidencias/README.md):
+
+![Cajones sobre el video con IA](evidencias/03_video_ia/resultado_cajones_estabilizados.gif)
+
+![Condiciones simuladas](evidencias/03_video_ia/montaje_condiciones_simuladas.jpg)
+
 ## Flujo de trabajo
 
 - Una rama `main` estable; cada tarea del cronograma entra como un commit/PR `feat(X.Y): ...`.

@@ -9,6 +9,29 @@ sistema. Los textos son la salida tal cual de los programas (solo se reemplazaro
 > Demuestra que el sistema funciona de punta a punta y cómo reacciona a distintas condiciones, pero **no** es una
 > medición de precisión con las cámaras reales; eso queda para el piloto real.
 
+## Vista rápida
+
+**Cajones sobre el video generado con IA** (verde = libre, rojo = ocupado, amarillo = vehículo detectado). El video
+completo está en [`video_resultado_cajones_estabilizados.mp4`](03_video_ia/video_resultado_cajones_estabilizados.mp4).
+
+![Cajones sobre el video con IA](03_video_ia/resultado_cajones_estabilizados.gif)
+
+**Detección de vehículos en el primer fotograma** (72 a 86 vehículos por fotograma):
+
+![Detecciones del modelo en el fotograma 0](03_video_ia/detecciones_fotograma_0s.jpg)
+
+**Las mismas escenas bajo condiciones simuladas** (noche, lluvia, niebla, sol de frente y ruido):
+
+![Condiciones simuladas](03_video_ia/montaje_condiciones_simuladas.jpg)
+
+**Cajones siguiendo el movimiento de la cámara** a los 0, 4 y 8 s (a los 8 s la toma ya cambió demasiado):
+
+![Cajones estabilizados](03_video_ia/montaje_cajones_estabilizados_0s_4s_8s.jpg)
+
+**Montaje sintético con verdad exacta** (3 cajones; un vehículo entra y sale):
+
+![Video sintético](02_simulacion_sintetica/resultado_video_sintetico.gif)
+
 ## Índice
 
 | Carpeta | Qué demuestra |
