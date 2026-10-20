@@ -16,7 +16,7 @@ async def lifespan(_: FastAPI):
     tarea.cancel()
 
 
-app = FastAPI(title="Estacionamiento IEST API", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="Estacionamiento IEST API", version="1.0.0", lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(consulta.router)
 app.include_router(admin.router)
