@@ -1,0 +1,80 @@
+{
+  "model": "models/yolov8n.pt",
+  "cameras": [
+    {
+      "id": "CAM-01",
+      "source": "datasets\\prueba_sintetica\\video.mp4",
+      "interval_s": 1.0,
+      "conf": 0.35,
+      "occupied_ratio": 0.3,
+      "footprint": 1.0,
+      "confirm_occupied": 2,
+      "confirm_free": 2,
+      "spaces": [
+        {
+          "id": "A-01",
+          "polygon": [
+            [
+              70,
+              250
+            ],
+            [
+              370,
+              250
+            ],
+            [
+              370,
+              650
+            ],
+            [
+              70,
+              650
+            ]
+          ]
+        },
+        {
+          "id": "A-02",
+          "polygon": [
+            [
+              490,
+              250
+            ],
+            [
+              790,
+              250
+            ],
+            [
+              790,
+              650
+            ],
+            [
+              490,
+              650
+            ]
+          ]
+        },
+        {
+          "id": "A-03",
+          "polygon": [
+            [
+              910,
+              250
+            ],
+            [
+              1210,
+              250
+            ],
+            [
+              1210,
+              650
+            ],
+            [
+              910,
+              650
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

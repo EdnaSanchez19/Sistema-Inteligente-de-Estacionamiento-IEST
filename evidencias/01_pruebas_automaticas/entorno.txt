@@ -1,0 +1,17 @@
+# Generado el 2026-10-20 16:33
+
+## Entorno donde se ejecutaron las pruebas
+
+Python 3.12.10 en Windows 11
+fastapi            0.143.0
+numpy              2.5.2
+pydantic           2.14.0
+pytest             9.1.1
+SQLAlchemy         2.0.54
+torch              2.6.0+cu124
+ultralytics        8.4.117
+uvicorn            0.54.0
+GPU: NVIDIA GeForce RTX 4050 Laptop GPU
+v22.19.0
+ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers
+

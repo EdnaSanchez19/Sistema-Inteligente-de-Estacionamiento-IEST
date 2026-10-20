@@ -1,0 +1,101 @@
+# Generado el 2026-10-20 16:33
+
+## API y base de datos (api/tests) — código de salida 0
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- <repo>\.venv\Scripts\python.exe
+rootdir: <repo>\api
+plugins: anyio-4.15.1
+collecting ... collected 22 items
+
+tests/test_admin.py::test_endpoints_de_administracion_exigen_admin PASSED [  4%]
+tests/test_admin.py::test_alta_de_usuario_vehiculo_y_colgante PASSED     [  9%]
+tests/test_admin.py::test_desactivar_usuario_bloquea_login_y_no_puede_hacerse_a_si_mismo PASSED [ 13%]
+tests/test_admin.py::test_asignar_espacio_y_correccion_manual PASSED     [ 18%]
+tests/test_admin.py::test_aviso_manual_y_visibilidad PASSED              [ 22%]
+tests/test_admin.py::test_aviso_automatico_zona_casi_llena_y_llena PASSED [ 27%]
+tests/test_admin.py::test_fechas_salen_con_zona_horaria_utc PASSED       [ 31%]
+tests/test_admin.py::test_watchdog_marca_camaras_sin_senal PASSED        [ 36%]
+tests/test_api.py::test_login_y_me PASSED                                [ 40%]
+tests/test_api.py::test_roles_en_endpoints_de_admin PASSED               [ 45%]
+tests/test_api.py::test_consultas_de_la_app PASSED                       [ 50%]
+tests/test_api.py::test_ingesta_requiere_api_key PASSED                  [ 54%]
+tests/test_api.py::test_ocupacion_genera_estado_y_eventos PASSED         [ 59%]
+tests/test_api.py::test_colgante_no_registrado_y_sin_colgante PASSED     [ 63%]
+tests/test_api.py::test_no_pisa_espacios_reservados_ni_fuera_de_servicio PASSED [ 68%]
+tests/test_api.py::test_camara_desconectada_y_restablecida PASSED        [ 72%]
+tests/test_api.py::test_secretos_sin_configurar_rechazan PASSED          [ 77%]
+tests/test_models.py::test_seed_crea_zonas_espacios_y_admin PASSED       [ 81%]
+tests/test_models.py::test_cadena_usuario_vehiculo_colgante_espacio PASSED [ 86%]
+tests/test_models.py::test_numero_de_espacio_unico_por_zona PASSED       [ 90%]
+tests/test_models.py::test_colgante_unico_por_vehiculo PASSED            [ 95%]
+tests/test_models.py::test_hash_de_password PASSED                       [100%]
+
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\fastapi\testclient.py:1
+  <repo>\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 22 passed, 1 warning in 6.15s ========================
+
+## Servidor de visión (vision/tests) — código de salida 0
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- <repo>\.venv\Scripts\python.exe
+rootdir: <repo>
+plugins: anyio-4.15.1
+collecting ... collected 14 items
+
+vision/tests/test_occupancy.py::test_vehiculo_dentro_ocupa_solo_su_cajon PASSED [  7%]
+vision/tests/test_occupancy.py::test_vehiculo_entre_dos_cajones_ocupa_solo_el_de_mayor_solape PASSED [ 14%]
+vision/tests/test_occupancy.py::test_vehiculo_apenas_tocando_no_cuenta PASSED [ 21%]
+vision/tests/test_occupancy.py::test_sin_detecciones_todo_libre PASSED   [ 28%]
+vision/tests/test_occupancy.py::test_footprint_reduce_el_derrame_hacia_cajones_de_atras PASSED [ 35%]
+vision/tests/test_occupancy.py::test_tracker_antirrebote PASSED          [ 42%]
+vision/tests/test_occupancy.py::test_parse_code_y_asignacion_de_colgante PASSED [ 50%]
+vision/tests/test_occupancy.py::test_config_cajones_y_variables PASSED   [ 57%]
+vision/tests/test_simulacion.py::test_metricas PASSED                    [ 64%]
+vision/tests/test_simulacion.py::test_etiquetas_ida_y_vuelta_y_busqueda_por_tiempo PASSED [ 71%]
+vision/tests/test_simulacion.py::test_clic_identifica_el_cajon PASSED    [ 78%]
+vision/tests/test_simulacion.py::test_condiciones_cambian_la_imagen_sin_romper_el_formato PASSED [ 85%]
+vision/tests/test_simulacion.py::test_comparar_condiciones_empareja_por_iou_sin_reutilizar_detecciones PASSED [ 92%]
+vision/tests/test_simulacion.py::test_estabilizador_sigue_un_desplazamiento_de_camara PASSED [100%]
+
+============================= 14 passed in 2.52s ==============================
+
+## End-to-end (tests/e2e) — código de salida 0
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- <repo>\.venv\Scripts\python.exe
+rootdir: <repo>
+plugins: anyio-4.15.1
+collecting ... collected 19 items
+
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[Usuario] PASSED [  5%]
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[Espacio] PASSED [ 10%]
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[Vehiculo] PASSED [ 15%]
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[Notificacion] PASSED [ 21%]
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[Evento] PASSED [ 26%]
+tests/e2e/test_contract.py::test_la_api_entrega_los_campos_que_espera_la_app[AlertaCamara] PASSED [ 31%]
+tests/e2e/test_contract.py::test_vehiculo_trae_el_colgante_anidado PASSED [ 36%]
+tests/e2e/test_contract.py::test_los_valores_de_los_enums_coinciden[EstadoEspacio-EstadoEspacio] PASSED [ 42%]
+tests/e2e/test_contract.py::test_los_valores_de_los_enums_coinciden[TipoEspacio-TipoEspacio] PASSED [ 47%]
+tests/e2e/test_contract.py::test_los_valores_de_los_enums_coinciden[TipoEvento-TipoEvento] PASSED [ 52%]
+tests/e2e/test_contract.py::test_los_valores_de_los_enums_coinciden[Rol-Rol] PASSED [ 57%]
+tests/e2e/test_pipeline.py::test_entrada_y_salida_de_un_vehiculo_con_colgante PASSED [ 63%]
+tests/e2e/test_pipeline.py::test_parpadeos_cortos_no_generan_eventos PASSED [ 68%]
+tests/e2e/test_pipeline.py::test_camara_sin_senal_genera_alerta PASSED   [ 73%]
+tests/e2e/test_pipeline.py::test_aviso_cuando_la_zona_se_llena PASSED    [ 78%]
+tests/e2e/test_pipeline.py::test_modelo_yolo_real_sobre_una_foto PASSED  [ 84%]
+tests/e2e/test_rtsp_simulada.py::test_captura_rtsp_cae_y_se_reconecta PASSED [ 89%]
+tests/e2e/test_video_simulado.py::test_video_de_dia_se_mide_con_buena_exactitud PASSED [ 94%]
+tests/e2e/test_video_simulado.py::test_la_noche_simulada_no_mejora_y_el_banco_lo_detecta PASSED [100%]
+
+======================== 19 passed in 90.91s (0:01:30) ========================
+
+## App móvil, verificación de tipos (tsc --noEmit) — código de salida 0
+
+> estacionamiento-mobile@1.0.0 typecheck
+> tsc --noEmit
+

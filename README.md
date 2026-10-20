@@ -115,7 +115,8 @@ de 3 minutos sin enviar datos (`CAMERA_TIMEOUT_S`).
 python scripts/run_tests.py       # API, visión, end-to-end y tipos de la app
 ```
 
-Resultados y alcance en [`docs/PRUEBAS_INTEGRACION.md`](docs/PRUEBAS_INTEGRACION.md). Como no hay acceso a las cámaras
+Resultados y alcance en [`docs/PRUEBAS_INTEGRACION.md`](docs/PRUEBAS_INTEGRACION.md); los registros, videos e imágenes
+de esas corridas están en [`evidencias/`](evidencias). Como no hay acceso a las cámaras
 reales, la validación se hace con video: ver [`docs/SIMULACION.md`](docs/SIMULACION.md).
 Detalles del servidor de visión en [`vision/README.md`](vision/README.md) y de la base de datos en [`db/README.md`](db/README.md).
 

@@ -5,7 +5,7 @@
 Como no habrá acceso a las cámaras del IEST, se agregó lo necesario para validar con video: procesamiento de
 video con métricas (`procesar_video`), etiquetado manual (`etiquetar`), degradación por condiciones
 (`condiciones`: noche, lluvia, niebla, sol, ruido), cámara RTSP simulada (`scripts/simular_rtsp.py`, con ffmpeg y
-mediamtx), captura RTSP por TCP y pruebas automáticas (53 en total). Guía en [`docs/SIMULACION.md`](docs/SIMULACION.md).
+mediamtx), captura RTSP por TCP y pruebas automáticas (55 en total). Guía en [`docs/SIMULACION.md`](docs/SIMULACION.md).
 Se probó con un video generado con IA (toma aérea de ~80 autos): detección sólida y mediciones de sensibilidad a
 noche y niebla en `docs/SIMULACION.md`. Sigue faltando un video de **cámara fija real** para medir la precisión.
 

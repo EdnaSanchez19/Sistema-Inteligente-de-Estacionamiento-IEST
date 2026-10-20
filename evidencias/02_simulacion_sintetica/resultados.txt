@@ -1,0 +1,100 @@
+# Generado el 2026-10-20 16:35
+
+## Video sintético — Original
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 47%, A-03 40%
+Eventos: 2 entradas, 2 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     18.0 s  A-03  entrada
+     24.0 s  A-02  salida
+
+Contra las etiquetas (90 comparaciones): exactitud 0.944, precisión 0.927, recall 0.950
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         38       2
+  libre            3      47
+
+## Video sintético — noche
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 50%, A-03 17%
+Eventos: 3 entradas, 3 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     23.0 s  A-03  entrada
+     25.0 s  A-02  salida
+     25.0 s  A-03  salida
+     27.0 s  A-03  entrada
+
+Contra las etiquetas (90 comparaciones): exactitud 0.856, precisión 0.886, recall 0.775
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         31       9
+  libre            4      46
+
+## Video sintético — lluvia
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 50%, A-03 40%
+Eventos: 2 entradas, 2 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     18.0 s  A-03  entrada
+     25.0 s  A-02  salida
+
+Contra las etiquetas (90 comparaciones): exactitud 0.933, precisión 0.905, recall 0.950
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         38       2
+  libre            4      46
+
+## Video sintético — niebla
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 50%, A-03 40%
+Eventos: 2 entradas, 2 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     18.0 s  A-03  entrada
+     25.0 s  A-02  salida
+
+Contra las etiquetas (90 comparaciones): exactitud 0.933, precisión 0.905, recall 0.950
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         38       2
+  libre            4      46
+
+## Video sintético — sol
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 50%, A-03 40%
+Eventos: 2 entradas, 2 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     18.0 s  A-03  entrada
+     25.0 s  A-02  salida
+
+Contra las etiquetas (90 comparaciones): exactitud 0.933, precisión 0.905, recall 0.950
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         38       2
+  libre            4      46
+
+## Video sintético — ruido
+
+30 fotogramas procesados (1.0 s entre cada uno), 3 cajones
+Ocupación media por cajón: A-01 50%, A-02 50%, A-03 40%
+Eventos: 2 entradas, 2 salidas
+     10.0 s  A-02  entrada
+     15.0 s  A-01  salida
+     18.0 s  A-03  entrada
+     25.0 s  A-02  salida
+
+Contra las etiquetas (90 comparaciones): exactitud 0.933, precisión 0.905, recall 0.950
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         38       2
+  libre            4      46
+

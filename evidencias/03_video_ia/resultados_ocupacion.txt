@@ -1,0 +1,45 @@
+# Generado el 2026-10-20 16:36
+
+## Primeros 2.5 s, cajones fijos (toma casi estable)
+
+6 fotogramas procesados (0.5 s entre cada uno), 8 cajones
+Ocupación media por cajón: A-01 100%, A-02 100%, A-03 100%, A-04 100%, A-05 100%, A-06 100%, A-07 0%, A-08 0%
+Eventos: 0 entradas, 0 salidas
+
+Contra las etiquetas (48 comparaciones): exactitud 1.000, precisión 1.000, recall 1.000
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         36       0
+  libre            0      12
+
+## Primeros 5 s, con estabilizador
+
+11 fotogramas procesados (0.5 s entre cada uno), 8 cajones
+Ocupación media por cajón: A-01 55%, A-02 100%, A-03 100%, A-04 100%, A-05 100%, A-06 45%, A-07 0%, A-08 0%
+Eventos: 0 entradas, 2 salidas
+      2.5 s  A-06  salida
+      3.0 s  A-01  salida
+
+Contra las etiquetas (88 comparaciones): exactitud 0.875, precisión 1.000, recall 0.833
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         55      11
+  libre            0      22
+
+## Video completo (10 s), con estabilizador
+
+20 fotogramas procesados (0.5 s entre cada uno), 8 cajones
+Ocupación media por cajón: A-01 30%, A-02 55%, A-03 70%, A-04 85%, A-05 100%, A-06 25%, A-07 0%, A-08 0%
+Eventos: 0 entradas, 5 salidas
+      2.5 s  A-06  salida
+      3.0 s  A-01  salida
+      5.5 s  A-02  salida
+      7.0 s  A-03  salida
+      8.5 s  A-04  salida
+
+Contra las etiquetas (160 comparaciones): exactitud 0.706, precisión 1.000, recall 0.608
+Matriz de confusión (filas = real, columnas = predicho)
+             ocupado   libre
+  ocupado         73      47
+  libre            0      40
+

@@ -1,0 +1,36 @@
+# Generado el 2026-10-20 16:39
+
+Cadena completa con el video sintético (3 cajones, A-01 a A-03), sin intervención manual:
+
+  video.mp4 --(ffmpeg + mediamtx, RTSP)--> servidor de visión (YOLOv8n) --HTTP--> API real (uvicorn, SQLite temporal) --> consulta como usuario
+
+La tabla muestra el estado de los cajones según la API cada vez que cambia (t en segundos desde el inicio de la
+captura). El video dura 30 s y se repite en bucle. Las líneas `INFO vision:` son del servidor de visión.
+Al final se listan los eventos y el estado de las cámaras que ve el administrador.
+Nota: "SIN SEÑAL" al inicio es normal: el servidor de visión arrancó unos segundos antes de que la cámara simulada
+empezara a transmitir.
+
+Cámara simulada en rtsp://127.0.0.1:8571/cam1  (Ctrl+C para detener)
+t(s)  A-01     A-02     A-03
+   0  libre     libre     libre   
+  16  ocupado   ocupado   libre   
+  18  libre     ocupado   libre   
+  19  libre     ocupado   ocupado 
+  25  libre     libre     ocupado 
+  33  ocupado   libre     libre   
+  42  ocupado   ocupado   libre   
+  46  libre     ocupado   libre   
+  49  libre     ocupado   ocupado 
+eventos: [('camara_restablecida', 'Cámara CAM-01 restablecida'), ('entrada', 'Entrada en A-01: vehículo sin colgante identificado'), ('entrada', 'Entrada en A-02: vehículo sin colgante identificado'), ('salida', 'Salida de A-01'), ('entrada', 'Entrada en A-03: vehículo sin colgante identificado'), ('salida', 'Salida de A-02'), ('entrada', 'Entrada en A-01: vehículo sin colgante identificado'), ('salida', 'Salida de A-03'), ('entrada', 'Entrada en A-02: vehículo sin colgante identificado'), ('salida', 'Salida de A-01'), ('entrada', 'Entrada en A-03: vehículo sin colgante identificado')]
+camaras: [('CAM-01', 'en_linea'), ('CAM-02', 'desconectada'), ('CAM-03', 'desconectada')]
+2026-10-20 16:38:14,546 INFO vision: Procesando 1 cámara(s). Ctrl+C para salir.
+2026-10-20 16:38:15,551 INFO vision: CAM-01 SIN SEÑAL
+2026-10-20 16:38:18,641 INFO vision: CAM-01 en línea
+2026-10-20 16:38:26,484 INFO vision: CAM-01 A-01 -> libre
+2026-10-20 16:38:27,577 INFO vision: CAM-01 A-03 -> OCUPADO
+2026-10-20 16:38:33,979 INFO vision: CAM-01 A-02 -> libre
+2026-10-20 16:38:41,613 INFO vision: CAM-01 A-01 -> OCUPADO
+2026-10-20 16:38:41,613 INFO vision: CAM-01 A-03 -> libre
+2026-10-20 16:38:50,197 INFO vision: CAM-01 A-02 -> OCUPADO
+2026-10-20 16:38:54,520 INFO vision: CAM-01 A-01 -> libre
+2026-10-20 16:38:57,774 INFO vision: CAM-01 A-03 -> OCUPADO

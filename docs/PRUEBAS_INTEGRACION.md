@@ -12,7 +12,7 @@ python -m pytest tests/e2e -q      # solo las end-to-end
 | Suite | Pruebas | Resultado |
 |---|---|---|
 | API y base de datos (`api/tests`) | 22 | Todas pasan |
-| Servidor de visión, lógica y herramientas de simulación (`vision/tests`) | 12 | Todas pasan |
+| Servidor de visión, lógica y herramientas de simulación (`vision/tests`) | 14 | Todas pasan |
 | End-to-end (`tests/e2e`) | 19 | Todas pasan |
 | App móvil: `tsc --noEmit` | – | Sin errores |
 

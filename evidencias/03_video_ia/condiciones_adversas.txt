@@ -1,0 +1,13 @@
+# Generado el 2026-10-20 16:37
+
+## Retención de vehículos detectados frente a la imagen original
+
+10 fotogramas, 792 vehículos en la línea base (79 por fotograma)
+
+condición   retención    extra
+noche           63.8%     4.0%
+lluvia          93.8%     4.0%
+niebla          54.7%     5.3%
+sol             84.3%     5.1%
+ruido           67.8%     3.9%
+
