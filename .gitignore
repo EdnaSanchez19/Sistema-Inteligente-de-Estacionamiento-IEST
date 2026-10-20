@@ -30,3 +30,6 @@ Thumbs.db
 # Visión
 vision/config/cameras.json
 salida/
+
+# Herramientas descargadas para simulación
+herramientas_externas/

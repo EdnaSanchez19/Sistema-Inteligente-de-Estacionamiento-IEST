@@ -1,5 +1,13 @@
 # Cambios
 
+## Sin versión — banco de simulación con video (20/10/2026)
+
+Como no habrá acceso a las cámaras del IEST, se agregó lo necesario para validar con video: procesamiento de
+video con métricas (`procesar_video`), etiquetado manual (`etiquetar`), degradación por condiciones
+(`condiciones`: noche, lluvia, niebla, sol, ruido), cámara RTSP simulada (`scripts/simular_rtsp.py`, con ffmpeg y
+mediamtx), captura RTSP por TCP y pruebas automáticas (53 en total). Guía en [`docs/SIMULACION.md`](docs/SIMULACION.md).
+Falta ejecutarlo con un video real de estacionamiento: lo medido hasta ahora usa un montaje sintético.
+
 ## 1.0.0 — 20/10/2026 · Versión funcional (hito 3.7)
 
 Primera versión completa de punta a punta, lista para entrar a las pruebas (fase 4).

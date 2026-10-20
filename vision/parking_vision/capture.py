@@ -1,11 +1,15 @@
 """Captura de video (RTSP, archivo, webcam o imagen) con reconexión automática."""
 from __future__ import annotations
 
+import os
 import threading
 import time
 
 import cv2
 import numpy as np
+
+# RTSP por TCP: más estable que UDP si hay pérdida de paquetes en la LAN/WiFi (no pisa lo que el usuario ya haya definido).
+os.environ.setdefault("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
 
 
 class CameraStream:
