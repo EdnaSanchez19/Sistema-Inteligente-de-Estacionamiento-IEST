@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import AdminScreen from '../screens/AdminScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -18,7 +19,14 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 const icon = (name: IconName) => ({ color, size }: { color: string; size: number }) => <Ionicons name={name} color={color} size={size} />;
 
 export default function Navigation() {
-  const { usuario } = useAuth();
+  const { usuario, cargando } = useAuth();
+  if (cargando) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary }}>
+        <ActivityIndicator color="#fff" size="large" />
+      </View>
+    );
+  }
   if (!usuario) return <LoginScreen />;
 
   return (

@@ -7,7 +7,7 @@ import { colors, spacing } from '../theme';
 
 export default function HomeScreen() {
   const { usuario } = useAuth();
-  const state = useLoad(api.espacios);
+  const state = useLoad(api.espacios, 15_000);
 
   return (
     <Screen state={state}>

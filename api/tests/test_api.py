@@ -1,40 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from sqlalchemy import select
 
-from app import seed
-from app.db import Base, get_db
+from app.db import get_db
 from app.main import app
 from app.models import Espacio, EstadoEspacio
-
-KEY = {"X-API-Key": "clave-ingesta-pruebas"}
-
-
-@pytest.fixture()
-def client(monkeypatch):
-    monkeypatch.setenv("SEED_ADMIN_PASSWORD", "admin-pass-123")
-    monkeypatch.setenv("SEED_DEMO_PASSWORD", "demo-pass-123")
-    # StaticPool: una sola conexión en memoria compartida por toda la prueba
-    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    Base.metadata.create_all(engine)
-    with Session(engine) as s:
-        seed.seed_base(s)
-        seed.seed_demo(s)
-
-    def override():
-        with Session(engine) as s:
-            yield s
-
-    app.dependency_overrides[get_db] = override
-    yield TestClient(app)
-    app.dependency_overrides.clear()
-
-
-def login(client, correo, password):
-    r = client.post("/auth/login", data={"username": correo, "password": password})
-    return {"Authorization": f"Bearer {r.json()['access_token']}"} if r.status_code == 200 else None
+from helpers import KEY, login
 
 
 def test_login_y_me(client):

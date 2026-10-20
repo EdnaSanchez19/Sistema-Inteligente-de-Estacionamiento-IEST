@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     jwt_expire_minutes: int = 480
     ingest_api_key: str = ""
+    camera_timeout_s: int = 180  # sin señal de una cámara durante este tiempo => desconectada
+    camera_check_interval_s: int = 60
 
     model_config = SettingsConfigDict(env_file=(".env", "../.env"), extra="ignore")
 

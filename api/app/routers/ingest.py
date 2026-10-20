@@ -1,12 +1,14 @@
 """Endpoints que usa el servidor de visión para publicar resultados (autenticados con X-API-Key)."""
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..auth import require_ingest_key
 from ..db import get_db
-from ..models import Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, TipoEvento, utcnow
+from ..models import Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, Notificacion, TipoEvento, Zona, utcnow
 from ..schemas import CamaraEstadoIn, OcupacionIn
+
+UMBRAL_CASI_LLENA = 3  # libres a partir de los cuales se avisa a todos los usuarios
 
 router = APIRouter(prefix="/ingest", tags=["ingest"], dependencies=[Depends(require_ingest_key)])
 
@@ -16,6 +18,19 @@ def _camara(db: Session, codigo: str) -> Camara:
     if cam is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Cámara {codigo} no registrada")
     return cam
+
+
+def _libres(db: Session, zona_id: int) -> int:
+    return db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona_id, Espacio.estado == EstadoEspacio.libre)) or 0
+
+
+def _avisar_cambio_de_zona(db: Session, zona_id: int, antes: int, despues: int) -> None:
+    """Notifica a todos cuando una zona se llena o queda casi llena (solo al cruzar el umbral)."""
+    zona = db.get(Zona, zona_id)
+    if despues == 0 and antes > 0:
+        db.add(Notificacion(titulo=f"Zona {zona.nombre} llena", mensaje=f"Ya no hay espacios libres en la zona {zona.nombre}."))
+    elif 0 < despues <= UMBRAL_CASI_LLENA < antes:
+        db.add(Notificacion(titulo=f"Zona {zona.nombre} casi llena", mensaje=f"Quedan {despues} espacios libres en la zona {zona.nombre}."))
 
 
 def _marcar_en_linea(db: Session, cam: Camara) -> None:
@@ -33,6 +48,7 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         db.add(Evento(tipo=TipoEvento.error_deteccion, descripcion=f"Confianza baja en {cam.codigo}", camara_id=cam.id))
 
     espacios = {e.numero: e for e in db.scalars(select(Espacio).where(Espacio.camara_id == cam.id))}
+    libres_antes = _libres(db, cam.zona_id)
     desconocidos, cambios = [], 0
     for item in data.espacios:
         esp = espacios.get(item.numero)
@@ -62,6 +78,9 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
             esp.colgante_actual = None
             db.add(Evento(tipo=TipoEvento.salida, descripcion=desc, espacio_id=esp.id, camara_id=cam.id, colgante_id=colgante_previo.id if colgante_previo else None))
         esp.estado = nuevo
+    if cambios:
+        db.flush()
+        _avisar_cambio_de_zona(db, cam.zona_id, libres_antes, _libres(db, cam.zona_id))
     db.commit()
     return {"actualizados": cambios, "desconocidos": desconocidos}
 

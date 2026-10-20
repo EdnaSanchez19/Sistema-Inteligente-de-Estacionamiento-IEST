@@ -56,8 +56,8 @@ export function Title({ children }: { children: React.ReactNode }) {
   return <Text style={s.title}>{children}</Text>;
 }
 
-/** Carga datos asíncronos con soporte de pull-to-refresh. */
-export function useLoad<T>(fn: () => Promise<T>) {
+/** Carga datos asíncronos con pull-to-refresh y, opcionalmente, actualización automática cada `intervalMs`. */
+export function useLoad<T>(fn: () => Promise<T>, intervalMs?: number) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,7 +73,10 @@ export function useLoad<T>(fn: () => Promise<T>) {
 
   useEffect(() => {
     load();
-  }, [load]);
+    if (!intervalMs) return;
+    const id = setInterval(load, intervalMs);
+    return () => clearInterval(id);
+  }, [load, intervalMs]);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);

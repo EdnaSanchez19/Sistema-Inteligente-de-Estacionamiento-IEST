@@ -14,7 +14,7 @@ const tipoEtiqueta: Record<TipoEspacio, string> = {
 };
 
 export default function ZonesScreen() {
-  const state = useLoad(api.espacios);
+  const state = useLoad(api.espacios, 15_000);
   const [zona, setZona] = useState<string | null>(null);
 
   return (

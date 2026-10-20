@@ -1,16 +1,35 @@
 import * as mock from '../data/mock';
 import { AlertaCamara, Espacio, Evento, Notificacion, ResumenZona, Usuario, Vehiculo } from '../types';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
-const USE_MOCK = (process.env.EXPO_PUBLIC_USE_MOCK ?? 'true') === 'true';
+const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
+export const USE_MOCK = (process.env.EXPO_PUBLIC_USE_MOCK ?? 'false') === 'true';
+const TIMEOUT_MS = 10_000;
 
 let token: string | null = null;
+let onUnauthorized: (() => void) | null = null;
+
 export const setToken = (t: string | null) => {
   token = t;
 };
+/** La sesión registra aquí qué hacer cuando el servidor responde 401 (token vencido o usuario desactivado). */
+export const setUnauthorizedHandler = (fn: (() => void) | null) => {
+  onUnauthorized = fn;
+};
+
+async function send(path: string, init: RequestInit = {}): Promise<Response> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    return await fetch(`${API_URL}${path}`, { ...init, signal: ctrl.signal });
+  } catch {
+    throw new Error('No se pudo conectar con el servidor. Revisa tu conexión.');
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await send(path, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -18,7 +37,12 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...(init.headers ?? {}),
     },
   });
-  if (!res.ok) throw new Error(`Error ${res.status} en ${path}`);
+  if (res.status === 401) {
+    onUnauthorized?.();
+    throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+  }
+  if (res.status === 403) throw new Error('No tienes permisos para ver esta información.');
+  if (!res.ok) throw new Error(`El servidor respondió con error ${res.status}.`);
   return res.json() as Promise<T>;
 }
 
@@ -43,16 +67,21 @@ export const api = {
       const usuario = correo.startsWith('admin') ? mock.adminDemo : mock.usuarioDemo;
       return delay({ token: 'mock-token', usuario });
     }
-    const form = new URLSearchParams({ username: correo, password });
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await send('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form.toString(),
+      body: new URLSearchParams({ username: correo, password }).toString(),
     });
-    if (!res.ok) throw new Error('Credenciales incorrectas');
-    const data = await res.json();
-    setToken(data.access_token);
-    return { token: data.access_token, usuario: await request<Usuario>('/auth/me') };
+    if (res.status === 401) throw new Error('Correo o contraseña incorrectos');
+    if (!res.ok) throw new Error(`El servidor respondió con error ${res.status}.`);
+    const { access_token } = await res.json();
+    setToken(access_token);
+    return { token: access_token, usuario: await request<Usuario>('/auth/me') };
+  },
+  /** Recupera la sesión guardada: devuelve el usuario si el token sigue siendo válido. */
+  async restaurar(savedToken: string): Promise<Usuario> {
+    setToken(savedToken);
+    return request<Usuario>('/auth/me');
   },
   espacios: (): Promise<Espacio[]> => (USE_MOCK ? delay(mock.espacios) : request('/espacios')),
   vehiculos: (): Promise<Vehiculo[]> => (USE_MOCK ? delay(mock.vehiculos) : request('/vehiculos/mios')),

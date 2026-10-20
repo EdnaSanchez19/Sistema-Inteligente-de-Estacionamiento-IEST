@@ -1,9 +1,18 @@
 """Esquemas de respuesta. Los nombres coinciden con los tipos de mobile/src/types.ts."""
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field
 
-from .models import Camara, Colgante, Espacio, Evento, Notificacion, Usuario, Vehiculo
+from .models import Camara, Colgante, Espacio, Evento, Notificacion, Rol, TipoColgante, TipoEspacio, EstadoEspacio, Usuario, Vehiculo
+
+
+def _utc(dt: datetime | None) -> datetime | None:
+    """SQLite devuelve fechas sin zona; se interpretan como UTC para que la app las convierta bien."""
+    return dt.replace(tzinfo=timezone.utc) if dt is not None and dt.tzinfo is None else dt
+
+
+UtcDatetime = Annotated[datetime, AfterValidator(_utc)]
 
 
 class UsuarioOut(BaseModel):
@@ -54,7 +63,7 @@ class NotificacionOut(BaseModel):
     id: int
     titulo: str
     mensaje: str
-    fecha: datetime
+    fecha: UtcDatetime
     leida: bool
 
     @classmethod
@@ -66,7 +75,7 @@ class EventoOut(BaseModel):
     id: int
     tipo: str
     descripcion: str
-    fecha: datetime
+    fecha: UtcDatetime
 
     @classmethod
     def of(cls, e: Evento) -> "EventoOut":
@@ -78,7 +87,7 @@ class CamaraOut(BaseModel):
     camara: str
     zona: str
     estado: str
-    ultimaSenal: datetime | None
+    ultimaSenal: UtcDatetime | None
 
     @classmethod
     def of(cls, c: Camara) -> "CamaraOut":
@@ -108,3 +117,62 @@ class OcupacionIn(BaseModel):
 class CamaraEstadoIn(BaseModel):
     camara: str = Field(max_length=40)
     en_linea: bool
+
+
+# --- Administración (solo rol admin) ---
+class UsuarioIn(BaseModel):
+    nombre: str = Field(min_length=2, max_length=120)
+    correo: str = Field(min_length=5, max_length=160, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    password: str = Field(min_length=8, max_length=128)
+    rol: Rol = Rol.estudiante
+
+
+class UsuarioPatch(BaseModel):
+    nombre: str | None = Field(default=None, min_length=2, max_length=120)
+    rol: Rol | None = None
+    activo: bool | None = None
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+
+
+class VehiculoIn(BaseModel):
+    usuario_id: int
+    placa: str | None = Field(default=None, max_length=20)
+    marca: str = Field(min_length=1, max_length=60)
+    modelo: str = Field(min_length=1, max_length=60)
+    color: str = Field(min_length=1, max_length=40)
+
+
+class ColganteIn(BaseModel):
+    codigo: str = Field(min_length=3, max_length=40)
+    tipo: TipoColgante
+    vehiculo_id: int | None = None
+
+
+class ColgantePatch(BaseModel):
+    vehiculo_id: int | None = None  # None desvincula
+    tipo: TipoColgante | None = None
+    activo: bool | None = None
+
+
+class ColganteAdminOut(BaseModel):
+    id: int
+    codigo: str
+    tipo: str
+    vehiculoId: int | None
+    activo: bool
+
+    @classmethod
+    def of(cls, c: Colgante) -> "ColganteAdminOut":
+        return cls(id=c.id, codigo=c.codigo, tipo=c.tipo.value, vehiculoId=c.vehiculo_id, activo=c.activo)
+
+
+class EspacioPatch(BaseModel):
+    estado: EstadoEspacio | None = None
+    tipo: TipoEspacio | None = None
+    usuario_asignado_id: int | None = None  # None desasigna (solo si viene en el cuerpo)
+
+
+class NotificacionIn(BaseModel):
+    titulo: str = Field(min_length=1, max_length=120)
+    mensaje: str = Field(min_length=1, max_length=1000)
+    usuario_id: int | None = None  # None = para todos
