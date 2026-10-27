@@ -1,13 +1,13 @@
-// Colores provisionales: reemplazar por los institucionales definidos en el
-// diseño de interfaz (tarea 2.4) cuando se tengan los mockups finales.
+// Colores institucionales aproximados (marrón y naranja de los logos de la Universidad Anáhuac / IEST), iguales a los
+// del panel web. Ajustar si el diseño final (tarea 2.4) define otros tonos.
 export const colors = {
-  primary: '#0B2A5B',
+  primary: '#6A2F23',
   accent: '#F28C28',
-  bg: '#F4F6FA',
+  bg: '#F5F1EE',
   card: '#FFFFFF',
-  text: '#1B2430',
-  muted: '#6B7686',
-  border: '#E1E6EE',
+  text: '#241A17',
+  muted: '#7B6B65',
+  border: '#E7DFDA',
   free: '#2E9E5B',
   occupied: '#D64545',
   reserved: '#E0A800',

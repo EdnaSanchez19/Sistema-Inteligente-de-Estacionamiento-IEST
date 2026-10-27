@@ -6,7 +6,14 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": false },
-    "android": { "package": "mx.edu.iest.estacionamiento" }
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "mx.edu.iest.estacionamiento"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }
