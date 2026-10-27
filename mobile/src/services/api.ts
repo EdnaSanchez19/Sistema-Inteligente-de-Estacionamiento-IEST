@@ -51,12 +51,15 @@ const delay = <T,>(v: T, ms = 250) => new Promise<T>((r) => setTimeout(() => r(v
 export const resumenPorZona = (espacios: Espacio[]): ResumenZona[] => {
   const zonas = [...new Set(espacios.map((e) => e.zona))].sort();
   return zonas.map((zona) => {
-    const delaZona = espacios.filter((e) => e.zona === zona && e.estado !== 'fuera_de_servicio');
+    const delaZona = espacios.filter((e) => e.zona === zona);
+    // Solo cuentan los cajones que una cámara ya observó: los demás no tienen un estado real que mostrar.
+    const vistos = delaZona.filter((e) => e.monitoreado && e.estado !== 'fuera_de_servicio');
     return {
       zona,
       total: delaZona.length,
-      libres: delaZona.filter((e) => e.estado === 'libre').length,
-      ocupados: delaZona.filter((e) => e.estado === 'ocupado').length,
+      monitoreados: delaZona.filter((e) => e.monitoreado).length,
+      libres: vistos.filter((e) => e.estado === 'libre').length,
+      ocupados: vistos.filter((e) => e.estado === 'ocupado').length,
     };
   });
 };

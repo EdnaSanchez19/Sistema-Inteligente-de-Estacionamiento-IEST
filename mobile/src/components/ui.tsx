@@ -48,6 +48,10 @@ export function Legend() {
           <Text style={s.legendText}>{estadoTexto[e]}</Text>
         </View>
       ))}
+      <View style={s.legendItem}>
+        <View style={[s.dot, { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.offline }]} />
+        <Text style={s.legendText}>Sin monitoreo</Text>
+      </View>
     </View>
   );
 }

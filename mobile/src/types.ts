@@ -17,13 +17,17 @@ export interface Espacio {
   zona: string;
   tipo: TipoEspacio;
   estado: EstadoEspacio;
+  /** false: ninguna cámara ha reportado este cajón; su estado no es una observación y se muestra "sin monitoreo" */
+  monitoreado: boolean;
+  actualizado?: string | null; // ISO
 }
 
 export interface ResumenZona {
   zona: string;
-  total: number;
-  libres: number;
-  ocupados: number;
+  total: number; // cajones de la isla
+  monitoreados: number; // los que una cámara ya observa
+  libres: number; // solo entre los monitoreados
+  ocupados: number; // solo entre los monitoreados
 }
 
 export interface Vehiculo {

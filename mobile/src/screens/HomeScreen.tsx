@@ -14,6 +14,7 @@ export default function HomeScreen() {
       {(espacios) => {
         const zonas = resumenPorZona(espacios);
         const total = zonas.reduce((a, z) => a + z.total, 0);
+        const monitoreados = zonas.reduce((a, z) => a + z.monitoreados, 0);
         const libres = zonas.reduce((a, z) => a + z.libres, 0);
         const ocupados = zonas.reduce((a, z) => a + z.ocupados, 0);
         return (
@@ -22,9 +23,12 @@ export default function HomeScreen() {
             <Card style={{ gap: spacing.md }}>
               <Text style={s.muted}>Espacios disponibles</Text>
               <Text style={s.big}>
-                {libres} <Text style={s.of}>de {total}</Text>
+                {libres} <Text style={s.of}>de {monitoreados} monitoreados</Text>
               </Text>
-              <OccupancyBar libres={libres} ocupados={ocupados} total={total} />
+              <OccupancyBar libres={libres} ocupados={ocupados} total={monitoreados} />
+              <Text style={s.muted}>
+                Cobertura: {monitoreados} de {total} cajones ({total ? Math.round((monitoreados / total) * 100) : 0} %). El resto aún no tiene cámara.
+              </Text>
               <Legend />
             </Card>
             {usuario?.espacioAsignado ? (
@@ -38,9 +42,14 @@ export default function HomeScreen() {
               <Card key={z.zona} style={{ gap: spacing.sm }}>
                 <View style={s.row}>
                   <Text style={s.zone}>Isla {z.zona}</Text>
-                  <Text style={[s.free, z.libres === 0 && { color: colors.occupied }]}>{z.libres} libres</Text>
+                  {z.monitoreados === 0 ? (
+                    <Text style={s.muted}>Sin cámara</Text>
+                  ) : (
+                    <Text style={[s.free, z.libres === 0 && { color: colors.occupied }]}>{z.libres} libres</Text>
+                  )}
                 </View>
-                <OccupancyBar libres={z.libres} ocupados={z.ocupados} total={z.total} />
+                <OccupancyBar libres={z.libres} ocupados={z.ocupados} total={z.monitoreados} />
+                {z.monitoreados > 0 && z.monitoreados < z.total ? <Text style={s.muted}>{z.monitoreados} de {z.total} cajones monitoreados</Text> : null}
               </Card>
             ))}
           </>

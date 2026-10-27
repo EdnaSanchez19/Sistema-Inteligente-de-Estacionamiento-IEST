@@ -21,6 +21,8 @@ export const espacios: Espacio[] = zonas.flatMap(({ zona, cantidad, tipoEspecial
       zona,
       tipo: i < 2 ? tipoEspecial : ('general' as TipoEspacio),
       estado: estadoDe(id),
+      monitoreado: zi < 5, // en el modo de ejemplo, las islas F a H no tienen cámara
+      actualizado: new Date().toISOString(),
     };
   }),
 );

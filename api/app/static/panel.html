@@ -3,159 +3,223 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Estacionamiento IEST · Panel</title>
+<title>Estacionamiento IEST</title>
 <style>
   :root {
-    --marron: #6a2f23; --marron-2: #4d2119; --naranja: #f28c28; --fondo: #f5f1ee; --tarjeta: #ffffff; --texto: #241a17; --suave: #7b6b65; --borde: #e7dfda;
-    --libre: #2e9e5b; --ocupado: #d64545; --reservado: #e0a800; --fuera: #8a93a0; --ok: #2e9e5b; --mal: #d64545; --sombra: 0 1px 2px rgba(60,30,20,.06), 0 4px 14px rgba(60,30,20,.05);
+    --marron: #6a2f23; --marron-2: #4d2119; --naranja: #f28c28; --fondo: #f5f1ee; --tarjeta: #ffffff; --texto: #241a17; --suave: #7b6b65; --borde: #e7dfda; --hover: #f0e9e4;
+    --libre: #2e9e5b; --ocupado: #d64545; --reservado: #d9a400; --fuera: #8a93a0; --sin: #b9aea8; --ok: #2e9e5b; --mal: #d64545;
+    --sombra: 0 1px 2px rgba(60,30,20,.06), 0 6px 18px rgba(60,30,20,.05);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --fondo: #171110; --tarjeta: #241a18; --texto: #f4ece8; --suave: #b6a7a1; --borde: #382b27; --sombra: 0 1px 2px rgba(0,0,0,.4); }
+    :root { --fondo: #171110; --tarjeta: #241a18; --texto: #f4ece8; --suave: #b6a7a1; --borde: #382b27; --hover: #2f2320; --sin: #5d514c; --sombra: 0 1px 2px rgba(0,0,0,.45); }
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); }
-  h1, h2, h3 { margin: 0; }
-  * { scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
+  * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
+  html, body { height: 100%; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); font-size: 14px; }
+  h1, h2, h3, h4, p { margin: 0; }
+  button { font: inherit; color: inherit; }
 
-  /* ---------- barra superior ---------- */
-  header { background: linear-gradient(135deg, var(--marron-2), var(--marron)); color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
-  .marca { display: flex; align-items: center; gap: 12px; }
-  .logo { width: 40px; height: 40px; border-radius: 50%; background: var(--naranja); display: grid; place-items: center; font-weight: 800; font-size: 22px; }
-  .marca h1 { font-size: 17px; font-weight: 700; line-height: 1.1; }
-  .marca small { opacity: .75; font-size: 12px; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: center; }
-  .chip { display: inline-flex; align-items: center; gap: 7px; background: #ffffff1a; border: 1px solid #ffffff26; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; white-space: nowrap; }
+  /* ---------- estructura ---------- */
+  #app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100%; }
+  #app.login { display: block; }
+  aside { background: linear-gradient(180deg, var(--marron-2), var(--marron)); color: #fff; display: flex; flex-direction: column; padding: 18px 12px; position: sticky; top: 0; height: 100vh; }
+  .marca { display: flex; align-items: center; gap: 11px; padding: 0 8px 18px; }
+  .logo { width: 38px; height: 38px; border-radius: 50%; background: var(--naranja); display: grid; place-items: center; font-weight: 800; font-size: 21px; flex: none; }
+  .marca b { display: block; font-size: 15px; line-height: 1.15; } .marca small { opacity: .7; font-size: 11.5px; }
+  nav { display: grid; gap: 3px; }
+  nav button { display: flex; align-items: center; gap: 11px; background: transparent; border: 0; color: #ffffffcc; padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 14px; }
+  nav button:hover { background: #ffffff14; color: #fff; }
+  nav button.sel { background: #ffffff24; color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 var(--naranja); }
+  nav svg { width: 19px; height: 19px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  nav .cuenta { margin-left: auto; font-size: 11px; background: #ffffff26; padding: 1px 8px; border-radius: 99px; }
+  .lado-pie { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid #ffffff22; font-size: 12.5px; display: grid; gap: 8px; }
+  .lado-pie button { background: transparent; border: 1px solid #ffffff44; color: #fff; padding: 7px; border-radius: 9px; cursor: pointer; }
+  .lado-pie button:hover { background: #ffffff1c; }
+  .conexion { display: flex; align-items: center; gap: 7px; opacity: .85; }
+
+  main { padding: 20px 26px 60px; min-width: 0; }
+  .cabecera { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .cabecera h2 { font-size: 22px; }
+  .cabecera .sub { color: var(--suave); font-size: 13px; margin-top: 2px; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; background: var(--tarjeta); border: 1px solid var(--borde); padding: 5px 11px; border-radius: 999px; font-size: 12.5px; white-space: nowrap; }
   .punto { width: 9px; height: 9px; border-radius: 50%; background: var(--fuera); flex: none; }
-  .punto.ok { background: #46d17f; box-shadow: 0 0 0 0 #46d17f99; animation: latido 2s infinite; }
-  .punto.mal { background: #ff6b6b; }
-  @keyframes latido { 70% { box-shadow: 0 0 0 7px #46d17f00; } 100% { box-shadow: 0 0 0 0 #46d17f00; } }
-  .usuario { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .usuario button { background: transparent; color: #fff; border: 1px solid #ffffff55; border-radius: 8px; padding: 5px 11px; cursor: pointer; }
-  .usuario button:hover { background: #ffffff1f; }
+  .punto.ok { background: var(--ok); } .punto.mal { background: var(--mal); } .punto.aviso { background: var(--reservado); }
+  .punto.ok.vivo { animation: latido 2s infinite; }
+  @keyframes latido { 0% { box-shadow: 0 0 0 0 #2e9e5b88; } 70% { box-shadow: 0 0 0 7px #2e9e5b00; } 100% { box-shadow: 0 0 0 0 #2e9e5b00; } }
 
-  main { max-width: 1320px; margin: 0 auto; padding: 18px 18px 56px; display: grid; gap: 16px; }
-  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px; padding: 18px; box-shadow: var(--sombra); }
-  .tarjeta > h2, .titulo { font-size: 14px; font-weight: 700; letter-spacing: .02em; color: var(--suave); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .vista { display: none; gap: 16px; } .vista.activa { display: grid; }
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px; padding: 18px; box-shadow: var(--sombra); min-width: 0; }
+  .tarjeta > h3, .titulo { font-size: 12.5px; font-weight: 700; letter-spacing: .05em; color: var(--suave); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .titulo .nota, h3 .nota { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .vacio { color: var(--suave); padding: 10px 2px; }
+  .rejilla { display: grid; gap: 16px; }
+  .dos { grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); }
+  .dos-iguales { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  @media (max-width: 1100px) { .dos { grid-template-columns: 1fr; } }
 
-  /* ---------- flujo del sistema ---------- */
-  .flujo { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding-bottom: 4px; }
-  .nodo { flex: 1 1 0; min-width: 150px; border: 1px solid var(--borde); border-radius: 14px; padding: 12px; background: var(--fondo); position: relative; }
-  .nodo .icono { font-size: 22px; line-height: 1; }
-  .nodo .nombre { font-weight: 700; font-size: 14px; margin-top: 6px; display: flex; align-items: center; gap: 7px; }
-  .nodo .nombre .punto { width: 8px; height: 8px; }
-  .nodo .dato { font-size: 12px; color: var(--suave); margin-top: 3px; min-height: 16px; }
-  .nodo.activo { border-color: #2e9e5b66; }
-  .enlace { flex: 0 0 38px; position: relative; align-self: center; height: 2px; background: var(--borde); margin: 0 2px; }
+  /* ---------- KPIs ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kpi { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 16px; padding: 15px 17px; box-shadow: var(--sombra); }
+  .kpi .rot { font-size: 12px; color: var(--suave); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .kpi .val { font-size: 34px; font-weight: 800; line-height: 1.1; margin-top: 6px; }
+  .kpi .val small { font-size: 15px; font-weight: 500; color: var(--suave); }
+  .kpi .sub { font-size: 12px; color: var(--suave); margin-top: 3px; }
+  .barra { height: 7px; border-radius: 5px; background: var(--borde); overflow: hidden; display: flex; margin-top: 9px; }
+  .barra i { display: block; height: 100%; transition: width .6s; }
+
+  /* ---------- video ---------- */
+  .video { position: relative; background: #0d0908; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; }
+  .video img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .video .fuera { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 22px; color: #d8c9c3; gap: 8px; font-size: 13.5px; }
+  .video .fuera code { background: #ffffff14; padding: 6px 10px; border-radius: 8px; font-size: 12px; user-select: all; }
+  .pestanas { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .pestanas button { border: 1px solid var(--borde); background: transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+  .pestanas button:hover { background: var(--hover); }
+  .pestanas button.sel { background: var(--marron); border-color: var(--marron); color: #fff; }
+  .datos { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 13px; color: var(--suave); }
+  .datos b { color: var(--texto); }
+
+  /* ---------- islas ---------- */
+  .leyenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--suave); align-items: center; }
+  .leyenda span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+  .leyenda .sin::before { background: repeating-linear-gradient(45deg, var(--sin) 0 2px, transparent 2px 4px); border: 1px solid var(--sin); }
+  .islas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .isla-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .isla-cab h4 { font-size: 17px; } .isla-cab span { font-size: 12.5px; color: var(--suave); }
+  .cobertura { display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 99px; background: var(--hover); color: var(--suave); margin-top: 6px; }
+  .cobertura.total { background: #2e9e5b22; color: var(--libre); } .cobertura.nula { background: transparent; border: 1px dashed var(--sin); }
+  .cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(33px, 1fr)); gap: 5px; margin-top: 12px; }
+  .cajon { height: 33px; border-radius: 7px; color: #fff; font-weight: 700; font-size: 11.5px; display: grid; place-items: center; position: relative; cursor: pointer; border: 0; padding: 0; transition: transform .15s, background .4s; }
+  .cajon:hover { transform: scale(1.12); z-index: 2; }
+  .cajon small { position: absolute; top: 0; right: 3px; font-size: 8px; }
+  .libre { background: var(--libre); } .ocupado { background: var(--ocupado); } .reservado { background: var(--reservado); } .fuera_de_servicio { background: var(--fuera); }
+  .cajon.sin { background: repeating-linear-gradient(45deg, var(--sin) 0 2px, transparent 2px 5px); color: var(--suave); border: 1px solid var(--sin); font-weight: 500; }
+  .cajon.cambio { animation: destello 2.4s ease-out; }
+  @keyframes destello { 0% { box-shadow: 0 0 0 0 var(--naranja); transform: scale(1.2); } 60% { box-shadow: 0 0 0 9px #f28c2800; } 100% { transform: scale(1); } }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filtros button { border: 1px solid var(--borde); background: var(--tarjeta); padding: 6px 13px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+  .filtros button.sel { background: var(--marron); border-color: var(--marron); color: #fff; }
+  .filtros input[type=search], .campo input, .campo select { border: 1px solid var(--borde); background: var(--tarjeta); color: var(--texto); padding: 8px 11px; border-radius: 10px; font: inherit; min-width: 0; }
+
+  /* ---------- listas y tablas ---------- */
+  ul.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; max-height: 420px; overflow-y: auto; }
+  ul.lista li { padding: 9px 11px; border-radius: 10px; background: var(--fondo); display: flex; justify-content: space-between; gap: 10px; align-items: center; font-size: 13px; }
+  ul.lista time { color: var(--suave); white-space: nowrap; font-size: 12px; }
+  ul.lista li.nuevo { animation: entra 1.2s ease-out; }
+  @keyframes entra { from { background: #f28c2838; transform: translateX(-6px); } }
+  .insignia { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: #fff; white-space: nowrap; display: inline-block; }
+  .tabla-caja { overflow: auto; max-height: 560px; border: 1px solid var(--borde); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); padding: 10px 12px; position: sticky; top: 0; background: var(--tarjeta); border-bottom: 1px solid var(--borde); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; } tbody tr:hover { background: var(--hover); }
+  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 12.5px; }
+
+  /* ---------- flujo y cámaras ---------- */
+  .flujo { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 4px; }
+  .nodo { flex: 1 1 0; min-width: 150px; border: 1px solid var(--borde); border-radius: 14px; padding: 12px; background: var(--fondo); }
+  .nodo .nom { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 7px; margin-top: 4px; }
+  .nodo .dato { font-size: 12px; color: var(--suave); margin-top: 4px; line-height: 1.4; }
+  .nodo .ico { font-size: 21px; line-height: 1; }
+  .enlace { flex: 0 0 34px; position: relative; align-self: center; height: 2px; background: var(--borde); margin: 0 2px; }
   .enlace.activo { background: #2e9e5b55; }
   .enlace.activo::after { content: ""; position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--libre); animation: viaja 1.4s linear infinite; }
   @keyframes viaja { from { left: 0; opacity: 1; } to { left: calc(100% - 8px); opacity: .3; } }
+  .camaras { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+  .camara-tarj { padding: 14px; } .camara-tarj .video { cursor: zoom-in; }
+  .camara-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+  .camara-cab b { font-size: 15px; }
+  .sinvideo { aspect-ratio: 16/9; border: 1px dashed var(--sin); border-radius: 12px; display: grid; place-content: center; text-align: center; color: var(--suave); padding: 16px; gap: 4px; }
 
-  /* ---------- cuadrícula principal ---------- */
-  .principal { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(300px, 1fr); gap: 16px; }
-  @media (max-width: 980px) { .principal { grid-template-columns: 1fr; } }
-  .video { position: relative; background: #0d0908; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; }
-  .video img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .video .fuera { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 24px; color: #d8c9c3; gap: 8px; font-size: 14px; }
-  .video .fuera code { background: #ffffff14; padding: 6px 10px; border-radius: 8px; font-size: 12px; user-select: all; }
-  .pestanas { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-  .pestanas button { border: 1px solid var(--borde); background: var(--fondo); color: var(--texto); padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; }
-  .pestanas button.sel { background: var(--marron); border-color: var(--marron); color: #fff; }
-  .pie-video { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 13px; color: var(--suave); }
-  .pie-video b { color: var(--texto); }
-  .leyenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--suave); }
-  .leyenda span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: var(--c); }
+  /* ---------- formularios ---------- */
+  .formularios { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  form.campos { display: grid; gap: 10px; }
+  .campo { display: grid; gap: 4px; font-size: 12.5px; color: var(--suave); }
+  .campo input, .campo select { color: var(--texto); font-size: 14px; }
+  .boton { background: var(--naranja); color: #fff; border: 0; padding: 10px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+  .boton:disabled { opacity: .5; cursor: default; }
 
-  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .kpi .valor { font-size: 38px; font-weight: 800; line-height: 1; }
-  .kpi .rotulo { font-size: 12.5px; color: var(--suave); margin-top: 5px; }
-  .donut { display: grid; place-items: center; margin: 4px 0 14px; position: relative; }
-  .donut svg { width: 150px; height: 150px; transform: rotate(-90deg); }
-  .donut .centro { position: absolute; text-align: center; }
-  .donut .centro b { font-size: 28px; display: block; }
-  .donut .centro span { font-size: 11.5px; color: var(--suave); }
-  .modelo dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13px; }
-  .modelo dt { color: var(--suave); } .modelo dd { margin: 0; font-weight: 600; text-align: right; }
-  .modelo canvas { width: 100%; height: 54px; margin-top: 12px; display: block; }
-
-  /* ---------- mapa ---------- */
-  .zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
-  .zona-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-  .zona-cab h3 { font-size: 17px; }
-  .zona-cab span { font-size: 13px; color: var(--suave); }
-  .barra { height: 8px; border-radius: 5px; background: var(--borde); overflow: hidden; display: flex; margin: 8px 0 14px; }
-  .barra i { display: block; height: 100%; transition: width .6s; }
-  .cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 5px; }
-  .cajon { height: 32px; border-radius: 7px; color: #fff; font-weight: 700; font-size: 11.5px; display: grid; place-items: center; position: relative; transition: background .4s, transform .2s; cursor: default; }
-  .cajon:hover { transform: scale(1.06); }
-  .cajon small { position: absolute; top: 0; right: 3px; font-size: 8px; opacity: .9; }
-  .libre { background: var(--libre); } .ocupado { background: var(--ocupado); } .reservado { background: var(--reservado); } .fuera_de_servicio { background: var(--fuera); }
-  .cajon.cambio { animation: destello 2.4s ease-out; }
-  @keyframes destello { 0% { box-shadow: 0 0 0 0 var(--naranja); transform: scale(1.18); } 60% { box-shadow: 0 0 0 9px #f28c2800; } 100% { transform: scale(1); } }
-
-  /* ---------- listas ---------- */
-  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 330px; overflow-y: auto; }
-  li { font-size: 13px; padding: 9px 11px; border-radius: 10px; background: var(--fondo); display: flex; justify-content: space-between; gap: 10px; align-items: center; }
-  li time { color: var(--suave); white-space: nowrap; font-size: 12px; }
-  li.nuevo { animation: entra 1s ease-out; }
-  @keyframes entra { from { background: #f28c2833; transform: translateX(-6px); } }
-  .insignia { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: #fff; white-space: nowrap; }
-  .vacio { color: var(--suave); font-size: 13px; padding: 8px 2px; }
-
-  /* ---------- login ---------- */
-  .login { max-width: 380px; margin: 9vh auto; display: grid; gap: 12px; text-align: center; padding: 28px; }
-  .login .logo { margin: 0 auto 4px; width: 56px; height: 56px; font-size: 30px; color: #fff; }
+  /* ---------- modal, toasts, login ---------- */
+  #modal { position: fixed; inset: 0; background: #0009; display: none; place-items: center; z-index: 50; padding: 20px; }
+  #modal.abierto { display: grid; }
+  .modal-caja { background: var(--tarjeta); border-radius: 18px; max-width: min(920px, 100%); width: 100%; max-height: 90vh; overflow: auto; padding: 22px; position: relative; box-shadow: 0 20px 60px #0008; }
+  .modal-cerrar { position: absolute; top: 12px; right: 14px; background: transparent; border: 0; font-size: 24px; cursor: pointer; color: var(--suave); line-height: 1; }
+  .detalle { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 12px 0 16px; font-size: 14px; }
+  .detalle dt { color: var(--suave); } .detalle dd { margin: 0; font-weight: 600; }
+  #toasts { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 60; }
+  .toast { background: var(--marron); color: #fff; padding: 11px 15px; border-radius: 12px; box-shadow: 0 8px 24px #0006; max-width: 360px; font-size: 13px; animation: entra 0.4s ease-out; }
+  .toast.mal { background: #a63030; } .toast.ok { background: #2a7d4c; }
+  .login { max-width: 390px; margin: 11vh auto; display: grid; gap: 12px; text-align: center; padding: 30px; }
+  .login .logo { margin: 0 auto 4px; width: 58px; height: 58px; font-size: 30px; color: #fff; background: var(--marron); }
   .login input { padding: 12px; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: var(--texto); font-size: 15px; }
-  .login button { padding: 12px; border: 0; border-radius: 10px; background: var(--naranja); color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
   .error { color: var(--mal); font-size: 13px; min-height: 18px; }
-  .pie { color: var(--suave); font-size: 12px; text-align: center; }
+  canvas.grafica { width: 100%; height: 190px; display: block; }
+
+  @media (max-width: 860px) {
+    #app { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; }
+    .marca { padding: 0; } nav { display: flex; flex-wrap: wrap; } nav button { padding: 8px 10px; }
+    .lado-pie { margin: 0 0 0 auto; border: 0; padding: 0; display: flex; align-items: center; }
+    main { padding: 16px 12px 50px; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="marca"><div class="logo">P</div><div><h1>Estacionamiento IEST</h1><small>Sistema inteligente · IEST Anáhuac</small></div></div>
-  <div class="chips" id="chips"></div>
-  <div class="usuario"><span id="quien"></span><button id="salir" hidden>Cerrar sesión</button></div>
-</header>
-<main id="app"></main>
+<div id="app" class="login"></div>
+<div id="modal"><div class="modal-caja"><button class="modal-cerrar" aria-label="Cerrar">×</button><div id="modal-contenido"></div></div></div>
+<div id="toasts"></div>
 
 <script>
+"use strict";
+/* ============================== utilidades ============================== */
 const API = location.origin;
 const VISION = (new URLSearchParams(location.search).get("vision") || `${location.protocol}//${location.hostname}:8100`).replace(/\/$/, "");
-let token = sessionStorage.getItem("token");
-let timerRapido = null, timerLento = null;
-let camaraSel = "CAM-01";
-let estadoPrevio = new Map();       // numero -> estado (para destacar cambios)
-let eventosVistos = new Set();
-let latencias = [];                 // historial para la gráfica
-let primeraVez = true;
-
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
-const hora = (iso) => iso ? new Date(iso).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "sin señal";
 const $ = (id) => document.getElementById(id);
+const h = (tag, props, ...hijos) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else if (k === "style") e.style.cssText = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of hijos.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
+};
+const hora = (iso) => iso ? new Date(iso).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—";
+const fechaHora = (iso) => iso ? new Date(iso).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—";
+const hace = (iso) => { if (!iso) return "nunca"; const s = Math.max(0, (Date.now() - new Date(iso)) / 1000); return s < 60 ? `hace ${Math.round(s)} s` : s < 3600 ? `hace ${Math.round(s / 60)} min` : `hace ${Math.round(s / 3600)} h`; };
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const ESTADO = { libre: "Libre", ocupado: "Ocupado", reservado: "Reservado", fuera_de_servicio: "Fuera de servicio" };
+const TIPO_ESPACIO = { general: "General", discapacidad: "Accesibilidad", directivo: "Directivo", visitante: "Visitante", motocicleta: "Motocicleta" };
+const MARCA_TIPO = { discapacidad: "♿", directivo: "★", visitante: "V", motocicleta: "M" };
+const COLOR_EVENTO = { entrada: "#2e9e5b", salida: "#6a2f23", cambio_ocupacion: "#c99700", error_deteccion: "#d64545", camara_desconectada: "#d64545", camara_restablecida: "#2e9e5b" };
+const NOMBRE_EVENTO = { entrada: "entrada", salida: "salida", cambio_ocupacion: "cambio manual", error_deteccion: "confianza baja", camara_desconectada: "cámara caída", camara_restablecida: "cámara restablecida" };
 
-async function api(path) {
-  const r = await fetch(API + path, { headers: { Authorization: "Bearer " + token } });
+let token = sessionStorage.getItem("token");
+const S = { yo: null, estado: null, espacios: [], eventos: null, camaras: null, avisos: [], serie: [], vista: "resumen", camSel: null, isla: "todas", filtroEvento: "todos", busqueda: "", previo: new Map(), vistos: new Set(), primera: true, latCam: {}, admin: {} };
+let timers = [];
+
+function toast(msg, tipo) {
+  const t = h("div", { class: "toast " + (tipo || ""), text: msg }); $("toasts").append(t); setTimeout(() => t.remove(), 6000);
+}
+async function api(path, opciones) {
+  const r = await fetch(API + path, { ...(opciones || {}), headers: { Authorization: "Bearer " + token, ...((opciones && opciones.headers) || {}) } });
   if (r.status === 401) { cerrarSesion(); throw new Error("Sesión expirada"); }
   if (r.status === 403) return null;
-  if (!r.ok) throw new Error("Error " + r.status);
+  if (!r.ok) { let d = ""; try { d = (await r.json()).detail; } catch (_) {} throw new Error(typeof d === "string" && d ? d : "Error " + r.status); }
   return r.json();
 }
+const post = (path, cuerpo, metodo) => api(path, { method: metodo || "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
 
-/* ------------------------------ login ------------------------------ */
+/* ============================== login ============================== */
 function vistaLogin(mensaje) {
-  clearInterval(timerRapido); clearInterval(timerLento);
-  $("quien").textContent = ""; $("salir").hidden = true; $("chips").replaceChildren();
-  const app = $("app"); app.replaceChildren();
-  const f = el("form", "tarjeta login");
-  f.append(el("div", "logo", "P"), el("h2", null, "Iniciar sesión"));
-  f.firstChild.style.background = "var(--marron)";
-  f.children[1].style.cssText = "text-transform:none;font-size:20px;color:var(--texto);justify-content:center;margin:0 0 4px";
-  const correo = el("input"); correo.type = "email"; correo.placeholder = "Correo institucional"; correo.required = true; correo.autocomplete = "username";
-  const pass = el("input"); pass.type = "password"; pass.placeholder = "Contraseña"; pass.required = true; pass.autocomplete = "current-password";
-  const err = el("div", "error", mensaje || "");
-  const btn = el("button", null, "Entrar"); btn.type = "submit";
-  f.append(correo, pass, err, btn);
+  timers.forEach(clearInterval); timers = [];
+  const app = $("app"); app.className = "login"; app.replaceChildren();
+  const correo = h("input", { type: "email", placeholder: "Correo institucional", required: true, autocomplete: "username" });
+  const pass = h("input", { type: "password", placeholder: "Contraseña", required: true, autocomplete: "current-password" });
+  const err = h("div", { class: "error", text: mensaje || "" });
+  const btn = h("button", { class: "boton", type: "submit", text: "Entrar" });
+  const f = h("form", { class: "tarjeta login" }, h("div", { class: "logo", text: "P" }), h("h2", { text: "Estacionamiento IEST" }), h("p", { class: "vacio", text: "Inicia sesión para ver la disponibilidad" }), correo, pass, err, btn);
   f.addEventListener("submit", async (ev) => {
     ev.preventDefault(); btn.disabled = true; err.textContent = "";
     try {
@@ -166,177 +230,391 @@ function vistaLogin(mensaje) {
   });
   app.append(f); correo.focus();
 }
-function cerrarSesion() { token = null; sessionStorage.removeItem("token"); vistaLogin(); }
-$("salir").addEventListener("click", cerrarSesion);
+function cerrarSesion() { token = null; sessionStorage.removeItem("token"); Object.assign(S, { yo: null, estado: null, espacios: [], eventos: null, camaras: null, primera: true }); vistaLogin(); }
 
-/* ------------------------------ estructura ------------------------------ */
+/* ============================== estructura ============================== */
+const ICONOS = {
+  resumen: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  camaras: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg>',
+  islas: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+  eventos: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  admin: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M17 11a3 3 0 100-6M18.5 14.3c1.9.7 3 2.4 3 5.7"/></svg>',
+  sistema: '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg>',
+};
+const VISTAS = [["resumen", "Resumen"], ["camaras", "Cámaras"], ["islas", "Islas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
+
 function armarEstructura() {
-  const app = $("app"); app.replaceChildren();
-  const html = `
-  <section class="tarjeta"><h2>Flujo del sistema <span id="flujo-hora" style="text-transform:none;font-weight:400"></span></h2>
-    <div class="flujo" id="flujo"></div></section>
-
-  <div class="principal">
-    <section class="tarjeta"><h2>Cámara en vivo · detección con YOLO <span class="leyenda"><span style="--c:var(--ocupado)">Ocupado</span><span style="--c:var(--libre)">Libre</span><span style="--c:#ffd700">Vehículo detectado</span></span></h2>
-      <div class="pestanas" id="pestanas"></div>
-      <div class="video"><img id="video" alt="Video de la cámara con las detecciones del modelo"><div class="fuera" id="video-fuera" hidden></div></div>
-      <div class="pie-video" id="pie-video"></div>
-    </section>
-    <div style="display:grid;gap:16px;align-content:start">
-      <section class="tarjeta"><h2>Disponibilidad</h2>
-        <div class="donut"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--borde)" stroke-width="14"/><circle id="arco" cx="60" cy="60" r="50" fill="none" stroke="var(--ocupado)" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 314" style="transition: stroke-dasharray .8s"/></svg>
-          <div class="centro"><b id="pct">–</b><span>ocupación</span></div></div>
-        <div class="kpis"><div class="kpi"><div class="valor" id="k-libres" style="color:var(--libre)">–</div><div class="rotulo">Libres</div></div><div class="kpi"><div class="valor" id="k-ocupados" style="color:var(--ocupado)">–</div><div class="rotulo">Ocupados</div></div></div>
-        <div class="leyenda"><span style="--c:var(--libre)">Libre</span><span style="--c:var(--ocupado)">Ocupado</span><span style="--c:var(--reservado)">Reservado</span><span style="--c:var(--fuera)">Fuera de servicio</span></div>
-      </section>
-      <section class="tarjeta modelo"><h2>Modelo de visión</h2><dl id="modelo"></dl><canvas id="spark" width="400" height="54"></canvas><div class="rotulo" style="font-size:11.5px;color:var(--suave);margin-top:4px">Latencia por detección (últimos ~2 min)</div></section>
-    </div>
-  </div>
-
-  <section><div class="zonas" id="zonas"></div></section>
-  <div class="trio" id="trio"></div>
-  <div class="pie" id="pie"></div>`;
-  app.insertAdjacentHTML("beforeend", html);
-}
-
-/* ------------------------------ flujo ------------------------------ */
-function pintarFlujo(s, camaras) {
-  const vis = s.vision.find((v) => v.camara === camaraSel) || s.vision[0];
-  const visOk = s.vision_conectada;
-  const nodos = [
-    ["📹", "Cámara", visOk && vis ? "ok" : "mal", vis ? `${vis.camara} · ${vis.resolucion} · ${vis.fps_video} fps` : "sin señal", visOk],
-    ["🧠", "Visión · YOLO", visOk ? "ok" : "mal", vis ? `${vis.modelo} · ${vis.latencia_ms.toFixed(0)} ms · ${vis.vehiculos} vehículos` : "servidor sin conexión", visOk],
-    ["⚙️", "API", "ok", `FastAPI v${s.version} · ${s.eventos_ultimo_minuto} eventos/min`, true],
-    ["🗄️", "Base de datos", s.base_de_datos.estado === "ok" ? "ok" : "mal", `${s.base_de_datos.motor} · ${Object.values(s.espacios).reduce((a, b) => a + b, 0)} cajones`, true],
-    ["📱", "Panel y app móvil", "ok", `Cámaras en línea: ${s.camaras.en_linea}/${s.camaras.total}`, true],
-  ];
-  const cont = $("flujo"); cont.replaceChildren();
-  nodos.forEach(([icono, nombre, est, dato, activo], i) => {
-    const n = el("div", "nodo" + (activo ? " activo" : ""));
-    n.append(el("div", "icono", icono));
-    const nom = el("div", "nombre"); const p = el("span", "punto " + est); nom.append(p, document.createTextNode(nombre)); n.append(nom, el("div", "dato", dato));
-    cont.append(n);
-    if (i < nodos.length - 1) cont.append(el("div", "enlace" + (nodos[i + 1][4] && activo ? " activo" : "")));
-  });
-  $("flujo-hora").textContent = "actualizado " + hora(s.hora);
-}
-
-/* ------------------------------ chips de estado ------------------------------ */
-function pintarChips(s) {
-  const chips = $("chips"); chips.replaceChildren();
-  const datos = [
-    ["API", true, "v" + s.version],
-    ["Base de datos", s.base_de_datos.estado === "ok", s.base_de_datos.motor],
-    ["Modelo YOLO", s.vision_conectada, s.vision_conectada ? s.vision[0].modelo + " · " + s.vision[0].dispositivo : "sin conexión"],
-    ["Cámaras", s.camaras.en_linea > 0, `${s.camaras.en_linea}/${s.camaras.total} en línea`],
-  ];
-  for (const [nombre, ok, det] of datos) { const c = el("span", "chip"); c.append(el("span", "punto " + (ok ? "ok" : "mal")), document.createTextNode(nombre + " · " + det)); chips.append(c); }
-}
-
-/* ------------------------------ video y modelo ------------------------------ */
-let videoActual = null;
-function pintarVideo(s) {
-  const nombres = s.vision.length ? s.vision.map((v) => v.camara) : ["CAM-01"];
-  if (!nombres.includes(camaraSel)) camaraSel = nombres[0];
-  const pest = $("pestanas");
-  if (pest.dataset.lista !== nombres.join()) {
-    pest.dataset.lista = nombres.join(); pest.replaceChildren();
-    for (const n of nombres) { const b = el("button", n === camaraSel ? "sel" : "", n); b.onclick = () => { camaraSel = n; videoActual = null; pintarVideo(s); }; pest.append(b); }
-  } else { [...pest.children].forEach((b) => b.classList.toggle("sel", b.textContent === camaraSel)); }
-
-  const img = $("video"), fuera = $("video-fuera");
-  if (videoActual !== camaraSel) {
-    videoActual = camaraSel; fuera.hidden = true;
-    img.onload = () => { fuera.hidden = true; };
-    img.onerror = () => {
-      fuera.hidden = false; fuera.replaceChildren(el("b", null, "Sin señal del servidor de visión"), el("span", null, "Inícialo para ver el video con las detecciones:"), el("code", null, "python -m parking_vision.demo_server"));
-      setTimeout(() => { if (videoActual === camaraSel) img.src = `${VISION}/stream/${camaraSel}?t=${Date.now()}`; }, 4000);
-    };
-    img.src = `${VISION}/stream/${camaraSel}?t=${Date.now()}`;
+  const app = $("app"); app.className = ""; app.replaceChildren();
+  const nav = h("nav");
+  for (const [id, nombre] of VISTAS) {
+    if (id === "admin" && S.yo.rol !== "admin") continue;
+    const b = h("button", { "data-vista": id, onclick: () => ir(id) }); b.innerHTML = ICONOS[id]; b.append(h("span", { text: nombre }));
+    if (id === "eventos") b.append(h("span", { class: "cuenta", id: "cuenta-eventos", hidden: true }));
+    nav.append(b);
   }
-
-  const v = s.vision.find((x) => x.camara === camaraSel);
-  const pie = $("pie-video"); pie.replaceChildren();
-  if (v) for (const [k, val] of [["Vehículos detectados", v.vehiculos], ["Cajones vigilados", `${v.ocupados} ocupados · ${v.libres} libres`], ["Resolución", v.resolucion], ["Último reporte", `hace ${v.hace_s.toFixed(0)} s`]]) { const sp = el("span"); sp.append(document.createTextNode(k + ": "), el("b", null, String(val))); pie.append(sp); }
-
-  const dl = $("modelo"); dl.replaceChildren();
-  if (v) {
-    latencias = [...latencias, v.latencia_ms].slice(-60);
-    for (const [k, val] of [["Modelo", v.modelo], ["Dispositivo", v.dispositivo.startsWith("cuda") ? "GPU (" + v.dispositivo + ")" : v.dispositivo], ["Entrada", v.imgsz + " px"], ["Confianza mínima", Math.round(v.umbral_confianza * 100) + " %"], ["Latencia", v.latencia_ms.toFixed(0) + " ms"], ["Detecciones/s", v.fps_deteccion.toFixed(1)], ["Video", v.fps_video + " fps"]]) { dl.append(el("dt", null, k), el("dd", null, val)); }
-    dibujarSpark();
-  } else { dl.append(el("dt", null, "Estado"), el("dd", null, "sin conexión")); }
+  const aside = h("aside", null,
+    h("div", { class: "marca" }, h("div", { class: "logo", text: "P" }), h("div", null, h("b", { text: "Estacionamiento" }), h("small", { text: "IEST Anáhuac" }))),
+    nav,
+    h("div", { class: "lado-pie" }, h("div", null, h("b", { text: S.yo.nombre }), h("div", { style: "opacity:.7", text: S.yo.rol === "admin" ? "Administrador" : S.yo.rol })),
+      h("div", { class: "conexion" }, h("span", { class: "punto ok vivo", id: "punto-conexion" }), h("span", { id: "texto-conexion", text: "Conectado" })),
+      h("button", { onclick: cerrarSesion, text: "Cerrar sesión" })));
+  const main = h("main", null,
+    h("div", { class: "cabecera" }, h("div", null, h("h2", { id: "titulo" }), h("div", { class: "sub", id: "subtitulo" })), h("div", { class: "chips", id: "chips" })),
+    vistaResumen(), vistaCamaras(), vistaIslas(), vistaEventos(), ...(S.yo.rol === "admin" ? [vistaAdmin()] : []), vistaSistema());
+  app.append(aside, main);
+}
+function ir(vista) {
+  if (vista === "admin" && S.yo.rol !== "admin") vista = "resumen";
+  S.vista = vista; history.replaceState(null, "", "#" + vista);
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("sel", b.dataset.vista === vista));
+  document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + vista));
+  const nombres = { resumen: ["Resumen", "Estado actual del estacionamiento"], camaras: ["Cámaras", "Video en vivo con las detecciones del modelo"], islas: ["Islas", "Cajones libres, ocupados y sin monitoreo"], eventos: ["Eventos", "Entradas, salidas y alertas registradas"], admin: ["Administración", "Usuarios, vehículos y colgantes"], sistema: ["Sistema", "Componentes y modelo de visión"] }[vista];
+  $("titulo").textContent = nombres[0]; $("subtitulo").textContent = nombres[1];
+  if (vista === "eventos" && S.eventos) S.eventos.forEach((e) => S.vistos.add(e.id));
+  gestionarVideos(); if (vista === "admin") cargarAdmin(); pintar();
 }
 
-function dibujarSpark() {
-  const c = $("spark"), g = c.getContext("2d"); g.clearRect(0, 0, c.width, c.height);
-  if (latencias.length < 2) return;
-  const max = Math.max(...latencias) * 1.15 || 1, w = c.width, h = c.height;
-  g.lineWidth = 2; g.strokeStyle = "#f28c28"; g.beginPath();
-  latencias.forEach((v, i) => { const x = (i / (latencias.length - 1)) * w, y = h - (v / max) * (h - 6) - 3; i ? g.lineTo(x, y) : g.moveTo(x, y); });
-  g.stroke(); g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fillStyle = "#f28c2822"; g.fill();
+/* ------------------------------ video persistente ------------------------------ */
+function urlVideo(cam) { return `${VISION}/stream/${cam}`; }
+function conectarVideo(img, cam, fuera) {
+  if (img.dataset.cam === cam && img.getAttribute("src")) return;
+  img.dataset.cam = cam; if (fuera) fuera.hidden = true;
+  img.onload = () => { if (fuera) fuera.hidden = true; };
+  img.onerror = () => {
+    if (fuera) { fuera.hidden = false; fuera.replaceChildren(h("b", { text: "Sin señal del servidor de visión" }), h("span", { text: "Inícialo para ver el video con las detecciones:" }), h("code", { text: "python scripts/iniciar_sistema.py" })); }
+    setTimeout(() => { if (img.dataset.cam === cam && img.dataset.activo === "1") { img.removeAttribute("src"); img.src = `${urlVideo(cam)}?t=${Date.now()}`; } }, 4000);
+  };
+  img.dataset.activo = "1"; img.src = `${urlVideo(cam)}?t=${Date.now()}`;
+}
+function desconectarVideo(img) { img.dataset.activo = "0"; img.dataset.cam = ""; img.removeAttribute("src"); }
+function gestionarVideos() {  // solo la vista visible mantiene sus videos abiertos
+  const v = $("video-resumen");
+  if (S.vista === "resumen") { const cam = camaraActiva(); if (cam) conectarVideo(v, cam, $("fuera-resumen")); } else desconectarVideo(v);
+  document.querySelectorAll(".camara-tarj img").forEach((img) => { if (S.vista === "camaras") conectarVideo(img, img.dataset.camara, img.nextElementSibling); else desconectarVideo(img); });
+}
+function camaraActiva() {
+  const lista = (S.estado ? S.estado.vision : []).map((v) => v.camara);
+  if (!lista.length) return null;
+  if (!S.camSel || !lista.includes(S.camSel)) S.camSel = lista[0];
+  return S.camSel;
 }
 
-/* ------------------------------ disponibilidad y mapa ------------------------------ */
-const TIPO = { discapacidad: "♿", directivo: "★", visitante: "V", motocicleta: "M" };
-function pintarEspacios(espacios) {
-  const util = espacios.filter((e) => e.estado !== "fuera_de_servicio");
-  const libres = util.filter((e) => e.estado === "libre").length, ocupados = util.filter((e) => e.estado === "ocupado").length;
-  $("k-libres").textContent = libres; $("k-ocupados").textContent = ocupados;
-  const pct = util.length ? Math.round((ocupados / util.length) * 100) : 0; $("pct").textContent = pct + " %";
-  $("arco").setAttribute("stroke-dasharray", `${(pct / 100) * 314} 314`);
+/* ============================== VISTA: resumen ============================== */
+function vistaResumen() {
+  return h("section", { class: "vista", id: "vista-resumen" },
+    h("div", { class: "kpis", id: "kpis" }),
+    h("div", { class: "rejilla dos" },
+      h("div", { class: "tarjeta" }, h("h3", null, "Cámara en vivo · detección con YOLO", h("span", { class: "leyenda nota" }, h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:#ffd700", text: "Vehículo" }))),
+        h("div", { class: "pestanas", id: "pestanas-resumen" }),
+        h("div", { class: "video" }, h("img", { id: "video-resumen", alt: "Video de la cámara con las detecciones del modelo" }), h("div", { class: "fuera", id: "fuera-resumen", hidden: true })),
+        h("div", { class: "datos", id: "datos-video" })),
+      h("div", { class: "rejilla", style: "align-content:start" },
+        h("div", { class: "tarjeta" }, h("h3", null, "Ocupación en el tiempo", h("span", { class: "nota", id: "nota-serie" })), h("canvas", { class: "grafica", id: "grafica" })),
+        h("div", { class: "tarjeta" }, h("h3", null, "Cobertura por isla", h("span", { class: "nota", text: "cajones que una cámara observa" })), h("div", { id: "cobertura-islas", style: "display:grid;gap:9px" })))),
+    h("div", { class: "rejilla dos-iguales" },
+      h("div", { class: "tarjeta" }, h("h3", null, "Últimos eventos", h("a", { href: "#eventos", style: "text-transform:none;letter-spacing:0;font-weight:500;color:var(--naranja)", text: "ver todos", onclick: (e) => { e.preventDefault(); ir("eventos"); } })), h("div", { id: "ultimos-eventos" })),
+      h("div", { class: "tarjeta" }, h("h3", null, "Avisos"), h("div", { id: "avisos" }))));
+}
+function kpi(rot, val, sub, color, extra) {
+  return h("div", { class: "kpi" }, h("div", { class: "rot", text: rot }), h("div", { class: "val", style: color ? `color:${color}` : "" }, val), sub ? h("div", { class: "sub", text: sub }) : null, extra);
+}
+function pintarResumen() {
+  const e = S.estado.espacios, v = S.estado.vision;
+  const monit = e.monitoreados, total = e.total, util = e.libre + e.ocupado + e.reservado;
+  const vehiculos = v.reduce((a, x) => a + x.vehiculos, 0);
+  const barraCob = h("div", { class: "barra" }, h("i", { style: `width:${pct(monit, total)}%;background:var(--naranja)` }));
+  $("kpis").replaceChildren(
+    kpi("Cajones monitoreados", [String(monit), h("small", { text: ` de ${total}` })], `Cobertura ${pct(monit, total)} %`, null, barraCob),
+    kpi("Libres", String(e.libre), monit ? `${pct(e.libre, util)} % de los monitoreados` : "sin datos aún", "var(--libre)"),
+    kpi("Ocupados", String(e.ocupado), monit ? `${pct(e.ocupado, util)} % de los monitoreados` : "sin datos aún", "var(--ocupado)"),
+    kpi("Vehículos detectados", String(vehiculos), v.length ? `en ${v.length} cámara${v.length > 1 ? "s" : ""}` : "sin servidor de visión", null),
+    kpi("Cámaras en línea", [String(S.estado.camaras.en_linea), h("small", { text: ` de ${S.estado.camaras.total}` })], `${S.estado.eventos_ultimo_minuto} eventos en el último minuto`, null));
 
-  const zonas = $("zonas"); zonas.replaceChildren();
-  for (const z of [...new Set(espacios.map((e) => e.zona))].sort()) {
-    const lista = espacios.filter((e) => e.zona === z), lib = lista.filter((e) => e.estado === "libre").length, oc = lista.filter((e) => e.estado === "ocupado").length;
-    const t = el("div", "tarjeta"); const cab = el("div", "zona-cab"); cab.append(el("h3", null, "Isla " + z), el("span", null, `${lib} libres de ${lista.length}`)); t.append(cab);
-    const barra = el("div", "barra"); const b1 = el("i"); b1.style.cssText = `width:${(oc / lista.length) * 100}%;background:var(--ocupado)`; const b2 = el("i"); b2.style.cssText = `width:${(lib / lista.length) * 100}%;background:var(--libre)`; barra.append(b1, b2); t.append(barra);
-    const g = el("div", "cajones");
-    for (const e of lista) {
-      const cambio = !primeraVez && estadoPrevio.has(e.numero) && estadoPrevio.get(e.numero) !== e.estado;
-      const c = el("div", "cajon " + e.estado + (cambio ? " cambio" : ""), e.numero.split("-")[1]); c.title = `${e.numero} · ${e.estado.replace(/_/g, " ")} · ${e.tipo}`;
-      if (TIPO[e.tipo]) c.append(el("small", null, TIPO[e.tipo])); g.append(c);
+  const pest = $("pestanas-resumen"), lista = v.map((x) => x.camara);
+  if (pest.dataset.lista !== lista.join()) {
+    pest.dataset.lista = lista.join(); pest.replaceChildren();
+    for (const c of lista) pest.append(h("button", { text: c, onclick: () => { S.camSel = c; gestionarVideos(); pintarResumen(); } }));
+    if (!lista.length) pest.append(h("span", { class: "vacio", text: "Ninguna cámara está reportando." }));
+  }
+  [...pest.children].forEach((b) => b.classList.toggle("sel", b.textContent === S.camSel));
+  gestionarVideos();
+  const cam = v.find((x) => x.camara === S.camSel), datos = $("datos-video"); datos.replaceChildren();
+  if (cam) for (const [k, val] of [["Vehículos", cam.vehiculos], ["Cajones vigilados", `${cam.ocupados} ocupados · ${cam.libres} libres`], ["Latencia", `${cam.latencia_ms.toFixed(0)} ms`], ["Resolución", cam.resolucion], ["Reporte", `hace ${cam.hace_s.toFixed(0)} s`]]) datos.append(h("span", null, k + ": ", h("b", { text: String(val) })));
+
+  const islas = agruparIslas();
+  $("cobertura-islas").replaceChildren(...islas.map((i) => h("div", { style: "cursor:pointer", onclick: () => { S.isla = i.nombre; ir("islas"); } },
+    h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: "Isla " + i.nombre }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados · ${i.monit}/${i.total}` : `sin cámara · 0/${i.total}` })),
+    h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })))));
+
+  const ev = S.eventos, cont = $("ultimos-eventos"); cont.replaceChildren();
+  if (ev === null) cont.append(h("div", { class: "vacio", text: "Los eventos son visibles solo para administradores." }));
+  else if (!ev.length) cont.append(h("div", { class: "vacio", text: "Aún no hay eventos: se registran cuando un vehículo entra o sale de un cajón monitoreado." }));
+  else cont.append(h("ul", { class: "lista", style: "max-height:300px" }, ev.slice(0, 7).map(filaEvento)));
+  const av = $("avisos"); av.replaceChildren();
+  av.append(S.avisos.length ? h("ul", { class: "lista", style: "max-height:300px" }, S.avisos.slice(0, 6).map((a) => h("li", null, h("span", null, h("b", { text: a.titulo + " " }), a.mensaje), h("time", { text: hace(a.fecha) })))) : h("div", { class: "vacio", text: "No hay avisos. Se generan cuando una isla con cobertura completa se llena." }));
+  $("nota-serie").textContent = S.serie.length > 1 ? `últimos ${Math.max(1, Math.round((new Date(S.serie[S.serie.length - 1].t) - new Date(S.serie[0].t)) / 60000))} min` : "";
+  dibujarSerie($("grafica"), S.serie);
+}
+function filaEvento(e) {
+  const ins = h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` });
+  return h("li", { class: S.vistos.size && e.id > 0 && !S.vistos.has(e.id) ? "nuevo" : "" }, h("span", null, ins, " " + e.descripcion), h("time", { text: hora(e.fecha) }));
+}
+function agruparIslas() {
+  const m = new Map();
+  for (const e of S.espacios) {
+    if (!m.has(e.zona)) m.set(e.zona, { nombre: e.zona, total: 0, monit: 0, libres: 0, ocupados: 0, lista: [] });
+    const i = m.get(e.zona); i.total++; i.lista.push(e);
+    if (e.monitoreado) { i.monit++; if (e.estado === "libre") i.libres++; if (e.estado === "ocupado") i.ocupados++; }
+  }
+  return [...m.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+}
+function dibujarSerie(canvas, pts) {
+  const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, hh = canvas.clientHeight;
+  if (!w) return; canvas.width = w * dpr; canvas.height = hh * dpr;
+  const g = canvas.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, w, hh);
+  const estilo = getComputedStyle(document.body), suave = estilo.getPropertyValue("--suave").trim() || "#888", borde = estilo.getPropertyValue("--borde").trim() || "#ddd";
+  if (pts.length < 2) { g.fillStyle = suave; g.font = "13px system-ui"; g.textAlign = "center"; g.fillText("Reuniendo datos… (una muestra cada 10 s)", w / 2, hh / 2); return; }
+  const max = Math.max(1, ...pts.map((p) => Math.max(p.libres, p.ocupados))), izq = 34, abajo = 20, W = w - izq - 6, H = hh - abajo - 8;
+  const t0 = new Date(pts[0].t).getTime(), t1 = new Date(pts[pts.length - 1].t).getTime(), dt = Math.max(1, t1 - t0);
+  const X = (p) => izq + ((new Date(p.t).getTime() - t0) / dt) * W, Y = (v) => 8 + H - (v / max) * H;
+  g.strokeStyle = borde; g.lineWidth = 1; g.fillStyle = suave; g.font = "11px system-ui"; g.textAlign = "right";
+  for (let i = 0; i <= 3; i++) { const v = Math.round((max * i) / 3), y = Y(v); g.beginPath(); g.moveTo(izq, y); g.lineTo(w - 6, y); g.stroke(); g.fillText(v, izq - 6, y + 4); }
+  const serie = (clave, color) => { g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(X(p), Y(p[clave])) : g.moveTo(X(p), Y(p[clave])))); g.strokeStyle = color; g.lineWidth = 2.2; g.stroke(); g.lineTo(X(pts[pts.length - 1]), Y(0)); g.lineTo(X(pts[0]), Y(0)); g.closePath(); g.fillStyle = color + "26"; g.fill(); };
+  serie("libres", "#2e9e5b"); serie("ocupados", "#d64545");
+  g.fillStyle = suave; g.textAlign = "left"; g.fillText(hora(pts[0].t), izq, hh - 4); g.textAlign = "right"; g.fillText(hora(pts[pts.length - 1].t), w - 6, hh - 4);
+}
+
+/* ============================== VISTA: cámaras ============================== */
+function vistaCamaras() { return h("section", { class: "vista", id: "vista-camaras" }, h("div", { class: "camaras", id: "camaras" })); }
+function pintarCamaras() {
+  const cont = $("camaras"), vision = new Map(S.estado.vision.map((v) => [v.camara, v]));
+  let lista = S.camaras ? S.camaras.map((c) => ({ codigo: c.camara, isla: c.zona, estado: c.estado, senal: c.ultimaSenal })) : S.estado.vision.map((v) => ({ codigo: v.camara, isla: null, estado: "en_linea", senal: null }));
+  lista = lista.sort((a, b) => a.codigo.localeCompare(b.codigo));
+  for (const c of lista) {
+    let t = cont.querySelector(`[data-tarjeta="${c.codigo}"]`);
+    const v = vision.get(c.codigo);
+    if (!t) { t = h("div", { class: "tarjeta camara-tarj", "data-tarjeta": c.codigo }, h("div", { class: "camara-cab" }), h("div", { class: "cuerpo-video" }), h("div", { class: "datos" })); cont.append(t); }
+    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.isla ? ` · Isla ${c.isla}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
+    const cv = t.querySelector(".cuerpo-video");
+    if (v && !cv.querySelector("img")) {
+      const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
+      cv.replaceChildren(h("div", { class: "video" }, img, h("div", { class: "fuera", hidden: true }))); if (S.vista === "camaras") conectarVideo(img, c.codigo, img.nextElementSibling);
+    } else if (!v && !cv.querySelector(".sinvideo")) {
+      cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: "Sin video configurado" }), h("span", { text: "Esta isla todavía no tiene una cámara conectada al modelo." })));
     }
-    t.append(g); zonas.append(t);
+    const d = t.querySelector(".datos"); d.replaceChildren();
+    if (v) for (const [k, val] of [["Vehículos", v.vehiculos], ["Vigilados", `${v.ocupados} ocupados · ${v.libres} libres`], ["Latencia", `${v.latencia_ms.toFixed(0)} ms`], ["FPS video", v.fps_video]]) d.append(h("span", null, k + ": ", h("b", { text: String(val) })));
+    else d.append(h("span", null, "Última señal: ", h("b", { text: hace(c.senal) })));
   }
-  estadoPrevio = new Map(espacios.map((e) => [e.numero, e.estado])); primeraVez = false;
+}
+function abrirVideo(cam) {
+  const img = h("img", { style: "width:100%;border-radius:12px;display:block;background:#000", alt: "Video ampliado de " + cam });
+  img.src = `${urlVideo(cam)}?t=${Date.now()}`; abrirModal(h("div", null, h("h3", { style: "margin-bottom:12px;font-size:18px", text: cam + " · en vivo" }), img));
 }
 
-/* ------------------------------ eventos, cámaras, avisos ------------------------------ */
-const COLOR = { entrada: "#2e9e5b", salida: "#6a2f23", cambio_ocupacion: "#c99700", error_deteccion: "#d64545", camara_desconectada: "#d64545", camara_restablecida: "#2e9e5b" };
-function pintarListas(avisos, eventos, camaras) {
-  const trio = $("trio"); trio.replaceChildren();
-  const tarjeta = (titulo, hijos, vacio) => { const t = el("div", "tarjeta"); t.append(el("h2", null, titulo)); if (!hijos.length) t.append(el("div", "vacio", vacio)); else { const ul = el("ul"); ul.append(...hijos); t.append(ul); } trio.append(t); };
-  if (eventos) {
-    const lis = eventos.map((e) => { const li = el("li", eventosVistos.size && !eventosVistos.has(e.id) ? "nuevo" : ""); const iz = el("span"); const ins = el("span", "insignia", e.tipo.replace(/_/g, " ")); ins.style.background = COLOR[e.tipo] || "#888"; iz.append(ins, document.createTextNode(" " + e.descripcion)); li.append(iz, el("time", null, hora(e.fecha))); return li; });
-    eventos.forEach((e) => eventosVistos.add(e.id));
-    tarjeta("Eventos en tiempo real", lis, "Aún no hay eventos.");
+/* ============================== VISTA: islas ============================== */
+function vistaIslas() {
+  return h("section", { class: "vista", id: "vista-islas" },
+    h("div", { class: "tarjeta", style: "display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between" },
+      h("div", { class: "filtros", id: "filtro-islas" }),
+      h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
+    h("div", { class: "islas", id: "islas" }));
+}
+function pintarIslas() {
+  const islas = agruparIslas(), f = $("filtro-islas");
+  const opciones = ["todas", ...islas.map((i) => i.nombre)];
+  if (f.dataset.lista !== opciones.join()) { f.dataset.lista = opciones.join(); f.replaceChildren(...opciones.map((o) => h("button", { "data-isla": o, text: o === "todas" ? "Todas" : "Isla " + o, onclick: () => { S.isla = o; pintarIslas(); } }))); }
+  [...f.children].forEach((b) => b.classList.toggle("sel", b.dataset.isla === S.isla));
+  const cont = $("islas"); cont.replaceChildren();
+  for (const i of islas.filter((x) => S.isla === "todas" || x.nombre === S.isla)) {
+    const clase = i.monit === 0 ? "nula" : i.monit === i.total ? "total" : "";
+    const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: "Isla " + i.nombre }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` : "sin cámara" })),
+      h("span", { class: "cobertura " + clase, text: `Cobertura ${i.monit}/${i.total} · ${pct(i.monit, i.total)} %` }),
+      h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })));
+    const g = h("div", { class: "cajones" });
+    for (const e of i.lista) {
+      const cambio = !S.primera && S.previo.has(e.numero) && S.previo.get(e.numero) !== e.estado + e.monitoreado;
+      const c = h("button", { class: "cajon " + (e.monitoreado || e.estado !== "libre" ? e.estado : "") + (e.monitoreado ? "" : " sin") + (cambio ? " cambio" : ""), title: `${e.numero} · ${e.monitoreado ? ESTADO[e.estado] : "sin monitoreo"} · ${TIPO_ESPACIO[e.tipo] || e.tipo}`, onclick: () => abrirCajon(e.numero) }, e.numero.split("-")[1]);
+      if (MARCA_TIPO[e.tipo]) c.append(h("small", { text: MARCA_TIPO[e.tipo] }));
+      g.append(c);
+    }
+    t.append(g); cont.append(t);
   }
-  if (camaras) {
-    tarjeta("Cámaras", camaras.map((c) => { const li = el("li"); const ins = el("span", "insignia", c.estado === "en_linea" ? "en línea" : "desconectada"); ins.style.background = c.estado === "en_linea" ? "#2e9e5b" : "#d64545"; const iz = el("span", null, `${c.camara} · isla ${c.zona} `); iz.append(ins); li.append(iz, el("time", null, hora(c.ultimaSenal))); return li; }), "Sin cámaras.");
-  }
-  tarjeta("Avisos", avisos.slice(0, 8).map((a) => { const li = el("li"); li.append(el("span", null, a.titulo + " — " + a.mensaje), el("time", null, hora(a.fecha))); return li; }), "No hay avisos.");
+}
+async function abrirCajon(numero) {
+  abrirModal(h("p", { class: "vacio", text: "Cargando…" }));
+  try {
+    const d = await api("/espacios/" + encodeURIComponent(numero));
+    const dl = h("dl", { class: "detalle" });
+    const fila = (k, v) => dl.append(h("dt", { text: k }), h("dd", null, v));
+    fila("Estado", d.monitoreado ? ESTADO[d.estado] : "Sin monitoreo (ninguna cámara lo observa)");
+    fila("Tipo", TIPO_ESPACIO[d.tipo] || d.tipo); fila("Cámara", d.camara || "—"); fila("Última actualización", d.monitoreado ? fechaHora(d.actualizado) : "—");
+    if (S.yo.rol === "admin") fila("Ocupado por", d.colgante ? `colgante ${d.colgante.codigo} (${d.colgante.tipo})` : d.estado === "ocupado" ? "vehículo sin colgante identificado" : "—");
+    const partes = [h("h3", { style: "font-size:20px", text: "Cajón " + d.numero }), dl];
+    if (S.yo.rol === "admin") {
+      partes.push(h("h4", { style: "margin:6px 0 8px", text: "Historial del cajón" }));
+      partes.push(d.historial.length ? h("ul", { class: "lista", style: "max-height:240px" }, d.historial.map((e) => filaEvento({ ...e, id: -1 }))) : h("p", { class: "vacio", text: "Sin eventos registrados en este cajón." }));
+    }
+    $("modal-contenido").replaceChildren(...partes);
+  } catch (e) { $("modal-contenido").replaceChildren(h("p", { class: "error", text: e.message })); }
 }
 
-/* ------------------------------ ciclos de actualización ------------------------------ */
-async function cicloRapido() {   // cada 2 s: estado del sistema y mapa
-  const [yo, estado, espacios] = await Promise.all([api("/auth/me"), api("/sistema/estado"), api("/espacios")]);
-  $("quien").textContent = yo.nombre; $("salir").hidden = false;
-  pintarChips(estado); pintarFlujo(estado); pintarVideo(estado); pintarEspacios(espacios);
-  $("pie").textContent = "Actualizado " + new Date().toLocaleTimeString("es-MX") + " · el mapa de las islas se refresca cada 2 s";
+/* ============================== VISTA: eventos ============================== */
+function vistaEventos() {
+  return h("section", { class: "vista", id: "vista-eventos" },
+    h("div", { class: "tarjeta" },
+      h("div", { class: "filtros", style: "margin-bottom:14px" },
+        ...[["todos", "Todos"], ["entrada", "Entradas"], ["salida", "Salidas"], ["alertas", "Alertas y cámaras"]].map(([k, t]) => h("button", { "data-f": k, text: t, onclick: () => { S.filtroEvento = k; pintarEventos(); } })),
+        h("input", { type: "search", placeholder: "Buscar cajón, colgante o texto…", style: "margin-left:auto;min-width:240px", oninput: (e) => { S.busqueda = e.target.value.toLowerCase(); pintarEventos(); } })),
+      h("div", { id: "resumen-eventos", class: "datos", style: "margin:0 0 12px" }),
+      h("div", { class: "tabla-caja" }, h("table", null, h("thead", null, h("tr", null, h("th", { text: "Hora" }), h("th", { text: "Tipo" }), h("th", { text: "Cajón" }), h("th", { text: "Detalle" }))), h("tbody", { id: "tabla-eventos" })))));
 }
-async function cicloLento() {    // cada 4 s: listas
-  const [avisos, eventos, camaras] = await Promise.all([api("/notificaciones"), api("/eventos?limit=14"), api("/camaras")]);
-  pintarListas(avisos, eventos, camaras);
+const ES_ALERTA = new Set(["error_deteccion", "camara_desconectada", "camara_restablecida"]);
+function pintarEventos() {
+  document.querySelectorAll("#vista-eventos .filtros button").forEach((b) => b.classList.toggle("sel", b.dataset.f === S.filtroEvento));
+  const tb = $("tabla-eventos"); tb.replaceChildren();
+  if (S.eventos === null) { $("resumen-eventos").replaceChildren(); tb.append(h("tr", null, h("td", { colspan: 4, class: "vacio", text: "El historial de eventos es visible solo para administradores." }))); return; }
+  const lista = S.eventos.filter((e) => (S.filtroEvento === "todos" || (S.filtroEvento === "alertas" ? ES_ALERTA.has(e.tipo) : e.tipo === S.filtroEvento)) && (!S.busqueda || e.descripcion.toLowerCase().includes(S.busqueda)));
+  const entradas = S.eventos.filter((e) => e.tipo === "entrada").length, salidas = S.eventos.filter((e) => e.tipo === "salida").length;
+  $("resumen-eventos").replaceChildren(h("span", null, "Mostrando ", h("b", { text: String(lista.length) }), " de ", String(S.eventos.length), " recientes"), h("span", null, "Entradas: ", h("b", { text: String(entradas) })), h("span", null, "Salidas: ", h("b", { text: String(salidas) })));
+  if (!lista.length) { tb.append(h("tr", null, h("td", { colspan: 4, class: "vacio", text: S.eventos.length ? "Ningún evento coincide con el filtro." : "Aún no hay eventos: se registran cuando un vehículo entra o sale de un cajón monitoreado." }))); return; }
+  for (const e of lista) {
+    const cajon = (e.descripcion.match(/\b[A-H]-\d{2}\b/) || [""])[0];
+    tb.append(h("tr", null, h("td", { class: "mono", text: fechaHora(e.fecha) }), h("td", null, h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` })),
+      h("td", null, cajon ? h("a", { href: "#", style: "color:var(--naranja);font-weight:600", text: cajon, onclick: (ev) => { ev.preventDefault(); abrirCajon(cajon); } }) : "—"), h("td", { text: e.descripcion })));
+  }
 }
 
-function iniciar() {
-  armarEstructura(); primeraVez = true; eventosVistos = new Set(); videoActual = null;
-  const aviso = (e) => { if (token) $("pie").textContent = "⚠ " + e.message; };
-  cicloRapido().catch(aviso); cicloLento().catch(aviso);
-  clearInterval(timerRapido); clearInterval(timerLento);
-  timerRapido = setInterval(() => cicloRapido().catch(aviso), 2000);
-  timerLento = setInterval(() => cicloLento().catch(() => {}), 4000);
+/* ============================== VISTA: administración ============================== */
+function vistaAdmin() {
+  const campo = (etq, ctrl) => h("label", { class: "campo" }, etq, ctrl);
+  const nombre = h("input", { required: true, minlength: 2, placeholder: "Nombre completo" }), correo = h("input", { type: "email", required: true, placeholder: "correo@iest.edu.mx" });
+  const rol = h("select", null, ...["estudiante", "docente", "directivo", "administrativo", "externo", "admin"].map((r) => h("option", { value: r, text: r })));
+  const clave = h("input", { type: "password", required: true, minlength: 8, placeholder: "Mínimo 8 caracteres", autocomplete: "new-password" });
+  const fUsuario = h("form", { class: "campos" }, campo("Nombre", nombre), campo("Correo", correo), campo("Rol", rol), campo("Contraseña inicial", clave), h("button", { class: "boton", type: "submit", text: "Registrar usuario" }));
+  fUsuario.addEventListener("submit", (e) => enviarAdmin(e, "/usuarios", () => ({ nombre: nombre.value, correo: correo.value, rol: rol.value, password: clave.value }), fUsuario, "Usuario registrado"));
+
+  const selUsuario = h("select", { id: "sel-usuario", required: true }), placa = h("input", { placeholder: "ABC-123-D" }), marca = h("input", { required: true, placeholder: "Marca" }), modelo = h("input", { required: true, placeholder: "Modelo" }), color = h("input", { required: true, placeholder: "Color" });
+  const fVeh = h("form", { class: "campos" }, campo("Usuario", selUsuario), campo("Placa (opcional)", placa), campo("Marca", marca), campo("Modelo", modelo), campo("Color", color), h("button", { class: "boton", type: "submit", text: "Registrar vehículo" }));
+  fVeh.addEventListener("submit", (e) => enviarAdmin(e, "/vehiculos", () => ({ usuario_id: +selUsuario.value, placa: placa.value || null, marca: marca.value, modelo: modelo.value, color: color.value }), fVeh, "Vehículo registrado"));
+
+  const codigo = h("input", { required: true, minlength: 3, placeholder: "IEST-000123" }), tipo = h("select", null, ...["estudiante", "docente", "directivo", "administrativo", "visitante"].map((r) => h("option", { value: r, text: r }))), selVeh = h("select", { id: "sel-vehiculo" });
+  const fCol = h("form", { class: "campos" }, campo("Código del colgante", codigo), campo("Tipo", tipo), campo("Vehículo", selVeh), h("button", { class: "boton", type: "submit", text: "Asignar colgante" }));
+  fCol.addEventListener("submit", (e) => enviarAdmin(e, "/colgantes", () => ({ codigo: codigo.value, tipo: tipo.value, vehiculo_id: selVeh.value ? +selVeh.value : null }), fCol, "Colgante asignado"));
+
+  return h("section", { class: "vista", id: "vista-admin" },
+    h("div", { class: "formularios" }, h("div", { class: "tarjeta" }, h("h3", { text: "Registrar usuario" }), fUsuario), h("div", { class: "tarjeta" }, h("h3", { text: "Registrar vehículo" }), fVeh), h("div", { class: "tarjeta" }, h("h3", { text: "Asignar colgante" }), fCol)),
+    h("div", { class: "tarjeta" }, h("h3", { text: "Usuarios" }), h("div", { class: "tabla-caja" }, h("table", null, h("thead", null, h("tr", null, ...["Nombre", "Correo", "Rol", "Cajón asignado"].map((t) => h("th", { text: t })))), h("tbody", { id: "tabla-usuarios" })))),
+    h("div", { class: "tarjeta" }, h("h3", { text: "Vehículos y colgantes" }), h("div", { class: "tabla-caja" }, h("table", null, h("thead", null, h("tr", null, ...["Placa", "Vehículo", "Propietario", "Colgante"].map((t) => h("th", { text: t })))), h("tbody", { id: "tabla-vehiculos" })))));
 }
+async function enviarAdmin(ev, ruta, cuerpo, form, ok) {
+  ev.preventDefault(); const b = form.querySelector("button"); b.disabled = true;
+  try { await post(ruta, cuerpo()); toast(ok, "ok"); form.reset(); await cargarAdmin(); } catch (e) { toast(e.message, "mal"); } finally { b.disabled = false; }
+}
+async function cargarAdmin() {
+  try {
+    const [us, ve, co] = await Promise.all([api("/usuarios"), api("/vehiculos"), api("/colgantes")]);
+    S.admin = { us, ve, co };
+    const sin = (t) => h("tr", null, h("td", { colspan: 4, class: "vacio", text: t }));
+    $("tabla-usuarios").replaceChildren(...(us.length ? us.map((u) => h("tr", null, h("td", { text: u.nombre }), h("td", { text: u.correo }), h("td", null, h("span", { class: "insignia", style: "background:var(--marron)", text: u.rol })), h("td", { text: u.espacioAsignado || "—" }))) : [sin("Aún no hay usuarios.")]));
+    const dueno = (v) => { const u = us.find((x) => x.id === v.usuario_id); return u ? u.nombre : "—"; };
+    $("tabla-vehiculos").replaceChildren(...(ve.length ? ve.map((v) => h("tr", null, h("td", { class: "mono", text: v.placa || "—" }), h("td", { text: `${v.marca} ${v.modelo} · ${v.color}` }), h("td", { text: dueno(v) }), h("td", null, v.colgante ? h("span", { class: "mono", text: `${v.colgante.codigo} (${v.colgante.tipo})` }) : h("span", { style: "color:var(--suave)", text: "sin colgante" })))) : [sin("Aún no hay vehículos registrados.")]));
+    $("sel-usuario").replaceChildren(...us.map((u) => h("option", { value: u.id, text: `${u.nombre} (${u.correo})` })));
+    $("sel-vehiculo").replaceChildren(h("option", { value: "", text: "— sin vehículo —" }), ...ve.filter((v) => !v.colgante).map((v) => h("option", { value: v.id, text: `${v.placa || "sin placa"} · ${v.marca} ${v.modelo}` })));
+  } catch (e) { toast(e.message, "mal"); }
+}
+
+/* ============================== VISTA: sistema ============================== */
+function vistaSistema() {
+  return h("section", { class: "vista", id: "vista-sistema" },
+    h("div", { class: "tarjeta" }, h("h3", { text: "Flujo del sistema" }), h("div", { class: "flujo", id: "flujo" })),
+    h("div", { class: "rejilla dos-iguales", id: "modelos" }));
+}
+function pintarSistema() {
+  const s = S.estado, v = s.vision, visOk = s.vision_conectada, c0 = v[0];
+  const nodos = [
+    ["📹", "Cámaras", visOk ? "ok" : "mal", c0 ? `${v.length} con video · ${c0.resolucion} · ${c0.fps_video} fps` : "ninguna reporta", visOk],
+    ["🧠", "Visión · YOLO", visOk ? "ok" : "mal", c0 ? `${c0.modelo} · ${c0.dispositivo} · ${c0.latencia_ms.toFixed(0)} ms` : "servidor sin conexión", visOk],
+    ["⚙️", "API", "ok", `FastAPI v${s.version} · ${s.eventos_ultimo_minuto} eventos/min`, true],
+    ["🗄️", "Base de datos", s.base_de_datos.estado === "ok" ? "ok" : "mal", `${s.base_de_datos.motor} · ${s.espacios.total} cajones`, true],
+    ["📱", "Panel y app móvil", "ok", `${s.espacios.monitoreados} cajones con datos reales`, true],
+  ];
+  const f = $("flujo"); f.replaceChildren();
+  nodos.forEach(([ico, nom, est, dato, act], i) => {
+    f.append(h("div", { class: "nodo" }, h("div", { class: "ico", text: ico }), h("div", { class: "nom" }, h("span", { class: "punto " + est }), nom), h("div", { class: "dato", text: dato })));
+    if (i < nodos.length - 1) f.append(h("div", { class: "enlace" + (act && nodos[i + 1][4] ? " activo" : "") }));
+  });
+  const cont = $("modelos"); cont.replaceChildren();
+  if (!v.length) cont.append(h("div", { class: "tarjeta" }, h("h3", { text: "Modelo de visión" }), h("p", { class: "vacio", text: "El servidor de visión no está reportando. Inícialo con: python scripts/iniciar_sistema.py" })));
+  for (const x of v) {
+    const dl = h("dl", { class: "detalle" });
+    for (const [k, val] of [["Modelo", x.modelo], ["Dispositivo", x.dispositivo.startsWith("cuda") ? `GPU (${x.dispositivo})` : x.dispositivo], ["Tamaño de entrada", x.imgsz + " px"], ["Confianza mínima", Math.round(x.umbral_confianza * 100) + " %"], ["Latencia por detección", x.latencia_ms.toFixed(0) + " ms"], ["Detecciones por segundo", x.fps_deteccion.toFixed(1)], ["Video", `${x.resolucion} · ${x.fps_video} fps`], ["Cajones vigilados", x.espacios], ["Último reporte", `hace ${x.hace_s.toFixed(0)} s`]]) dl.append(h("dt", { text: k }), h("dd", { text: String(val) }));
+    const cv = h("canvas", { class: "grafica", style: "height:90px" });
+    cont.append(h("div", { class: "tarjeta" }, h("h3", null, x.camara, h("span", { class: "insignia", style: `background:${x.hace_s <= 15 ? "#2e9e5b" : "#d64545"}`, text: x.hace_s <= 15 ? "reportando" : "sin reporte" })), dl, h("div", { class: "datos", style: "margin:0 0 6px", text: "Latencia reciente" }), cv));
+    const lat = S.latCam[x.camara] || []; requestAnimationFrame(() => dibujarLinea(cv, lat));
+  }
+}
+function dibujarLinea(canvas, valores) {
+  const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, hh = canvas.clientHeight; if (!w) return;
+  canvas.width = w * dpr; canvas.height = hh * dpr; const g = canvas.getContext("2d"); g.scale(dpr, dpr);
+  if (valores.length < 2) return; const max = Math.max(...valores) * 1.15 || 1;
+  g.beginPath(); valores.forEach((v, i) => { const x = (i / (valores.length - 1)) * w, y = hh - (v / max) * (hh - 6) - 3; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+  g.strokeStyle = "#f28c28"; g.lineWidth = 2; g.stroke(); g.lineTo(w, hh); g.lineTo(0, hh); g.closePath(); g.fillStyle = "#f28c2826"; g.fill();
+}
+
+/* ============================== modal ============================== */
+function abrirModal(contenido) { $("modal-contenido").replaceChildren(contenido); $("modal").classList.add("abierto"); }
+function cerrarModal() { $("modal").classList.remove("abierto"); $("modal-contenido").replaceChildren(); }
+$("modal").addEventListener("click", (e) => { if (e.target.id === "modal" || e.target.classList.contains("modal-cerrar")) cerrarModal(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
+
+/* ============================== ciclo de actualización ============================== */
+function pintarComun() {
+  const s = S.estado, v = s.vision;
+  const chip = (nombre, ok, det) => h("span", { class: "chip" }, h("span", { class: "punto " + (ok ? "ok" : "mal") }), `${nombre} · ${det}`);
+  $("chips").replaceChildren(chip("API", true, "v" + s.version), chip("Base de datos", s.base_de_datos.estado === "ok", s.base_de_datos.motor), chip("Modelo YOLO", s.vision_conectada, s.vision_conectada ? `${v[0].modelo} · ${v[0].dispositivo}` : "sin conexión"), chip("Cámaras", s.camaras.en_linea > 0, `${s.camaras.en_linea}/${s.camaras.total} en línea`));
+  const n = $("cuenta-eventos"); if (n) { const nuevos = S.eventos ? S.eventos.filter((e) => !S.vistos.has(e.id)).length : 0; n.hidden = !(nuevos && S.vista !== "eventos"); n.textContent = nuevos; }
+}
+function pintar() {
+  if (!S.estado) return;
+  pintarComun();
+  ({ resumen: pintarResumen, camaras: pintarCamaras, islas: pintarIslas, eventos: pintarEventos, sistema: pintarSistema, admin: () => {} })[S.vista]();
+}
+function conexion(ok) {
+  const p = $("punto-conexion"); if (!p) return; p.className = "punto " + (ok ? "ok vivo" : "mal"); $("texto-conexion").textContent = ok ? "Conectado" : "Sin conexión con la API";
+}
+async function cicloRapido() {
+  const [estado, espacios] = await Promise.all([api("/sistema/estado"), api("/espacios")]);
+  S.estado = estado; S.espacios = espacios;
+  for (const x of estado.vision) { const a = (S.latCam[x.camara] = S.latCam[x.camara] || []); a.push(x.latencia_ms); if (a.length > 60) a.shift(); }
+  pintar();
+  S.previo = new Map(espacios.map((e) => [e.numero, e.estado + e.monitoreado])); S.primera = false; conexion(true);
+}
+async function cicloLento() {
+  const [avisos, eventos, camaras] = await Promise.all([api("/notificaciones"), api("/eventos?limit=200"), api("/camaras")]);
+  S.avisos = avisos; S.camaras = camaras;
+  if (eventos && S.vistos.size) {  // avisa de lo importante que acaba de pasar
+    for (const e of eventos.filter((x) => !S.vistos.has(x.id))) { if (e.tipo === "camara_desconectada" || e.tipo === "error_deteccion") toast(e.descripcion, "mal"); else if (e.tipo === "camara_restablecida") toast(e.descripcion, "ok"); }
+  }
+  S.eventos = eventos;
+  if (eventos && !S.vistos.size) eventos.forEach((e) => S.vistos.add(e.id));  // lo que ya estaba al abrir no cuenta como nuevo
+  pintar(); if (eventos && S.vista === "eventos") eventos.forEach((e) => S.vistos.add(e.id));
+}
+async function cicloSerie() { S.serie = await api("/sistema/historial?minutos=60"); if (S.vista === "resumen") pintarResumen(); }
+
+async function iniciar() {
+  try { S.yo = await api("/auth/me"); } catch (e) { return vistaLogin(e.message); }
+  Object.assign(S, { primera: true, vistos: new Set(), eventos: null });
+  armarEstructura();
+  const inicial = (location.hash || "#resumen").slice(1); S.vista = VISTAS.some(([v]) => v === inicial) ? inicial : "resumen";
+  const aviso = () => conexion(false);
+  await Promise.all([cicloRapido().catch(aviso), cicloLento().catch(aviso), cicloSerie().catch(() => {})]);
+  ir(S.vista);
+  timers.forEach(clearInterval);
+  timers = [setInterval(() => cicloRapido().catch(aviso), 2000), setInterval(() => cicloLento().catch(() => {}), 4000), setInterval(() => cicloSerie().catch(() => {}), 10000)];
+  window.addEventListener("resize", () => { if (S.vista === "resumen") dibujarSerie($("grafica"), S.serie); });
+}
+window.addEventListener("hashchange", () => { const v = (location.hash || "").slice(1); if (S.yo && v !== S.vista && VISTAS.some(([x]) => x === v)) ir(v); });
 
 token ? iniciar() : vistaLogin();
 </script>

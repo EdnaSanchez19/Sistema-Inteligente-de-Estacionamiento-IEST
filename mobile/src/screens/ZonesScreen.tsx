@@ -23,6 +23,7 @@ export default function ZonesScreen() {
         const zonas = [...new Set(espacios.map((e) => e.zona))].sort();
         const actual = zona ?? zonas[0];
         const lista = espacios.filter((e) => e.zona === actual);
+        const monitoreados = lista.filter((e) => e.monitoreado).length;
         return (
           <>
             <View style={s.chips}>
@@ -33,12 +34,15 @@ export default function ZonesScreen() {
               ))}
             </View>
             <Card style={{ gap: spacing.md }}>
+              <Text style={s.cobertura}>
+                {monitoreados === 0 ? 'Esta isla aún no tiene cámara' : `Cobertura: ${monitoreados} de ${lista.length} cajones monitoreados`}
+              </Text>
               <Legend />
               <View style={s.grid}>
                 {lista.map((e) => (
-                  <View key={e.id} style={[s.cell, { backgroundColor: estadoColor[e.estado] }]}>
-                    <Text style={s.cellNum}>{e.numero.split('-')[1]}</Text>
-                    {tipoEtiqueta[e.tipo] ? <Text style={s.cellTipo}>{tipoEtiqueta[e.tipo]}</Text> : null}
+                  <View key={e.id} style={[s.cell, e.monitoreado ? { backgroundColor: estadoColor[e.estado] } : s.cellSin]}>
+                    <Text style={[s.cellNum, !e.monitoreado && { color: colors.muted, fontWeight: '500' }]}>{e.numero.split('-')[1]}</Text>
+                    {tipoEtiqueta[e.tipo] ? <Text style={[s.cellTipo, !e.monitoreado && { color: colors.muted }]}>{tipoEtiqueta[e.tipo]}</Text> : null}
                   </View>
                 ))}
               </View>
@@ -57,6 +61,8 @@ const s = StyleSheet.create({
   chipText: { fontWeight: '600', color: colors.text },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   cell: { width: 40, height: 46, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  cellSin: { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.offline, backgroundColor: colors.bg },
+  cobertura: { color: colors.muted, fontSize: 13 },
   cellNum: { color: '#fff', fontWeight: '800', fontSize: 16 },
   cellTipo: { color: '#fff', fontSize: 12 },
 });
