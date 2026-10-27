@@ -30,11 +30,23 @@ LOW_CONF_MIN_GAP_S = 30.0
 LOW_CONF_MAX_FILES = 500
 
 
-def process_frame(cam: CameraConfig, detector: VehicleDetector, frame) -> tuple[list[SpaceState], list[Detection], list[Detection]]:
-    """Devuelve (estado de cada cajón, vehículos confiables, todas las detecciones incluso dudosas)."""
+def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_previos: dict[str, bool] | None = None) -> tuple[list[SpaceState], list[Detection], list[Detection]]:
+    """Devuelve (estado de cada cajón, vehículos confiables, todas las detecciones incluso dudosas).
+
+    Con `ocupados_previos` (el estado confirmado hasta ahora) aplica histéresis: para MARCAR un cajón como ocupado se
+    exige la confianza normal (`conf`), pero un cajón que ya estaba ocupado se conserva mientras siga habiendo una
+    detección más débil (`conf_baja`). Así un auto parcialmente tapado, que el modelo ve a ratos, no hace parpadear
+    el cajón entre ocupado y libre ni genera entradas y salidas falsas.
+    """
     all_dets = detector.detect(frame)
     vehicles = [d for d in all_dets if d.conf >= cam.conf]
     states = compute_occupancy(cam.spaces, vehicles, cam.occupied_ratio, cam.footprint)
+    if ocupados_previos:
+        debiles = [d for d in all_dets if d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
+        con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint)}
+        for i, s in enumerate(states):
+            if not s.occupied and ocupados_previos.get(s.id) and con_debiles[s.id].occupied:
+                states[i] = con_debiles[s.id]  # se mantiene ocupado por una detección débil
     return states, vehicles, all_dets
 
 
@@ -95,7 +107,7 @@ class CameraWorker(threading.Thread):
                 continue
             try:
                 with self.det_lock:
-                    states, vehicles, all_dets = process_frame(cam, self.detector, frame)
+                    states, vehicles, all_dets = process_frame(cam, self.detector, frame, self.tracker.state)
                     pend = self.pendants.read(frame, vehicles) if self.pendants else {}
             except Exception:
                 log.exception("%s: fallo al procesar el fotograma", cam.id)

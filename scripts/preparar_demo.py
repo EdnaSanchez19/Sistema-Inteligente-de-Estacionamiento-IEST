@@ -81,17 +81,21 @@ def main() -> None:
     out.release()
 
     spaces = [{"id": k, "polygon": v} for k, v in CAJONES.items()]
-    cfg = {
-        "model": "models/yolov8n.pt",
-        "imgsz": 1280,
-        "cameras": [
-            {"id": "CAM-01", "source": "../demo/camara1_estatica.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "spaces": spaces},
-        ],
-    }
+    camaras = [
+        {"id": "CAM-01", "source": "../demo/camara1_estatica.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "spaces": spaces},
+    ]
+    # CAM-02: cámara de seguridad real y fija. Sus 40 cajones los arma scripts/cajones_cam02.py; el video (de terceros)
+    # no se incluye en el repositorio: se copia a demo/camara2_cctv.mp4 (ver docs/EJECUCION.md).
+    cajones2 = ROOT / "demo" / "cajones_cam02.json"
+    if cajones2.exists():
+        c2 = json.loads(cajones2.read_text(encoding="utf-8"))["cajones"]
+        camaras.append({"id": "CAM-02", "source": "../demo/camara2_cctv.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 3, "confirm_free": 6,
+                        "spaces": [{"id": c["id"], "polygon": c["polygon"]} for c in c2]})
+    cfg = {"model": "models/yolov8n.pt", "imgsz": 1280, "cameras": camaras}
     (args.salida / "cameras_demo.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     cv2.imwrite(str(args.salida / "camara1_fotograma0.jpg"), frames[0])
     cv2.imwrite(str(args.salida / "camara1_fotograma_final.jpg"), frames[-1])
-    print(f"Listo en {args.salida}: camara1_estatica.mp4 ({len(frames) * 2 - 2} fotogramas), cameras_demo.json")
+    print(f"Listo en {args.salida}: camara1_estatica.mp4 ({len(frames) * 2 - 2} fotogramas), cameras_demo.json con {len(camaras)} cámara(s)")
 
 
 if __name__ == "__main__":

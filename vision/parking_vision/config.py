@@ -53,7 +53,8 @@ class CameraConfig:
     source: str  # URL RTSP, ruta de video/imagen o índice de webcam
     spaces: list[Space]
     interval_s: float = 2.0  # procesa un fotograma cada N segundos
-    conf: float = 0.35  # confianza mínima para contar un vehículo
+    conf: float = 0.35  # confianza mínima para marcar un cajón como ocupado
+    conf_baja: float | None = None  # histéresis: un cajón ya ocupado sigue ocupado mientras haya una detección con al menos esta confianza (por defecto 0.6 x conf)
     occupied_ratio: float = 0.30  # fracción del cajón cubierta para marcarlo ocupado
     footprint: float = 0.6  # parte inferior del recuadro usada como "huella" en el suelo (0-1)
     confirm_occupied: int = 2  # observaciones seguidas para pasar a ocupado

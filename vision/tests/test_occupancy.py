@@ -76,3 +76,25 @@ def test_config_cajones_y_variables(tmp_path, monkeypatch):
     assert cfg.cameras[0].source == "rtsp://u:secreta@h/1"
     assert [s.id for s in cfg.cameras[0].spaces] == ["A-01", "A-02", "A-03"]
     assert "secreta" not in p.read_text()  # la credencial no se escribe en el archivo
+
+
+def test_histeresis_un_auto_tapado_no_hace_parpadear_el_cajon():
+    """Para marcar ocupado se exige conf; para soltar un cajón ya ocupado basta una detección más débil (conf_baja)."""
+    from parking_vision.config import CameraConfig
+    from parking_vision.run import process_frame
+
+    class Detector:
+        def __init__(self, dets):
+            self.dets = dets
+
+        def detect(self, frame):
+            return self.dets
+
+    cam = CameraConfig(id="C", source="x", spaces=SPACES[:1], conf=0.35, occupied_ratio=0.3, footprint=1.0)
+    debil = [Detection(10, 20, 90, 190, 0.25)]  # entre 0.6 x conf (0.21) y conf (0.35)
+    fuerte = [Detection(10, 20, 90, 190, 0.80)]
+    assert process_frame(cam, Detector(debil), None, None)[0][0].occupied is False  # sin historia, una detección débil no basta
+    assert process_frame(cam, Detector(debil), None, {"A-01": False})[0][0].occupied is False
+    assert process_frame(cam, Detector(debil), None, {"A-01": True})[0][0].occupied is True  # ya estaba ocupado: se conserva
+    assert process_frame(cam, Detector(fuerte), None, {"A-01": False})[0][0].occupied is True
+    assert process_frame(cam, Detector([Detection(10, 20, 90, 190, 0.05)]), None, {"A-01": True})[0][0].occupied is False  # ruido muy débil: sí se libera

@@ -23,6 +23,10 @@ CameraStream (RTSP) ─▶ VehicleDetector (YOLO) ─▶ compute_occupancy (ROI)
 4. El cajón queda ocupado si la huella cubre ≥ `occupied_ratio` (30 %) de su área.
 5. Un cajón cambia de estado solo tras `confirm_occupied` (2) o `confirm_free` (3) observaciones
    seguidas iguales, para evitar parpadeos (personas cruzando, autos en maniobra).
+6. **Histéresis:** para *marcar* un cajón ocupado se exige `conf`, pero uno que ya estaba ocupado se conserva mientras haya
+   una detección con al menos `conf_baja` (por defecto 0.6 x `conf`). Así un auto parcialmente tapado, que el modelo ve a
+   ratos, no hace parpadear el cajón ni genera entradas y salidas falsas.
+7. La **primera** observación de un cajón fija su estado inicial en la API: no es una entrada ni una salida.
 
 `conf`, `occupied_ratio` y `footprint` son valores iniciales: **hay que calibrarlos con las cámaras
 reales** (tareas 4.3 y 4.4). Con el dataset PKLot se pueden comparar combinaciones con `evaluate_pklot`.
@@ -52,6 +56,13 @@ python -m parking_vision.run
 - La primera ejecución descarga `yolov8n.pt` automáticamente (Ultralytics).
 - Un único modelo se comparte entre cámaras con un candado; con muchas cámaras conviene subir
   `interval_s`.
+
+## Cajones de una cámara fija
+
+`python scripts/descubrir_cajones.py --video v.mp4` propone cajones a partir de dónde se estacionan los autos (solo donde
+hubo un auto); `scripts/cajones_cam02.py` es el ejemplo de cómo se combinaron con los cajones vacíos marcados en el pavimento
+para la cámara CAM-02. En producción los cajones se dibujan sobre las líneas con `parking_vision.tools.define_spaces`.
+`parking_vision.demo_server` procesa videos como cámaras y emite el video anotado (ver `docs/EJECUCION.md`).
 
 ## Colgantes (clasificación + OCR)
 

@@ -105,7 +105,7 @@ class CamaraDemo:
                 continue
             t0 = time.time()
             with self.det_lock:
-                states, vehicles, _ = process_frame(cam, self.detector, frame)
+                states, vehicles, _ = process_frame(cam, self.detector, frame, self.tracker.state)
             ms = (time.time() - t0) * 1000
             self._lat = (self._lat + [ms])[-20:]
             changes = self.tracker.update({s.id: s.occupied for s in states})
@@ -117,6 +117,7 @@ class CamaraDemo:
                 "fps_video": round(self.fps_video, 1), "fps_deteccion": round(1000 / (sum(self._lat) / len(self._lat)), 1) if self._lat else 0.0,
                 "latencia_ms": round(sum(self._lat) / len(self._lat), 1), "vehiculos": len(vehicles), "libres": libres,
                 "ocupados": len(confirmados) - libres, "espacios": len(confirmados), "resolucion": self.resolucion, "umbral_confianza": cam.conf,
+                "ids": [s.id for s in confirmados],  # cajones que esta cámara vigila de verdad
             }
             for c in changes:
                 if c.previous is not None:
@@ -223,7 +224,15 @@ def main() -> None:
     detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes)
     modelo = Path(cfg.model).stem.replace("yolov", "YOLOv")  # yolov8n -> YOLOv8n
     det_lock = threading.Lock()
-    camaras = {c.id: CamaraDemo(c, cfg, detector, det_lock, publisher, modelo) for c in cfg.cameras}
+    disponibles = []
+    for c in cfg.cameras:
+        if Path(c.source).exists():
+            disponibles.append(c)
+        else:
+            log.warning("%s: no existe el video %s; se omite esa cámara", c.id, c.source)
+    if not disponibles:
+        raise SystemExit("Ninguna cámara tiene video. Corre scripts/preparar_demo.py")
+    camaras = {c.id: CamaraDemo(c, cfg, detector, det_lock, publisher, modelo) for c in disponibles}
     for c in camaras.values():
         c.start()
 

@@ -1,0 +1,34 @@
+{
+  "fuente": "Kaggle: datasetengineer/smart-parking-management-dataset (sintético, 1000 filas)",
+  "registros": 1000,
+  "ocupacion_media": 0.55,
+  "duracion_horas": {
+    "0": 0.053,
+    "1": 0.15,
+    "2": 0.238,
+    "3": 0.247,
+    "4": 0.144,
+    "5": 0.102,
+    "6": 0.048,
+    "7": 0.015,
+    "8": 0.001,
+    "10": 0.002
+  },
+  "duracion_media_horas": 2.87,
+  "tipo_usuario": {
+    "Registered": 0.732,
+    "Visitor": 0.235,
+    "Staff": 0.033
+  },
+  "tipo_vehiculo": {
+    "Car": 0.704,
+    "Motorcycle": 0.191,
+    "Electric Vehicle": 0.105
+  },
+  "tamano_cajon": {
+    "Standard": 0.712,
+    "Compact": 0.181,
+    "Oversized": 0.107
+  },
+  "cajones_reservados": 0.157
+}
