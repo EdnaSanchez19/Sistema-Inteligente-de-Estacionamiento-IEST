@@ -12,7 +12,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .config import get_settings
-from .models import Camara, EstadoCamara, Evento, TipoEvento
+from . import historial
+from .models import Camara, Espacio, EstadoCamara, EstadoEspacio, Evento, TipoEvento
 
 log = logging.getLogger("watchdog")
 
@@ -33,6 +34,22 @@ def revisar_camaras(db: Session, timeout_s: int, ahora: datetime | None = None) 
     if caidas:
         db.commit()
     return caidas
+
+
+def muestrear_ocupacion(db: Session) -> None:
+    """Guarda un punto de la serie de ocupación con los cajones que una cámara ya observa."""
+    estados = db.scalars(select(Espacio.estado).where(Espacio.monitoreado.is_(True))).all()
+    historial.registrar(sum(e == EstadoEspacio.libre for e in estados), sum(e == EstadoEspacio.ocupado for e in estados), len(estados))
+
+
+async def muestrear(session_factory, cada_s: int = 10) -> None:
+    while True:
+        await asyncio.sleep(cada_s)
+        try:
+            with session_factory() as db:
+                muestrear_ocupacion(db)
+        except Exception:
+            log.exception("Falló el muestreo de ocupación")
 
 
 async def vigilar(session_factory) -> None:

@@ -78,6 +78,7 @@ def test_entrada_y_salida_de_un_vehiculo_con_colgante(api, escena):
     w = arrancar(api, "CAM-01", source, spaces, det, pend)
     try:
         wait_until(lambda: api.get("/camaras", admin)[0]["estado"] == "en_linea")
+        wait_until(lambda: {"A-01", "A-02", "A-03"} <= api.monitoreados(demo))  # el estado inicial (todo libre) ya quedó fijado
         assert api.estados(demo)["A-02"] == "libre"
 
         # Entra un auto al cajón A-02 (el centro de la imagen)
@@ -135,6 +136,8 @@ def test_aviso_cuando_la_isla_se_llena(api, escena):
     admin, demo = api.admin, api.demo
     numeros = [f"C-{i:02d}" for i in range(1, 41)]
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": []})  # CAM-02 en línea
+    # la cámara observa primero los 40 cajones (todos libres) y después se van ocupando: solo así hay cambios reales
+    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": True} for n in numeros]})
     titulos = [n["titulo"] for n in api.get("/notificaciones", demo)]
     assert "Isla C llena" in titulos
@@ -157,7 +160,8 @@ def test_modelo_yolo_real_sobre_una_foto(api):
     try:
         wait_until(lambda: api.estados(demo)["B-01"] == "ocupado", timeout=30)
         assert api.estados(demo)["B-02"] == "libre"
-        entrada = next(e for e in api.get("/eventos", admin) if e["tipo"] == "entrada" and "B-01" in e["descripcion"])
-        assert "sin colgante identificado" in entrada["descripcion"]
+        assert {"B-01", "B-02"} <= api.monitoreados(demo)  # ya los observa una cámara
+        # el autobús estaba desde el primer fotograma: es el estado inicial del cajón, no una entrada
+        assert not [e for e in api.get("/eventos", admin) if e["tipo"] == "entrada" and "B-01" in e["descripcion"]]
     finally:
         detener(w)

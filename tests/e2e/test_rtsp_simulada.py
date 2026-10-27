@@ -1,4 +1,5 @@
 """Captura RTSP real contra una cámara simulada con ffmpeg, incluida una caída y la reconexión."""
+import os
 import shutil
 import subprocess
 import sys
@@ -17,6 +18,18 @@ pytestmark = pytest.mark.skipif(
     shutil.which("ffmpeg") is None or not (MEDIAMTX.exists() or shutil.which("mediamtx")),
     reason="requiere ffmpeg y mediamtx (ver scripts/simular_rtsp.py)",
 )
+
+
+def detener_arbol(proc: subprocess.Popen) -> None:
+    """Termina el proceso y sus hijos (en Windows, terminate() deja huérfanos a mediamtx y ffmpeg)."""
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
+    else:
+        proc.terminate()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
 
 
 @pytest.fixture()
@@ -47,5 +60,4 @@ def test_captura_rtsp_cae_y_se_reconecta(video):
         wait_until(lambda: stream.seconds_since_frame() < 1.5, timeout=40)
     finally:
         stream.stop()
-        cam.terminate()
-        cam.wait(timeout=10)
+        detener_arbol(cam)

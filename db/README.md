@@ -25,7 +25,7 @@ erDiagram
 | `vehiculos` | Vehículos de cada usuario (la placa es opcional) |
 | `colgantes` | Código leído por OCR + tipo; un colgante por vehículo |
 | `zonas` / `camaras` | Zonas del estacionamiento y cámara RTSP que las cubre (estado y última señal) |
-| `espacios` | Cajón: número, zona, tipo, estado actual, asignado y colgante que lo ocupa |
+| `espacios` | Cajón: número, zona, tipo, estado actual, `monitoreado` (una cámara ya lo observó; si no, su "libre" es solo el valor inicial), asignado y colgante que lo ocupa |
 | `eventos` | Historial de auditoría: entradas, salidas, cambios de ocupación, errores y cámaras caídas |
 | `notificaciones` | Avisos para la app (`usuario_id` nulo = para todos) |
 

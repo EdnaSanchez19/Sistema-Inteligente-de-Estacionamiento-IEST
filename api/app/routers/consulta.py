@@ -1,12 +1,13 @@
 """Consultas que usa la app móvil."""
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..auth import get_current_user, require_admin
 from ..db import get_db
 from ..models import Camara, Espacio, Evento, Notificacion, Usuario, Vehiculo, Zona
-from ..schemas import CamaraOut, EspacioOut, EventoOut, NotificacionOut, VehiculoOut
+from ..models import Rol
+from ..schemas import CamaraOut, ColganteOut, EspacioDetalleOut, EspacioOut, EventoCajonOut, EventoOut, NotificacionOut, VehiculoOut
 
 router = APIRouter(tags=["consulta"])
 
@@ -17,6 +18,20 @@ def espacios(zona: str | None = None, _: Usuario = Depends(get_current_user), db
     if zona:
         q = q.where(Zona.nombre == zona)
     return [EspacioOut.of(e) for e in db.scalars(q)]
+
+
+@router.get("/espacios/{numero}", response_model=EspacioDetalleOut)
+def detalle_de_espacio(numero: str, user: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
+    esp = db.scalar(select(Espacio).where(Espacio.numero == numero).options(selectinload(Espacio.zona), selectinload(Espacio.camara)))
+    if esp is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"El cajón {numero} no existe")
+    out = EspacioDetalleOut(**EspacioOut.of(esp).model_dump(), camara=esp.camara.codigo if esp.camara else None)
+    if user.rol == Rol.admin:  # quién estaciona y el historial son datos de auditoría
+        if esp.colgante_actual:
+            out.colgante = ColganteOut(codigo=esp.colgante_actual.codigo, tipo=esp.colgante_actual.tipo.value)
+        q = select(Evento).where(Evento.espacio_id == esp.id).order_by(Evento.creado_en.desc(), Evento.id.desc()).limit(15)
+        out.historial = [EventoCajonOut(id=e.id, tipo=e.tipo.value, descripcion=e.descripcion, fecha=e.creado_en, confianza=e.confianza) for e in db.scalars(q)]
+    return out
 
 
 @router.get("/vehiculos/mios", response_model=list[VehiculoOut])

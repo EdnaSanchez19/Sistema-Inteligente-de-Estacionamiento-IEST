@@ -34,15 +34,25 @@ class EspacioOut(BaseModel):
     zona: str
     tipo: str
     estado: str
+    monitoreado: bool = False  # False: ninguna cámara ha reportado este cajón, su estado no es una observación
+    actualizado: UtcDatetime | None = None
 
     @classmethod
     def of(cls, e: Espacio) -> "EspacioOut":
-        return cls(id=e.id, numero=e.numero, zona=e.zona.nombre, tipo=e.tipo.value, estado=e.estado.value)
+        return cls(id=e.id, numero=e.numero, zona=e.zona.nombre, tipo=e.tipo.value, estado=e.estado.value, monitoreado=bool(e.monitoreado), actualizado=e.actualizado_en)
 
 
 class ColganteOut(BaseModel):
     codigo: str
     tipo: str
+
+
+class EventoCajonOut(BaseModel):
+    id: int
+    tipo: str
+    descripcion: str
+    fecha: UtcDatetime
+    confianza: float | None = None
 
 
 class VehiculoOut(BaseModel):
@@ -130,6 +140,7 @@ class ModeloIn(BaseModel):
     espacios: int = Field(default=0, ge=0, le=10000)
     resolucion: str = Field(default="", max_length=20)
     umbral_confianza: float = Field(default=0, ge=0, le=1)
+    ids: list[str] = Field(default_factory=list, max_length=500)  # cajones que vigila esta cámara
 
 
 class CamaraEstadoIn(BaseModel):
@@ -194,3 +205,9 @@ class NotificacionIn(BaseModel):
     titulo: str = Field(min_length=1, max_length=120)
     mensaje: str = Field(min_length=1, max_length=1000)
     usuario_id: int | None = None  # None = para todos
+
+
+class EspacioDetalleOut(EspacioOut):
+    camara: str | None = None
+    colgante: ColganteOut | None = None  # quién ocupa el cajón ahora (solo administradores)
+    historial: list[EventoCajonOut] = []  # últimos eventos del cajón (solo administradores)

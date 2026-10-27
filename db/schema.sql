@@ -82,6 +82,7 @@ CREATE TABLE espacios (
 	camara_id INTEGER, 
 	tipo VARCHAR(30) NOT NULL, 
 	estado VARCHAR(30) NOT NULL, 
+	monitoreado BOOLEAN NOT NULL, 
 	roi JSON, 
 	usuario_asignado_id INTEGER, 
 	colgante_actual_id INTEGER, 

@@ -143,6 +143,9 @@ class Espacio(Base):
     camara_id: Mapped[int | None] = mapped_column(ForeignKey("camaras.id", ondelete="SET NULL"))
     tipo: Mapped[TipoEspacio] = mapped_column(_enum(TipoEspacio), default=TipoEspacio.general)
     estado: Mapped[EstadoEspacio] = mapped_column(_enum(EstadoEspacio), default=EstadoEspacio.libre)
+    # False hasta que una cámara reporta este cajón por primera vez: antes de eso su "libre" es solo el valor inicial,
+    # no una observación, y la interfaz lo muestra como "sin monitoreo".
+    monitoreado: Mapped[bool] = mapped_column(Boolean, default=False)
     # Referencia de la ROI para humanos/herramientas; la fuente de verdad de la detección es vision/config.
     roi: Mapped[list | None] = mapped_column(JSON)
     usuario_asignado_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))

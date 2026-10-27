@@ -61,3 +61,17 @@ def test_hash_de_password():
     assert verify_password("secreto123", h)
     assert not verify_password("otra", h)
     assert not verify_password("secreto123", "basura")
+
+
+def test_datos_de_muestra_con_la_mezcla_del_dataset_y_sin_duplicar(db):
+    from collections import Counter
+
+    seed.seed_base(db)
+    assert seed.seed_muestra(db, 200) == 200
+    assert seed.seed_muestra(db, 200) == 0  # idempotente
+    por_tipo = Counter(c.tipo for c in db.scalars(select(Colgante)))
+    assert por_tipo[TipoColgante.estudiante] == 102 and por_tipo[TipoColgante.docente] == 44
+    assert por_tipo[TipoColgante.visitante] == 48 and por_tipo[TipoColgante.administrativo] == 4 and por_tipo[TipoColgante.directivo] == 2
+    # cada colgante pertenece a un vehículo de un usuario, y la lista que usa el simulador coincide con la de la base
+    assert all(c.vehiculo.usuario for c in db.scalars(select(Colgante)))
+    assert {c.codigo for c in db.scalars(select(Colgante))} == {c for c, _ in seed.colgantes_de_muestra(200)}

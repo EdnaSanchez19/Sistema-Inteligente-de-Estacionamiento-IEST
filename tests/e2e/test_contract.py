@@ -30,6 +30,7 @@ def valores_ts(tipo: str) -> set[str]:
 def respuestas(api):
     admin, demo = api.admin, api.demo
     api.post("/notificaciones", admin, {"titulo": "Prueba", "mensaje": "contrato"})
+    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-01", "espacios": [{"numero": "A-10", "ocupado": False}]})  # estado inicial
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-01", "espacios": [{"numero": "A-10", "ocupado": True, "colgante_codigo": "IEST-004512"}]})
     return {
         "Usuario": api.get("/auth/me", demo),

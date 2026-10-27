@@ -8,17 +8,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from .config import get_settings
-from .db import Base, SessionLocal, engine
+from .db import Base, SessionLocal, engine, migrar_esquema
 from .routers import admin, auth, consulta, ingest, sistema
-from .watchdog import vigilar
+from .watchdog import muestrear, vigilar
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(engine)  # en el piloto; si el esquema crece, migrar a Alembic
-    tarea = asyncio.create_task(vigilar(SessionLocal))
+    migrar_esquema()
+    tareas = [asyncio.create_task(vigilar(SessionLocal)), asyncio.create_task(muestrear(SessionLocal))]
     yield
-    tarea.cancel()
+    for t in tareas:
+        t.cancel()
 
 
 app = FastAPI(title="Estacionamiento IEST API", version="1.0.0", lifespan=lifespan)

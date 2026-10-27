@@ -22,11 +22,19 @@ def _camara(db: Session, codigo: str) -> Camara:
 
 
 def _libres(db: Session, zona_id: int) -> int:
-    return db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona_id, Espacio.estado == EstadoEspacio.libre)) or 0
+    """Cajones libres que una cámara ya observó (un cajón sin monitoreo no cuenta: su "libre" es solo el valor inicial)."""
+    return db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona_id, Espacio.monitoreado.is_(True), Espacio.estado == EstadoEspacio.libre)) or 0
 
 
 def _avisar_cambio_de_zona(db: Session, zona_id: int, antes: int, despues: int) -> None:
-    """Notifica a todos cuando una zona se llena o queda casi llena (solo al cruzar el umbral)."""
+    """Notifica a todos cuando una isla se llena o queda casi llena (solo al cruzar el umbral).
+
+    Solo se avisa si las cámaras ya cubren todos los cajones de la isla; con cobertura parcial "casi llena" no significaría nada.
+    """
+    total = db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona_id)) or 0
+    monitoreados = db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona_id, Espacio.monitoreado.is_(True))) or 0
+    if monitoreados < total:
+        return
     zona = db.get(Zona, zona_id)
     if despues == 0 and antes > 0:
         db.add(Notificacion(titulo=f"Isla {zona.nombre} llena", mensaje=f"Ya no hay espacios libres en la isla {zona.nombre}."))
@@ -56,10 +64,16 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         if esp is None:
             desconocidos.append(item.numero)
             continue
+        primera_vez = not esp.monitoreado
+        esp.monitoreado = True
         # Reservados y fuera de servicio los decide un administrador, no la cámara.
         if esp.estado not in (EstadoEspacio.libre, EstadoEspacio.ocupado):
             continue
         nuevo = EstadoEspacio.ocupado if item.ocupado else EstadoEspacio.libre
+        if primera_vez:
+            # Primera observación del cajón: es su estado inicial, no una entrada ni una salida. No genera evento.
+            esp.estado = nuevo
+            continue
         if nuevo == esp.estado:
             continue
         cambios += 1

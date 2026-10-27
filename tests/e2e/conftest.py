@@ -69,6 +69,10 @@ class Api:
     def estados(self, headers: dict) -> dict[str, str]:
         return {e["numero"]: e["estado"] for e in self.get("/espacios", headers)}
 
+    def monitoreados(self, headers: dict) -> set[str]:
+        """Cajones que una cámara ya observó (su estado inicial quedó fijado)."""
+        return {e["numero"] for e in self.get("/espacios", headers) if e["monitoreado"]}
+
 
 @pytest.fixture(scope="session")
 def api(tmp_path_factory) -> Api:

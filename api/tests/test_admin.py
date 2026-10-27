@@ -85,6 +85,7 @@ def test_aviso_automatico_isla_casi_llena_y_llena(client):
         return client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": ocupado} for n in numeros]})
 
     isla_c = [f"C-{i:02d}" for i in range(1, 41)]  # 40 cajones
+    ocupar(isla_c, ocupado=False)  # la cámara observa los 40 (estado inicial: libres); hasta aquí no hay aviso posible
     ocupar(isla_c[:36])  # quedan 4 libres: aún sin aviso
     assert not [n for n in client.get("/notificaciones", headers=h).json() if "casi llena" in n["titulo"]]
     ocupar(isla_c[36:37])  # quedan 3 -> casi llena
@@ -118,3 +119,11 @@ def test_watchdog_marca_camaras_sin_senal(client):
     assert estados["CAM-01"] == "desconectada" and estados["CAM-02"] == "en_linea"
     tipos = [e["tipo"] for e in client.get("/eventos", headers=h).json()]
     assert tipos.count("camara_desconectada") == 1
+
+
+def test_no_hay_aviso_de_isla_llena_si_la_camara_no_cubre_toda_la_isla(client):
+    h = admin_headers(client)
+    parcial = [f"C-{i:02d}" for i in range(1, 11)]  # la cámara solo vigila 10 de los 40 cajones
+    client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in parcial]})
+    client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": True} for n in parcial]})
+    assert not [n for n in client.get("/notificaciones", headers=h).json() if "llena" in n["titulo"]]  # "llena" sería falso: hay 30 sin observar
