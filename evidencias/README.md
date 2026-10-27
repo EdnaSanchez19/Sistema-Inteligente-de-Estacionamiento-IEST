@@ -39,7 +39,7 @@ completo está en [`video_resultado_cajones_estabilizados.mp4`](03_video_ia/vide
 | [`01_pruebas_automaticas/`](01_pruebas_automaticas) | 55 pruebas automáticas (22 API y base de datos, 14 visión, 19 end-to-end) y verificación de tipos de la app, todas en verde; entorno de ejecución |
 | [`02_simulacion_sintetica/`](02_simulacion_sintetica) | Montaje de 30 s con verdad exacta: métricas por condición (día, noche, lluvia, niebla, sol, ruido) |
 | [`03_video_ia/`](03_video_ia) | Video de 10 s generado con IA (toma aérea de ~80 autos): detección, ocupación por cajón y condiciones adversas |
-| [`05_panel_demo/`](05_panel_demo) | Captura del panel de demostración funcionando (ver [`docs/DEMO.md`](../docs/DEMO.md)) |
+| [`05_panel/`](05_panel) | Capturas del panel con datos reales del modelo: resumen y mapa de islas con cobertura (ver [`docs/EJECUCION.md`](../docs/EJECUCION.md)) |
 | [`04_cadena_completa/`](04_cadena_completa) | Cámara RTSP simulada → servidor de visión con YOLO → API → estado de los cajones, con entradas y salidas registradas |
 
 ## Resultados principales

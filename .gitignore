@@ -41,3 +41,4 @@ credenciales_demo.txt
 # Demostración: el video estabilizado se genera con scripts/preparar_demo.py
 demo/*.mp4
 demo/*.jpg
+credenciales.txt

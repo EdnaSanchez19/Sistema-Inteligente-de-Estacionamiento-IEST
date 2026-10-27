@@ -26,7 +26,7 @@ Por eso el informe de 4.3 debe decir que el piloto fue **simulado con video** y 
 | `parking_vision.tools.comparar_condiciones` | Sin etiquetas: cuántos vehículos de la imagen original sigue encontrando el modelo en cada condición |
 | `procesar_video --estabilizar` | Los cajones acompañan el movimiento de la cámara (dron, viento, vibración) |
 | `scripts/simular_rtsp.py` | Publica el video por RTSP como una cámara IP, con caídas programables |
-| `scripts/simulate_cameras.py` | Publica ocupación aleatoria directo a la API (para demostrar la app) |
+| `scripts/simulate_cameras.py` | Publica ocupación INVENTADA a la API (pruebas de carga; no es operación real) |
 | `scripts/crear_video_prueba.py` | Montaje sintético con verdad conocida, solo para probar las herramientas |
 
 Todos se ejecutan desde `vision/` con `python -m parking_vision.tools.<nombre>`, salvo los `scripts/`.

@@ -44,16 +44,17 @@ el valor de ejemplo (`cambia_...`) la API rechaza el login y la ingesta a propó
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-## Demostración (un comando)
+## Ejecutar con videos como cámaras (un comando)
 
 ```bash
-python scripts/iniciar_demo.py
+python scripts/iniciar_sistema.py
 ```
 
-Abre un panel con un video de cámara fija, el modelo YOLO detectando en vivo, el flujo cámara → modelo → API → base de
-datos y el mapa de cajones. Detalles y límites en [`docs/DEMO.md`](docs/DEMO.md).
+Levanta la API, la base de datos y el servidor de visión (YOLO) con videos como cámaras, y abre el panel. Todo lo que se
+muestra es lo que el modelo observa; los cajones sin cámara aparecen como "sin monitoreo", no como libres. Detalles,
+cobertura y límites en [`docs/EJECUCION.md`](docs/EJECUCION.md).
 
-![Panel de demostración](evidencias/05_panel_demo/panel_completo.jpg)
+![Panel del sistema](evidencias/05_panel/panel_resumen.jpg)
 
 ## Ejecutar el sistema
 
@@ -88,7 +89,7 @@ Con cámaras reales, sigue [`vision/README.md`](vision/README.md) (dibujar los c
 **Sin cámaras (demostración):** el simulador publica entradas y salidas aleatorias a la API:
 
 ```bash
-python scripts/simulate_cameras.py --api http://localhost:8000 --interval 2
+python scripts/simulate_cameras.py --api http://localhost:8000   # datos INVENTADOS, solo para pruebas de carga
 ```
 
 ### App móvil

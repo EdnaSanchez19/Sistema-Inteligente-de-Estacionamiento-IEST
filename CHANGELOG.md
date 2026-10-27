@@ -1,5 +1,20 @@
 # Cambios
 
+## Sin versión — el sistema pasa a trabajar con datos reales (27/10/2026)
+
+- **Cajones "sin monitoreo".** Un cajón que ninguna cámara ha observado ya no aparece como libre: la API expone
+  `monitoreado` y la interfaz lo muestra rayado, con la cobertura por isla y en general. La primera observación de un cajón
+  fija su estado inicial sin generar entradas ni salidas falsas, y los avisos "isla llena" exigen cobertura completa.
+- **Panel rediseñado** (`/panel`): barra lateral con Resumen, Cámaras, Islas, Eventos, Administración y Sistema; detalle e
+  historial de cada cajón; gráfica de ocupación en el tiempo; registro de usuarios, vehículos y colgantes. La app móvil
+  muestra la misma cobertura.
+- **CAM-02: cámara de seguridad real y fija** (isla B, 40 cajones, 23 ocupados y 17 vacíos al inicio) además de CAM-01
+  (video generado con IA). Nuevo `scripts/descubrir_cajones.py` y `scripts/cajones_cam02.py`.
+- **Histéresis** en la ocupación (`conf_baja`): un auto parcialmente tapado ya no hace parpadear el cajón.
+- `scripts/iniciar_sistema.py` levanta todo con datos reales; la simulación pasa a ser opcional (`--con-simulacion`).
+- Nuevos endpoints: `GET /espacios/{numero}`, `GET /sistema/historial`; migración automática de la columna `monitoreado`.
+- Análisis del dataset de Kaggle (sintético, sin imágenes): `docs/DATASET_KAGGLE.md`.
+
 ## Sin versión — panel de demostración (27/10/2026)
 
 El estacionamiento pasa a **8 islas de 40 cajones** (320 en total) con una cámara por isla (`CAM-01` a `CAM-08`); antes eran
@@ -7,9 +22,9 @@ El estacionamiento pasa a **8 islas de 40 cajones** (320 en total) con una cáma
 
 Panel web (`/panel`) rediseñado con los colores institucionales: video de cámara fija con el modelo YOLO detectando en
 vivo, flujo del sistema con estado real, estado del modelo (latencia, FPS, vehículos), mapa de cajones con destellos
-al cambiar, eventos, cámaras y avisos. Nuevo `scripts/iniciar_demo.py` que lo levanta todo; `GET /sistema/estado` y
+al cambiar, eventos, cámaras y avisos. Nuevo `scripts/iniciar_demo.py` (hoy `iniciar_sistema.py`) que lo levanta todo; `GET /sistema/estado` y
 `POST /ingest/modelo` en la API; CORS configurable; la app móvil adopta los mismos colores. Corrige el paquete
-`expo-asset` que faltaba en la app. El video es generado con IA y las zonas B y C son simuladas (ver `docs/DEMO.md`).
+`expo-asset` que faltaba en la app. El video es generado con IA y las zonas B y C son simuladas (ver `docs/EJECUCION.md`).
 
 ## Sin versión — banco de simulación con video (20/10/2026)
 
