@@ -33,3 +33,11 @@ salida/
 
 # Herramientas descargadas para simulación
 herramientas_externas/
+
+# Local
+credenciales_demo.txt
+*.db
+
+# Demostración: el video estabilizado se genera con scripts/preparar_demo.py
+demo/*.mp4
+demo/*.jpg

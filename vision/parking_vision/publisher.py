@@ -30,3 +30,7 @@ class ApiPublisher:
 
     def camera_status(self, camara: str, en_linea: bool) -> bool:
         return self._post("/ingest/camara-estado", {"camara": camara, "en_linea": en_linea})
+
+    def model_stats(self, stats: dict) -> bool:
+        """Estado del modelo (versión, dispositivo, FPS, latencia, vehículos) para el panel del sistema."""
+        return self._post("/ingest/modelo", stats)

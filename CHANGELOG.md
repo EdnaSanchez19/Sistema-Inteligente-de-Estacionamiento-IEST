@@ -1,5 +1,13 @@
 # Cambios
 
+## Sin versión — panel de demostración (27/10/2026)
+
+Panel web (`/panel`) rediseñado con los colores institucionales: video de cámara fija con el modelo YOLO detectando en
+vivo, flujo del sistema con estado real, estado del modelo (latencia, FPS, vehículos), mapa de cajones con destellos
+al cambiar, eventos, cámaras y avisos. Nuevo `scripts/iniciar_demo.py` que lo levanta todo; `GET /sistema/estado` y
+`POST /ingest/modelo` en la API; CORS configurable; la app móvil adopta los mismos colores. Corrige el paquete
+`expo-asset` que faltaba en la app. El video es generado con IA y las zonas B y C son simuladas (ver `docs/DEMO.md`).
+
 ## Sin versión — banco de simulación con video (20/10/2026)
 
 Como no habrá acceso a las cámaras del IEST, se agregó lo necesario para validar con video: procesamiento de

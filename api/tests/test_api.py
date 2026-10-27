@@ -94,3 +94,16 @@ def test_secretos_sin_configurar_rechazan(client, monkeypatch):
     finally:
         monkeypatch.setenv("INGEST_API_KEY", "clave-ingesta-pruebas")
         get_settings.cache_clear()
+
+
+def test_cors_solo_permite_los_origenes_configurados(client):
+    ok = client.options("/espacios", headers={"Origin": "http://localhost:8081", "Access-Control-Request-Method": "GET", "Access-Control-Request-Headers": "authorization"})
+    assert ok.status_code == 200 and ok.headers["access-control-allow-origin"] == "http://localhost:8081"
+    ajeno = client.options("/espacios", headers={"Origin": "http://sitio-ajeno.example", "Access-Control-Request-Method": "GET"})
+    assert "access-control-allow-origin" not in ajeno.headers
+
+
+def test_panel_web_se_sirve_sin_autenticacion(client):
+    r = client.get("/panel")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/html")
+    assert "Estacionamiento IEST" in r.text

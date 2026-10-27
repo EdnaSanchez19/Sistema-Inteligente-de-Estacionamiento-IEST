@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from ..auth import require_ingest_key
 from ..db import get_db
 from ..models import Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, Notificacion, TipoEvento, Zona, utcnow
-from ..schemas import CamaraEstadoIn, OcupacionIn
+from .. import estado_vision
+from ..schemas import CamaraEstadoIn, ModeloIn, OcupacionIn
 
 UMBRAL_CASI_LLENA = 3  # libres a partir de los cuales se avisa a todos los usuarios
 
@@ -83,6 +84,13 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         _avisar_cambio_de_zona(db, cam.zona_id, libres_antes, _libres(db, cam.zona_id))
     db.commit()
     return {"actualizados": cambios, "desconocidos": desconocidos}
+
+
+@router.post("/modelo")
+def modelo(data: ModeloIn) -> dict:
+    """El servidor de visión reporta cómo va el modelo; el panel lo muestra (no se guarda en la base de datos)."""
+    estado_vision.registrar(data.camara, data.model_dump(exclude={"camara"}))
+    return {"recibido": True}
 
 
 @router.post("/camara-estado")

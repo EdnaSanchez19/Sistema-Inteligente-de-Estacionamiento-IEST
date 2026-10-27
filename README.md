@@ -44,6 +44,17 @@ el valor de ejemplo (`cambia_...`) la API rechaza el login y la ingesta a propó
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
+## Demostración (un comando)
+
+```bash
+python scripts/iniciar_demo.py
+```
+
+Abre un panel con un video de cámara fija, el modelo YOLO detectando en vivo, el flujo cámara → modelo → API → base de
+datos y el mapa de cajones. Detalles y límites en [`docs/DEMO.md`](docs/DEMO.md).
+
+![Panel de demostración](evidencias/05_panel_demo/panel_completo.jpg)
+
 ## Ejecutar el sistema
 
 ### Opción A: con Docker (como en el piloto)

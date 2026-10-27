@@ -39,13 +39,17 @@ def main() -> None:
     ap.add_argument("--interval", type=float, default=2.0, help="segundos entre actualizaciones")
     ap.add_argument("--ocupacion-inicial", type=float, default=0.5, help="fracción de cajones ocupados al empezar")
     ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--zonas", default="", help="solo simula estas zonas, p. ej. B,C (por defecto todas)")
     args = ap.parse_args()
 
     rnd = random.Random(args.seed)
     http = requests.Session()
     http.headers["X-API-Key"] = clave_de_ingesta()
 
-    camaras = {cam: [f"{zona}-{i:02d}" for i in range(1, n + 1)] for zona, cam, n, _ in ZONAS}
+    solo = {z.strip().upper() for z in args.zonas.split(",") if z.strip()}
+    camaras = {cam: [f"{zona}-{i:02d}" for i in range(1, n + 1)] for zona, cam, n, _ in ZONAS if not solo or zona in solo}
+    if not camaras:
+        raise SystemExit(f"Ninguna zona coincide con --zonas {args.zonas!r}")
     estado = {num: rnd.random() < args.ocupacion_inicial for nums in camaras.values() for num in nums}
     con_colgante: str | None = None  # cajón que tiene el colgante demo (solo puede estar en uno a la vez)
     primera = True

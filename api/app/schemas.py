@@ -114,6 +114,24 @@ class OcupacionIn(BaseModel):
     baja_confianza: bool = False
 
 
+class ModeloIn(BaseModel):
+    """Estadísticas que reporta el servidor de visión sobre el modelo (para el panel)."""
+
+    camara: str = Field(max_length=40)
+    modelo: str = Field(max_length=60)
+    dispositivo: str = Field(default="", max_length=40)
+    imgsz: int = Field(default=0, ge=0, le=8192)
+    fps_video: float = Field(default=0, ge=0, le=1000)
+    fps_deteccion: float = Field(default=0, ge=0, le=1000)
+    latencia_ms: float = Field(default=0, ge=0, le=600000)
+    vehiculos: int = Field(default=0, ge=0, le=10000)
+    libres: int = Field(default=0, ge=0, le=10000)
+    ocupados: int = Field(default=0, ge=0, le=10000)
+    espacios: int = Field(default=0, ge=0, le=10000)
+    resolucion: str = Field(default="", max_length=20)
+    umbral_confianza: float = Field(default=0, ge=0, le=1)
+
+
 class CamaraEstadoIn(BaseModel):
     camara: str = Field(max_length=40)
     en_linea: bool
