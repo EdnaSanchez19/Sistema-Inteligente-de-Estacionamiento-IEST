@@ -33,11 +33,11 @@ export default function HomeScreen() {
                 <Text style={s.assigned}>{usuario.espacioAsignado}</Text>
               </Card>
             ) : null}
-            <Title>Por zona</Title>
+            <Title>Por isla</Title>
             {zonas.map((z) => (
               <Card key={z.zona} style={{ gap: spacing.sm }}>
                 <View style={s.row}>
-                  <Text style={s.zone}>Zona {z.zona}</Text>
+                  <Text style={s.zone}>Isla {z.zona}</Text>
                   <Text style={[s.free, z.libres === 0 && { color: colors.occupied }]}>{z.libres} libres</Text>
                 </View>
                 <OccupancyBar libres={z.libres} ocupados={z.ocupados} total={z.total} />

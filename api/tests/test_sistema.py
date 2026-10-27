@@ -18,7 +18,7 @@ def test_el_modelo_reporta_y_el_panel_lo_ve(client):
     assert despues["vision_conectada"] is True
     v = despues["vision"][0]
     assert v["camara"] == "CAM-01" and v["modelo"] == "YOLOv8n" and v["vehiculos"] == 79 and v["hace_s"] < 5
-    assert despues["camaras"]["total"] == 3 and despues["espacios"]["libre"] == 48
+    assert despues["camaras"]["total"] == 8 and despues["espacios"]["libre"] == 320
     estado_vision.limpiar()
 
 

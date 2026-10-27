@@ -78,16 +78,16 @@
   .modelo canvas { width: 100%; height: 54px; margin-top: 12px; display: block; }
 
   /* ---------- mapa ---------- */
-  .zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
   .zona-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
   .zona-cab h3 { font-size: 17px; }
   .zona-cab span { font-size: 13px; color: var(--suave); }
   .barra { height: 8px; border-radius: 5px; background: var(--borde); overflow: hidden; display: flex; margin: 8px 0 14px; }
   .barra i { display: block; height: 100%; transition: width .6s; }
-  .cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 6px; }
-  .cajon { height: 50px; border-radius: 9px; color: #fff; font-weight: 700; font-size: 13px; display: grid; place-items: center; position: relative; transition: background .4s, transform .2s; cursor: default; }
+  .cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 5px; }
+  .cajon { height: 32px; border-radius: 7px; color: #fff; font-weight: 700; font-size: 11.5px; display: grid; place-items: center; position: relative; transition: background .4s, transform .2s; cursor: default; }
   .cajon:hover { transform: scale(1.06); }
-  .cajon small { position: absolute; top: 2px; right: 5px; font-size: 10px; opacity: .9; }
+  .cajon small { position: absolute; top: 0; right: 3px; font-size: 8px; opacity: .9; }
   .libre { background: var(--libre); } .ocupado { background: var(--ocupado); } .reservado { background: var(--reservado); } .fuera_de_servicio { background: var(--fuera); }
   .cajon.cambio { animation: destello 2.4s ease-out; }
   @keyframes destello { 0% { box-shadow: 0 0 0 0 var(--naranja); transform: scale(1.18); } 60% { box-shadow: 0 0 0 9px #f28c2800; } 100% { transform: scale(1); } }
@@ -288,7 +288,7 @@ function pintarEspacios(espacios) {
   const zonas = $("zonas"); zonas.replaceChildren();
   for (const z of [...new Set(espacios.map((e) => e.zona))].sort()) {
     const lista = espacios.filter((e) => e.zona === z), lib = lista.filter((e) => e.estado === "libre").length, oc = lista.filter((e) => e.estado === "ocupado").length;
-    const t = el("div", "tarjeta"); const cab = el("div", "zona-cab"); cab.append(el("h3", null, "Zona " + z), el("span", null, `${lib} libres de ${lista.length}`)); t.append(cab);
+    const t = el("div", "tarjeta"); const cab = el("div", "zona-cab"); cab.append(el("h3", null, "Isla " + z), el("span", null, `${lib} libres de ${lista.length}`)); t.append(cab);
     const barra = el("div", "barra"); const b1 = el("i"); b1.style.cssText = `width:${(oc / lista.length) * 100}%;background:var(--ocupado)`; const b2 = el("i"); b2.style.cssText = `width:${(lib / lista.length) * 100}%;background:var(--libre)`; barra.append(b1, b2); t.append(barra);
     const g = el("div", "cajones");
     for (const e of lista) {
@@ -312,7 +312,7 @@ function pintarListas(avisos, eventos, camaras) {
     tarjeta("Eventos en tiempo real", lis, "Aún no hay eventos.");
   }
   if (camaras) {
-    tarjeta("Cámaras", camaras.map((c) => { const li = el("li"); const ins = el("span", "insignia", c.estado === "en_linea" ? "en línea" : "desconectada"); ins.style.background = c.estado === "en_linea" ? "#2e9e5b" : "#d64545"; const iz = el("span", null, `${c.camara} · zona ${c.zona} `); iz.append(ins); li.append(iz, el("time", null, hora(c.ultimaSenal))); return li; }), "Sin cámaras.");
+    tarjeta("Cámaras", camaras.map((c) => { const li = el("li"); const ins = el("span", "insignia", c.estado === "en_linea" ? "en línea" : "desconectada"); ins.style.background = c.estado === "en_linea" ? "#2e9e5b" : "#d64545"; const iz = el("span", null, `${c.camara} · isla ${c.zona} `); iz.append(ins); li.append(iz, el("time", null, hora(c.ultimaSenal))); return li; }), "Sin cámaras.");
   }
   tarjeta("Avisos", avisos.slice(0, 8).map((a) => { const li = el("li"); li.append(el("span", null, a.titulo + " — " + a.mensaje), el("time", null, hora(a.fecha))); return li; }), "No hay avisos.");
 }
@@ -322,7 +322,7 @@ async function cicloRapido() {   // cada 2 s: estado del sistema y mapa
   const [yo, estado, espacios] = await Promise.all([api("/auth/me"), api("/sistema/estado"), api("/espacios")]);
   $("quien").textContent = yo.nombre; $("salir").hidden = false;
   pintarChips(estado); pintarFlujo(estado); pintarVideo(estado); pintarEspacios(espacios);
-  $("pie").textContent = "Actualizado " + new Date().toLocaleTimeString("es-MX") + " · el mapa se refresca cada 2 s";
+  $("pie").textContent = "Actualizado " + new Date().toLocaleTimeString("es-MX") + " · el mapa de las islas se refresca cada 2 s";
 }
 async function cicloLento() {    // cada 4 s: listas
   const [avisos, eventos, camaras] = await Promise.all([api("/notificaciones"), api("/eventos?limit=14"), api("/camaras")]);

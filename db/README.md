@@ -31,6 +31,8 @@ erDiagram
 
 ## Decisiones
 
+- **Zona = isla.** El estacionamiento son 8 islas (A a H) de 40 cajones, 320 en total, una cámara por isla. En el modelo
+  de datos la tabla se llama `zonas`; en la app y el panel se muestra como "Isla".
 - **Colgante vs. placa:** el cronograma habla de placas, la arquitectura de colgantes. El modelo usa el
   colgante como identificador principal y deja la placa como dato opcional del vehículo.
 - Las URL RTSP (con usuario y contraseña) **no** se guardan aquí, solo en la config del servidor de visión.

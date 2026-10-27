@@ -28,7 +28,7 @@ export default function ZonesScreen() {
             <View style={s.chips}>
               {zonas.map((z) => (
                 <Pressable key={z} onPress={() => setZona(z)} style={[s.chip, z === actual && s.chipOn]}>
-                  <Text style={[s.chipText, z === actual && { color: '#fff' }]}>Zona {z}</Text>
+                  <Text style={[s.chipText, z === actual && { color: '#fff' }]}>Isla {z}</Text>
                 </Pressable>
               ))}
             </View>
@@ -51,12 +51,12 @@ export default function ZonesScreen() {
 }
 
 const s = StyleSheet.create({
-  chips: { flexDirection: 'row', gap: spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontWeight: '600', color: colors.text },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  cell: { width: 56, height: 64, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  cell: { width: 40, height: 46, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
   cellNum: { color: '#fff', fontWeight: '800', fontSize: 16 },
   cellTipo: { color: '#fff', fontSize: 12 },
 });

@@ -17,16 +17,19 @@ from .db import Base, engine
 from .models import (Camara, Colgante, Espacio, EstadoCamara, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
 from .security import hash_password
 
-ZONAS = [  # (zona, cámara, cantidad, tipo de los primeros 2 cajones)
-    ("A", "CAM-01", 20, TipoEspacio.discapacidad),
-    ("B", "CAM-02", 16, TipoEspacio.directivo),
-    ("C", "CAM-03", 12, TipoEspacio.visitante),
-]
+# El estacionamiento son 8 islas (las "zonas" del modelo de datos) de 40 cajones, cada una vigilada por una cámara:
+# 8 x 40 = 320 cajones. Los 2 primeros cajones de cada isla son de un tipo especial.
+CAJONES_POR_ISLA = 40
+_ESPECIAL = {
+    "A": TipoEspacio.discapacidad, "B": TipoEspacio.directivo, "C": TipoEspacio.visitante, "D": TipoEspacio.discapacidad,
+    "E": TipoEspacio.directivo, "F": TipoEspacio.visitante, "G": TipoEspacio.motocicleta, "H": TipoEspacio.directivo,
+}
+ZONAS = [(isla, f"CAM-{i:02d}", CAJONES_POR_ISLA, _ESPECIAL[isla]) for i, isla in enumerate("ABCDEFGH", start=1)]  # (isla, cámara, cajones, tipo especial)
 
 
 def seed_base(db: Session) -> None:
     for nombre, cam, cantidad, especial in ZONAS:
-        zona = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Zona {nombre}")
+        zona = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Isla {nombre}")
         db.add(zona)
         db.flush()
         camara = db.scalar(select(Camara).where(Camara.codigo == cam)) or Camara(codigo=cam, zona_id=zona.id, estado=EstadoCamara.desconectada)

@@ -78,21 +78,21 @@ def test_aviso_manual_y_visibilidad(client):
     assert demo["id"]  # el usuario demo existe y solo ve los suyos + los generales
 
 
-def test_aviso_automatico_zona_casi_llena_y_llena(client):
+def test_aviso_automatico_isla_casi_llena_y_llena(client):
     h = admin_headers(client)
 
     def ocupar(numeros, ocupado=True):
         return client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": ocupado} for n in numeros]})
 
-    zona_c = [f"C-{i:02d}" for i in range(1, 13)]  # 12 cajones
-    ocupar(zona_c[:8])  # quedan 4 libres: aún sin aviso
+    isla_c = [f"C-{i:02d}" for i in range(1, 41)]  # 40 cajones
+    ocupar(isla_c[:36])  # quedan 4 libres: aún sin aviso
     assert not [n for n in client.get("/notificaciones", headers=h).json() if "casi llena" in n["titulo"]]
-    ocupar(zona_c[8:9])  # quedan 3 -> casi llena
-    ocupar(zona_c[9:10])  # quedan 2 -> no repite el aviso
+    ocupar(isla_c[36:37])  # quedan 3 -> casi llena
+    ocupar(isla_c[37:38])  # quedan 2 -> no repite el aviso
     avisos = [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
-    assert avisos.count("Zona C casi llena") == 1
-    ocupar(zona_c[10:])  # 0 libres -> llena
-    assert "Zona C llena" in [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
+    assert avisos.count("Isla C casi llena") == 1
+    ocupar(isla_c[38:])  # 0 libres -> llena
+    assert "Isla C llena" in [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
 
 
 def test_fechas_salen_con_zona_horaria_utc(client):

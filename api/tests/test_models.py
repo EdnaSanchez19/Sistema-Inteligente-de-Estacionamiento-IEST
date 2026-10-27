@@ -22,7 +22,7 @@ def test_seed_crea_zonas_espacios_y_admin(db, monkeypatch):
     seed.seed_base(db)
     seed.seed_base(db)  # idempotente
     assert db.scalar(select(Zona.id).where(Zona.nombre == "A")) is not None
-    assert len(db.scalars(select(Espacio)).all()) == 48
+    assert len(db.scalars(select(Espacio)).all()) == 320
     admin = db.scalar(select(Usuario).where(Usuario.rol == Rol.admin))
     assert admin is not None and admin.password_hash != "x" * 12
 

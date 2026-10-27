@@ -6,8 +6,8 @@
 Qué arranca (y se detiene todo junto con Ctrl+C):
   1. La API (FastAPI) con una base SQLite local.
   2. El servidor de visión en modo demostración: procesa un video como si fuera una cámara fija, detecta vehículos
-     con YOLO, publica la ocupación de la zona A en la API y emite el video anotado.
-  3. Un simulador que mueve vehículos en las zonas B y C para que haya eventos en vivo.
+     con YOLO, publica la ocupación de la isla A en la API y emite el video anotado.
+  3. Un simulador que mueve vehículos en las islas B a H para que haya eventos en vivo.
 
 La primera vez prepara lo que falta: .env con claves aleatorias, base de datos con usuarios de demostración
 (se guardan en credenciales_demo.txt, que no se sube a git), el video estabilizado y el modelo YOLO (~6 MB).
@@ -107,7 +107,7 @@ def main() -> None:
         if not esperar(f"{api}/health"):
             raise SystemExit("La API no arrancó (¿el puerto está ocupado?)")
         procesos.append(subprocess.Popen([PY, "-m", "parking_vision.demo_server", "--config", "../demo/cameras_demo.json", "--puerto", str(args.puerto_video)], cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
-        procesos.append(subprocess.Popen([PY, str(ROOT / "scripts" / "simulate_cameras.py"), "--api", api, "--interval", "3", "--zonas", "B,C"], env=ENV, stdout=subprocess.DEVNULL))
+        procesos.append(subprocess.Popen([PY, str(ROOT / "scripts" / "simulate_cameras.py"), "--api", api, "--interval", "3", "--zonas", "B,C,D,E,F,G,H"], env=ENV, stdout=subprocess.DEVNULL))
         esperar(f"http://127.0.0.1:{args.puerto_video}/estado", 120)
         url = f"{api.replace('127.0.0.1', 'localhost')}/panel"
         print(f"\nDemostración lista: {url}\nUsuarios y claves: credenciales_demo.txt\nCtrl+C para detener todo.\n")

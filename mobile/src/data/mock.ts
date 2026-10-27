@@ -1,10 +1,8 @@
 import { AlertaCamara, Espacio, Evento, EstadoEspacio, Notificacion, TipoEspacio, Usuario, Vehiculo } from '../types';
 
-const zonas = [
-  { zona: 'A', cantidad: 20, tipoEspecial: 'discapacidad' as TipoEspacio },
-  { zona: 'B', cantidad: 16, tipoEspecial: 'directivo' as TipoEspacio },
-  { zona: 'C', cantidad: 12, tipoEspecial: 'visitante' as TipoEspacio },
-];
+// 8 islas de 40 cajones (igual que la base de datos inicial); los 2 primeros de cada isla son de un tipo especial.
+const especial: TipoEspacio[] = ['discapacidad', 'directivo', 'visitante', 'discapacidad', 'directivo', 'visitante', 'motocicleta', 'directivo'];
+const zonas = 'ABCDEFGH'.split('').map((zona, i) => ({ zona, cantidad: 40, tipoEspecial: especial[i] }));
 
 // Estado pseudo-aleatorio pero estable (para que la UI no cambie en cada render)
 const estadoDe = (n: number): EstadoEspacio => {
@@ -42,7 +40,7 @@ export const vehiculos: Vehiculo[] = [
 ];
 
 export const notificaciones: Notificacion[] = [
-  { id: 1, titulo: 'Zona A casi llena', mensaje: 'Quedan menos de 3 espacios libres en la zona A.', fecha: new Date(Date.now() - 12 * 60_000).toISOString(), leida: false },
+  { id: 1, titulo: 'Isla A casi llena', mensaje: 'Quedan menos de 3 espacios libres en la isla A.', fecha: new Date(Date.now() - 12 * 60_000).toISOString(), leida: false },
   { id: 2, titulo: 'Espacio asignado', mensaje: 'Tu espacio asignado es A-03.', fecha: new Date(Date.now() - 26 * 3600_000).toISOString(), leida: true },
 ];
 
@@ -53,8 +51,10 @@ export const eventos: Evento[] = [
   { id: 4, tipo: 'salida', descripcion: 'Salida vehículo colgante IEST-001873', fecha: new Date(Date.now() - 55 * 60_000).toISOString() },
 ];
 
-export const alertasCamara: AlertaCamara[] = [
-  { id: 1, camara: 'CAM-01', zona: 'A', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
-  { id: 2, camara: 'CAM-02', zona: 'B', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
-  { id: 3, camara: 'CAM-03', zona: 'C', estado: 'desconectada', ultimaSenal: new Date(Date.now() - 3 * 3600_000).toISOString() },
-];
+export const alertasCamara: AlertaCamara[] = 'ABCDEFGH'.split('').map((zona, i) => ({
+  id: i + 1,
+  camara: `CAM-${String(i + 1).padStart(2, '0')}`,
+  zona,
+  estado: i === 2 ? 'desconectada' : 'en_linea',
+  ultimaSenal: new Date(Date.now() - (i === 2 ? 3 * 3600_000 : 0)).toISOString(),
+}));

@@ -28,7 +28,7 @@ vista de un usuario.
 | Flujo del sistema | Cámara → Visión (YOLO) → API → Base de datos → Panel/app, cada uno con su estado y sus cifras; las conexiones se animan cuando hay datos | Estado real, cada 2 s |
 | Cámara en vivo | El video con los vehículos detectados (amarillo) y los cajones en rojo (ocupado) o verde (libre) | Servidor de visión, por MJPEG |
 | Modelo de visión | Modelo, dispositivo, tamaño de entrada, confianza mínima, latencia, detecciones por segundo y su gráfica | El servidor de visión lo reporta a la API |
-| Disponibilidad y mapa | Libres, ocupados y % de ocupación; cajones por zona que destellan cuando cambian | `GET /espacios` |
+| Disponibilidad y mapa | Libres, ocupados y % de ocupación; las 8 islas con sus 40 cajones, que destellan cuando cambian | `GET /espacios` |
 | Eventos, cámaras y avisos | Entradas y salidas en tiempo real, estado de cada cámara, avisos "zona casi llena" | `GET /eventos`, `/camaras`, `/notificaciones` |
 
 ## Cómo se conecta el modelo con el sistema
@@ -48,9 +48,10 @@ Es el mismo código de ocupación, antirrebote y publicación que usa el servido
 - **Real:** el modelo YOLO, la decisión de ocupación, el envío a la API, la base de datos, los eventos y los avisos.
 - **Demostrativo:**
   - El video está **generado con IA**: una toma aérea que se estabilizó para que parezca cámara fija, y no hay
-    entradas ni salidas de vehículos en él. Los 12 cajones de la zona A están dibujados a ojo (9 con auto y 3 sobre
+    entradas ni salidas de vehículos en él. Los 12 cajones vigilados de la isla A están dibujados a ojo (9 con auto y 3 sobre
     asfalto vacío).
-  - Las **zonas B y C** las mueve un simulador aleatorio para que haya eventos en vivo; no vienen de ninguna cámara.
+  - Las **islas B a H** las mueve un simulador aleatorio para que haya eventos en vivo; no vienen de ninguna cámara.
+  - El estacionamiento son **8 islas de 40 cajones** (320 en total), una cámara por isla; solo la isla A tiene video.
   - No hay lectura de colgantes: los vehículos aparecen "sin colgante identificado".
 - No sustituye la validación con cámaras reales del IEST (ver [`SIMULACION.md`](SIMULACION.md)).
 

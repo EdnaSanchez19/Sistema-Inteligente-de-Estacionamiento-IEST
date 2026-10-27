@@ -39,7 +39,7 @@ export default function Navigation() {
         }}
       >
         <Tab.Screen name="Inicio" component={HomeScreen} options={{ tabBarIcon: icon('speedometer-outline') }} />
-        <Tab.Screen name="Zonas" component={ZonesScreen} options={{ tabBarIcon: icon('grid-outline') }} />
+        <Tab.Screen name="Islas" component={ZonesScreen} options={{ tabBarIcon: icon('grid-outline') }} />
         <Tab.Screen name="Avisos" component={NotificationsScreen} options={{ tabBarIcon: icon('notifications-outline') }} />
         <Tab.Screen name="Mi cuenta" component={VehicleScreen} options={{ tabBarIcon: icon('car-outline') }} />
         {esAdmin(usuario) ? <Tab.Screen name="Admin" component={AdminScreen} options={{ tabBarIcon: icon('shield-checkmark-outline') }} /> : null}

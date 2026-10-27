@@ -130,14 +130,14 @@ def test_camara_sin_senal_genera_alerta(api, escena):
         detener(w)
 
 
-def test_aviso_cuando_la_zona_se_llena(api, escena):
-    """Zona C (12 cajones): al ocuparse los últimos, todos reciben el aviso en la app."""
+def test_aviso_cuando_la_isla_se_llena(api, escena):
+    """Isla C (40 cajones): al ocuparse los últimos, todos reciben el aviso en la app."""
     admin, demo = api.admin, api.demo
-    numeros = [f"C-{i:02d}" for i in range(1, 13)]
+    numeros = [f"C-{i:02d}" for i in range(1, 41)]
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": []})  # CAM-02 en línea
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": True} for n in numeros]})
     titulos = [n["titulo"] for n in api.get("/notificaciones", demo)]
-    assert "Zona C llena" in titulos
+    assert "Isla C llena" in titulos
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
     assert set(api.estados(admin)[n] for n in numeros) == {"libre"}
 

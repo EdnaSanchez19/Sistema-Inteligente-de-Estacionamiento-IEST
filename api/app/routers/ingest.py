@@ -29,9 +29,9 @@ def _avisar_cambio_de_zona(db: Session, zona_id: int, antes: int, despues: int) 
     """Notifica a todos cuando una zona se llena o queda casi llena (solo al cruzar el umbral)."""
     zona = db.get(Zona, zona_id)
     if despues == 0 and antes > 0:
-        db.add(Notificacion(titulo=f"Zona {zona.nombre} llena", mensaje=f"Ya no hay espacios libres en la zona {zona.nombre}."))
+        db.add(Notificacion(titulo=f"Isla {zona.nombre} llena", mensaje=f"Ya no hay espacios libres en la isla {zona.nombre}."))
     elif 0 < despues <= UMBRAL_CASI_LLENA < antes:
-        db.add(Notificacion(titulo=f"Zona {zona.nombre} casi llena", mensaje=f"Quedan {despues} espacios libres en la zona {zona.nombre}."))
+        db.add(Notificacion(titulo=f"Isla {zona.nombre} casi llena", mensaje=f"Quedan {despues} espacios libres en la isla {zona.nombre}."))
 
 
 def _marcar_en_linea(db: Session, cam: Camara) -> None:

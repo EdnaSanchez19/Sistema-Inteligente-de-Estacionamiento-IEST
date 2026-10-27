@@ -2,6 +2,9 @@
 
 ## Sin versión — panel de demostración (27/10/2026)
 
+El estacionamiento pasa a **8 islas de 40 cajones** (320 en total) con una cámara por isla (`CAM-01` a `CAM-08`); antes eran
+3 zonas de ejemplo. La app, el panel y los avisos hablan de "islas".
+
 Panel web (`/panel`) rediseñado con los colores institucionales: video de cámara fija con el modelo YOLO detectando en
 vivo, flujo del sistema con estado real, estado del modelo (latencia, FPS, vehículos), mapa de cajones con destellos
 al cambiar, eventos, cámaras y avisos. Nuevo `scripts/iniciar_demo.py` que lo levanta todo; `GET /sistema/estado` y

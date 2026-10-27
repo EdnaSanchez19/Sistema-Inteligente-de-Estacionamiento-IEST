@@ -25,8 +25,8 @@ def test_roles_en_endpoints_de_admin(client):
 def test_consultas_de_la_app(client):
     h = login(client, "demo@iest.edu.mx", "demo-pass-123")
     espacios = client.get("/espacios", headers=h).json()
-    assert len(espacios) == 48 and {"id", "numero", "zona", "tipo", "estado"} <= espacios[0].keys()
-    assert len(client.get("/espacios?zona=C", headers=h).json()) == 12
+    assert len(espacios) == 320 and {"id", "numero", "zona", "tipo", "estado"} <= espacios[0].keys()
+    assert len(client.get("/espacios?zona=C", headers=h).json()) == 40
     v = client.get("/vehiculos/mios", headers=h).json()
     assert v[0]["colgante"]["codigo"] == "IEST-004512"
 
