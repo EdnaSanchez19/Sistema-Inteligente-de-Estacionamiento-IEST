@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Estacionamiento IEST Anáhuac</title>
+<script>try { const t = localStorage.getItem("tema"); if (t === "claro" || t === "oscuro") document.documentElement.dataset.tema = t; } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;600;700&family=Zilla+Slab:wght@500;600;700&display=swap" rel="stylesheet">
@@ -14,9 +15,12 @@
     --libre: #2e9e5b; --ocupado: #d64545; --obstruido: #f2c200; --reservado: #4f7fd9; --fuera: #8a93a0; --sin: #b9aea8; --ok: #2e9e5b; --mal: #d64545;
     --sombra: 0 1px 2px rgba(19,37,57,.06), 0 6px 18px rgba(19,37,57,.05);
   }
+  /* oscuro: lo pide el sistema operativo, salvo que el botón del panel haya fijado un tema */
   @media (prefers-color-scheme: dark) {
-    :root { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45); }
+    :root:not([data-tema="claro"]) { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45); }
   }
+  :root[data-tema="oscuro"] { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45); }
+  :root[data-tema="claro"] { color-scheme: light; } :root[data-tema="oscuro"] { color-scheme: dark; }
   * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
   html, body { height: 100%; }
   body { margin: 0; font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); font-size: 14px; }
@@ -156,11 +160,31 @@
   #toasts { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 60; }
   .toast { background: var(--marino); color: #fff; border-left: 4px solid var(--naranja); padding: 11px 15px; border-radius: 6px; box-shadow: 0 8px 24px #0006; max-width: 360px; font-size: 13px; animation: entra 0.4s ease-out; }
   .toast.mal { background: #a63030; } .toast.ok { background: #2a7d4c; }
-  #app.login { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 22px; padding: 28px 16px; background: linear-gradient(135deg, #f86923 0%, #ff5900 38%, #132539 100%); }
-  .portada { color: #fff; text-align: center; max-width: 520px; }
-  .portada small { font-family: var(--marca-fuente); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; opacity: .95; }
-  .portada h1 { font-family: var(--titular); font-weight: 600; font-size: 40px; line-height: 1.1; margin-top: 8px; }
-  .login { width: min(390px, 100%); display: grid; gap: 12px; text-align: center; padding: 30px; border-top: 4px solid var(--naranja); }
+  /* inicio de sesión: la foto del campus a la izquierda, el formulario a la derecha */
+  #app.login { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(380px, 1fr); gap: 0; width: auto; padding: 0; border: 0; text-align: left; background: var(--fondo); }
+  #app.login .portada .logo { margin: 0; }
+  .portada { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 56px 52px; color: #fff; min-height: 100vh; overflow: hidden;
+    background: #132539 url("/panel/portada.jpg") 47% 40% / cover no-repeat; }
+  .portada::before { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(19,37,57,.94) 0%, rgba(19,37,57,.55) 38%, rgba(19,37,57,.05) 70%), linear-gradient(120deg, rgba(248,105,35,.28), rgba(248,105,35,0) 55%); }
+  .portada > * { position: relative; }
+  .portada .insignia { display: flex; align-items: center; gap: 12px; position: absolute; top: 34px; left: 52px; }
+  .portada .insignia .logo { width: 44px; height: 44px; font-size: 24px; }
+  .portada .insignia b { font-family: var(--marca-fuente); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; font-size: 16px; text-shadow: 0 1px 8px #0008; }
+  .portada small { font-family: var(--marca-fuente); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; color: #ffb48c; }
+  .portada h1 { font-family: var(--titular); font-weight: 600; font-size: 46px; line-height: 1.08; max-width: 560px; text-shadow: 0 2px 16px #0006; }
+  .portada p { font-size: 15.5px; line-height: 1.5; max-width: 480px; opacity: .92; }
+  .acceso { position: relative; display: grid; place-items: center; padding: 40px 28px; }
+  .acceso .tema { position: absolute; top: 20px; right: 22px; background: transparent; border: 1px solid var(--borde); color: var(--suave); padding: 7px 12px; border-radius: 5px; cursor: pointer; font-family: var(--marca-fuente); font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  .acceso .tema:hover { border-color: var(--naranja); color: var(--naranja-fuerte); }
+  .acceso .pie { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; color: var(--suave); font-size: 12px; }
+  .login { width: min(390px, 100%); display: grid; gap: 12px; text-align: center; padding: 32px 30px; border-top: 4px solid var(--naranja); }
+  @media (max-width: 860px) {
+    #app.login { grid-template-columns: 1fr; }
+    .portada { min-height: 260px; padding: 24px 22px; justify-content: flex-end; }
+    .portada .insignia { top: 18px; left: 22px; }
+    .portada h1 { font-size: 28px; } .portada p { display: none; }
+    .acceso { padding: 66px 16px 60px; }
+  }
   .login h2 { font-family: var(--titular); font-size: 26px; font-weight: 600; }
   .login .logo { margin: 0 auto 4px; width: 54px; height: 54px; font-size: 28px; }
   .login input { padding: 12px; border-radius: 5px; border: 1px solid var(--borde); background: var(--fondo); color: var(--texto); font-size: 15px; }
@@ -239,7 +263,13 @@ function vistaLogin(mensaje) {
   const err = h("div", { class: "error", text: mensaje || "" });
   const btn = h("button", { class: "boton", type: "submit", text: "Entrar" });
   const f = h("form", { class: "tarjeta login" }, h("div", { class: "logo", text: "P" }), h("h2", { text: "Inicia sesión" }), h("p", { class: "vacio", text: "Con tu correo institucional" }), correo, pass, err, btn);
-  const portada = h("div", { class: "portada" }, h("small", { text: "IEST Anáhuac · Tampico" }), h("h1", { text: "Tu lugar de estacionamiento, en tiempo real" }));
+  const portada = h("div", { class: "portada" },
+    h("div", { class: "insignia" }, h("div", { class: "logo", text: "P" }), h("b", { text: "IEST Anáhuac" })),
+    h("small", { text: "Sistema inteligente de estacionamiento" }),
+    h("h1", { text: "Encuentra tu lugar antes de llegar" }),
+    h("p", { text: "Cámaras y visión por computadora que muestran en tiempo real qué cajones están libres, ocupados u obstruidos." }));
+  const botonTema = h("button", { class: "tema", id: "boton-tema", type: "button", onclick: alternarTema });
+  const acceso = h("div", { class: "acceso" }, botonTema, f, h("div", { class: "pie", text: "IEST Anáhuac · Tampico" }));
   f.addEventListener("submit", async (ev) => {
     ev.preventDefault(); btn.disabled = true; err.textContent = "";
     try {
@@ -248,7 +278,7 @@ function vistaLogin(mensaje) {
       token = (await r.json()).access_token; sessionStorage.setItem("token", token); iniciar();
     } catch (e) { err.textContent = e.message; btn.disabled = false; }
   });
-  app.append(portada, f); correo.focus();
+  app.append(portada, acceso); textoBotonTema(); correo.focus();
 }
 function cerrarSesion() { token = null; sessionStorage.removeItem("token"); Object.assign(S, { yo: null, estado: null, espacios: [], eventos: null, camaras: null, primera: true }); vistaLogin(); }
 
@@ -263,6 +293,18 @@ const ICONOS = {
 };
 const VISTAS = [["resumen", "Resumen"], ["camaras", "Cámaras"], ["islas", "Islas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
 
+/* tema claro / oscuro: por omisión el del sistema; el botón fija uno y lo recuerda en este navegador */
+function temaActual() {
+  const fijo = document.documentElement.dataset.tema;
+  return fijo || (matchMedia("(prefers-color-scheme: dark)").matches ? "oscuro" : "claro");
+}
+function textoBotonTema() { const b = $("boton-tema"); if (b) b.textContent = temaActual() === "oscuro" ? "☀ Modo claro" : "☾ Modo oscuro"; }
+function alternarTema() {
+  const nuevo = temaActual() === "oscuro" ? "claro" : "oscuro";
+  document.documentElement.dataset.tema = nuevo;
+  try { localStorage.setItem("tema", nuevo); } catch (e) { /* sin almacenamiento: vale solo para esta visita */ }
+  textoBotonTema();
+}
 function armarEstructura() {
   const app = $("app"); app.className = ""; app.replaceChildren();
   const nav = h("nav");
@@ -277,11 +319,13 @@ function armarEstructura() {
     nav,
     h("div", { class: "lado-pie" }, h("div", null, h("b", { text: S.yo.nombre }), h("div", { style: "opacity:.7", text: S.yo.rol === "admin" ? "Administrador" : S.yo.rol })),
       h("div", { class: "conexion" }, h("span", { class: "punto ok vivo", id: "punto-conexion" }), h("span", { id: "texto-conexion", text: "Conectado" })),
+      h("button", { id: "boton-tema", onclick: alternarTema }),
       h("button", { onclick: cerrarSesion, text: "Cerrar sesión" })));
   const main = h("main", null,
     h("div", { class: "cabecera" }, h("div", null, h("h2", { id: "titulo" }), h("div", { class: "sub", id: "subtitulo" })), h("div", { class: "chips", id: "chips" })),
     vistaResumen(), vistaCamaras(), vistaIslas(), vistaEventos(), ...(S.yo.rol === "admin" ? [vistaAdmin()] : []), vistaSistema());
   app.append(aside, main);
+  textoBotonTema();
 }
 function ir(vista) {
   if (vista === "admin" && S.yo.rol !== "admin") vista = "resumen";

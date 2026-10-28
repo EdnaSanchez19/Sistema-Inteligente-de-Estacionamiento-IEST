@@ -50,14 +50,14 @@ switch ($Accion) {
         if (-not (Test-Path $Pythonw)) { throw "No existe $Pythonw. Crea el entorno virtual (.venv) primero, ver README." }
         if (Responde) { Write-Host 'Ya hay un sistema respondiendo en el puerto 8000 (iniciado a mano?). Detenlo antes de instalar el servicio.'; exit 1 }
         $argumentos = '"' + (Join-Path $Raiz 'scripts\iniciar_sistema.py') + '" --oculto --host 127.0.0.1'
-        $accion = New-ScheduledTaskAction -Execute $Pythonw -Argument $argumentos -WorkingDirectory $Raiz
+        $paso = New-ScheduledTaskAction -Execute $Pythonw -Argument $argumentos -WorkingDirectory $Raiz  # no llamarla $accion: PowerShell no distingue mayusculas y pisaria al parametro $Accion
         $usuario = "$env:USERDOMAIN\$env:USERNAME"
         $disparador = New-ScheduledTaskTrigger -AtLogOn -User $usuario
         $config = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
             -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 5 -RestartInterval (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew
         $principal = New-ScheduledTaskPrincipal -UserId $usuario -LogonType Interactive -RunLevel Limited
-        Register-ScheduledTask -TaskName $Nombre -Action $accion -Trigger $disparador -Settings $config -Principal $principal `
-            -Description 'Sistema Inteligente de Estacionamiento IEST: API, vision y panel en localhost' -Force | Out-Null
+        Register-ScheduledTask -TaskName $Nombre -Action $paso -Trigger $disparador -Settings $config -Principal $principal `
+            -Description 'Sistema Inteligente de Estacionamiento IEST: API, vision y panel en localhost' -Force -ErrorAction Stop | Out-Null
         Write-Host "Tarea '$Nombre' instalada: arrancara sola cada vez que inicies sesion."
         Start-ScheduledTask -TaskName $Nombre
         if (Esperar-Sistema) { Write-Host 'Listo: http://localhost:8000/panel  (usuario y clave en credenciales.txt)' }

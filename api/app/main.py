@@ -43,6 +43,12 @@ def panel() -> FileResponse:
     return FileResponse(Path(__file__).parent / "static" / "panel.html", media_type="text/html")
 
 
+@app.get("/panel/portada.jpg", include_in_schema=False)
+def portada() -> FileResponse:
+    """Foto de la pantalla de inicio de sesión del panel."""
+    return FileResponse(Path(__file__).parent / "static" / "portada.jpg", media_type="image/jpeg")
+
+
 @app.get("/health", tags=["sistema"])
 def health() -> dict[str, str]:
     return {"status": "ok"}
