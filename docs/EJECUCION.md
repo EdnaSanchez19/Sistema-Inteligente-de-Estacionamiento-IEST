@@ -20,19 +20,40 @@ GPU NVIDIA cada detección tarda unos 70 a 120 ms; en CPU será más lenta.
 Desde el panel (sección **Administración**) se registran usuarios, vehículos y colgantes. Con esos usuarios se entra a
 la app móvil.
 
+## Dejarlo corriendo en localhost (sin terminal abierta)
+
+Para que el sitio quede funcionando en segundo plano, sin ventanas y sin que nadie lo inicie a mano, hay un servicio de Windows
+(una tarea del usuario que arranca al **iniciar sesión**; no pide permisos de administrador):
+
+| Qué quieres | Comando (en PowerShell, desde la carpeta del proyecto) |
+|---|---|
+| Instalarlo y arrancarlo (una sola vez) | `powershell -ExecutionPolicy Bypass -File scripts\servicio.ps1 instalar` |
+| Ver si está corriendo | `... scripts\servicio.ps1 estado` |
+| Detenerlo / volver a iniciarlo | `... scripts\servicio.ps1 detener` · `iniciar` · `reiniciar` |
+| Quitarlo del todo | `... scripts\servicio.ps1 quitar` |
+
+También se puede hacer doble clic en `scripts\servicio.bat` (sin argumento muestra el estado; ábrelo desde una terminal con
+`scripts\servicio.bat instalar` para instalarlo). Después de instalarlo, el panel está siempre en `http://localhost:8000/panel`
+cuando tu sesión de Windows está abierta; si el sistema se cae, se reinicia solo (hasta 5 veces). El registro queda en
+`logs\sistema.log`. En este modo la API escucha **solo en 127.0.0.1**: no se puede abrir desde otros equipos (para la app en un
+teléfono usa `python scripts/iniciar_sistema.py`, que sí escucha en la red local). No lo mezcles con `iniciar_sistema.py` a mano:
+usan los mismos puertos (8000 y 8100). Para probarlo sin instalar nada: `python scripts/iniciar_sistema.py --oculto --host 127.0.0.1`
+(se detiene con `servicio.ps1 detener` o terminando el PID de `logs\sistema.pid`).
+
 ## Qué cámaras hay
 
-El estacionamiento son **8 islas de 40 cajones** (320 en total), una cámara por isla. Hoy hay video para cuatro:
+El estacionamiento son **8 islas de alrededor de 40 cajones** (320 de base), una cámara por isla; si una cámara ve más o menos, la
+configuración manda y la base de datos registra los cajones al iniciar. Hoy hay video para cuatro:
 
 | Cámara | Isla | Video | Cajones vigilados |
 |---|---|---|---|
 | CAM-01 | A | Toma aérea **generada con IA**, estabilizada para que parezca fija | 12 de 40 (9 con auto y 3 sobre asfalto vacío) |
-| CAM-02 | B | **Cámara de seguridad real** y fija (estacionamiento al aire libre, 152 s) | 40 de 40 (23 ocupados y 17 vacíos al inicio) |
-| CAM-03 | C | Otra vista de esa cámara de seguridad (52 s) | 40 de 40 (23 ocupados y 17 vacíos al inicio) |
+| CAM-02 | B | Cámara de seguridad fija (estacionamiento al aire libre, 152 s) | 52 (los coches estacionados y 16 cajones vacíos pintados en las filas lejanas) |
+| CAM-03 | C | Otra vista de esa cámara de seguridad (52 s) | 57 (los coches estacionados y 16 cajones vacíos pintados en las filas lejanas) |
 | CAM-04 | D | Estacionamiento techado, cámara fija (22 s), con un jeep que cruza el pasillo | 8 de 40 (todos ocupados: es lo único que se ve) |
 | CAM-05 a CAM-08 | E a H | — | Ninguno |
 
-Los videos de CAM-02, CAM-03 y CAM-04 son de terceros y **no se incluyen en el repositorio**: cópialos a `demo/` con los
+**Todos los videos son de demostración** para mostrar la eficacia del modelo YOLO; no son las grabaciones de las cámaras del IEST. Los videos de CAM-02, CAM-03 y CAM-04 son de terceros y **no se incluyen en el repositorio**: cópialos a `demo/` con los
 nombres `camara2_cctv.mp4`, `camara3_cctv.mp4` y `camara4_garaje.mp4`. Sin su video, esa cámara no se activa y su isla queda
 sin monitoreo. Los cajones de cada una (`demo/cajones_cam0N.json`) sí están en el repo.
 
@@ -55,11 +76,22 @@ en general. Los avisos "isla casi llena" y "isla llena" solo se generan cuando l
 
 ![Panel: islas](../evidencias/05_panel/panel_islas.jpg)
 
+## Libre, ocupado, obstruido
+
+Cada cajón monitoreado está en uno de tres estados que decide la cámara: **libre** (verde), **ocupado** por un vehículo (rojo) u
+**obstruido** (amarillo): sin vehículo pero con un objeto dentro (una persona parada, una maleta, una bicicleta...). Un cajón
+obstruido no cuenta como libre. *Reservado* (azul) y *fuera de servicio* los fija un administrador. Detalles y límites
+(los objetos que YOLO no conoce, como un cono, no se detectan) en [`vision/README.md`](../vision/README.md) y
+[`SIMULACION.md`](SIMULACION.md).
+
+Cada cajón dice también **cuánto lleva en su estado**: para un coche, cuánto tiempo lleva estacionado sin moverse. Cuando la
+cámara no vio la llegada, se muestra como "al menos".
+
 ## Qué se ve en el panel
 
 | Sección | Contenido |
 |---|---|
-| Resumen | Cajones monitoreados, libres y ocupados; vehículos detectados; video con las detecciones; gráfica de ocupación en el tiempo (se llena mientras corre); cobertura por isla; últimos eventos y avisos |
+| Resumen | Cajones monitoreados, libres, ocupados y obstruidos; los coches que llevan más tiempo estacionados; vehículos detectados; video con las detecciones; gráfica de ocupación en el tiempo (se llena mientras corre); cobertura por isla; últimos eventos y avisos |
 | Cámaras | Una tarjeta por cámara con su video en vivo (clic para ampliar), latencia, vehículos y estado; las islas sin cámara se marcan "sin video configurado" |
 | Islas | Los 320 cajones por isla; clic en un cajón para ver su estado, su cámara y, a administradores, su historial y quién lo ocupa |
 | Eventos | Entradas, salidas y alertas con filtros y búsqueda (solo administradores) |

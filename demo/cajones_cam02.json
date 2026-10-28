@@ -882,6 +882,270 @@
     ]
    ],
    "fuente": "autos del video"
+  },
+  {
+   "id": "B-41",
+   "polygon": [
+    [
+     424,
+     360
+    ],
+    [
+     479,
+     360
+    ],
+    [
+     482,
+     384
+    ],
+    [
+     421,
+     384
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-42",
+   "polygon": [
+    [
+     584,
+     341
+    ],
+    [
+     659,
+     341
+    ],
+    [
+     662,
+     377
+    ],
+    [
+     581,
+     377
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-43",
+   "polygon": [
+    [
+     824,
+     342
+    ],
+    [
+     880,
+     342
+    ],
+    [
+     883,
+     368
+    ],
+    [
+     821,
+     368
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-44",
+   "polygon": [
+    [
+     101,
+     399
+    ],
+    [
+     150,
+     399
+    ],
+    [
+     153,
+     423
+    ],
+    [
+     98,
+     423
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-45",
+   "polygon": [
+    [
+     174,
+     398
+    ],
+    [
+     216,
+     398
+    ],
+    [
+     219,
+     423
+    ],
+    [
+     171,
+     423
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-46",
+   "polygon": [
+    [
+     238,
+     394
+    ],
+    [
+     284,
+     394
+    ],
+    [
+     287,
+     420
+    ],
+    [
+     235,
+     420
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-47",
+   "polygon": [
+    [
+     381,
+     390
+    ],
+    [
+     432,
+     390
+    ],
+    [
+     435,
+     413
+    ],
+    [
+     378,
+     413
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-48",
+   "polygon": [
+    [
+     249,
+     453
+    ],
+    [
+     301,
+     453
+    ],
+    [
+     304,
+     482
+    ],
+    [
+     246,
+     482
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-49",
+   "polygon": [
+    [
+     58,
+     464
+    ],
+    [
+     117,
+     464
+    ],
+    [
+     120,
+     494
+    ],
+    [
+     55,
+     494
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-50",
+   "polygon": [
+    [
+     1096,
+     597
+    ],
+    [
+     1277,
+     597
+    ],
+    [
+     1280,
+     660
+    ],
+    [
+     1093,
+     660
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-51",
+   "polygon": [
+    [
+     852,
+     625
+    ],
+    [
+     1002,
+     625
+    ],
+    [
+     1005,
+     692
+    ],
+    [
+     849,
+     692
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "B-52",
+   "polygon": [
+    [
+     993,
+     629
+    ],
+    [
+     1220,
+     629
+    ],
+    [
+     1223,
+     701
+    ],
+    [
+     990,
+     701
+    ]
+   ],
+   "fuente": "auto del video (completado)"
   }
  ]
 }

@@ -20,9 +20,11 @@ def test_la_demo_define_las_camaras_esperadas():
     cams = {c.id: c for c in load_config(CONFIG).cameras}
     assert len(cams["CAM-01"].spaces) == 12  # isla A: 9 con auto + 3 de asfalto vacío (video generado con IA)
     if "CAM-02" in cams:  # isla B: cámara de seguridad real
-        assert [s.id for s in cams["CAM-02"].spaces] == [f"B-{i:02d}" for i in range(1, 41)]
+        n = len(cams["CAM-02"].spaces)  # los 40 de siempre más los que se completaron con los coches y cajones que faltaban
+        assert n >= 40 and [s.id for s in cams["CAM-02"].spaces] == [f"B-{i:02d}" for i in range(1, n + 1)]
     if "CAM-03" in cams:  # isla C: otra vista de la cámara de seguridad
-        assert [s.id for s in cams["CAM-03"].spaces] == [f"C-{i:02d}" for i in range(1, 41)]
+        n = len(cams["CAM-03"].spaces)
+        assert n >= 40 and [s.id for s in cams["CAM-03"].spaces] == [f"C-{i:02d}" for i in range(1, n + 1)]
     if "CAM-04" in cams:  # isla D: estacionamiento techado (solo se ven 8 cajones)
         assert all(s.id.startswith("D-") for s in cams["CAM-04"].spaces) and 1 <= len(cams["CAM-04"].spaces) <= 40
     ids = [s.id for c in cams.values() for s in c.spaces]
@@ -41,13 +43,14 @@ def test_los_cajones_son_poligonos_convexos_dentro_de_la_imagen(camara):
         assert pts[:, 0].min() >= -5 and pts[:, 0].max() <= 1285 and pts[:, 1].min() >= -5 and pts[:, 1].max() <= 725, f"{s.id} sale de la imagen"
 
 
-def test_los_cajones_de_la_isla_b_no_se_encimen_demasiado():
+@pytest.mark.parametrize("camara", ["CAM-01", "CAM-02", "CAM-03", "CAM-04"])
+def test_los_cajones_de_una_camara_no_se_encimen_demasiado(camara):
     from parking_vision.occupancy import _intersection_area
 
     cams = {c.id: c for c in load_config(CONFIG).cameras}
-    if "CAM-02" not in cams:
-        pytest.skip("CAM-02 no está en la configuración")
-    sp = cams["CAM-02"].spaces
+    if camara not in cams:
+        pytest.skip(f"{camara} no está en la configuración")
+    sp = cams[camara].spaces
     for i, a in enumerate(sp):
         area_a = cv2.contourArea(a.polygon)
         for b in sp[i + 1 :]:

@@ -39,7 +39,7 @@ def revisar_camaras(db: Session, timeout_s: int, ahora: datetime | None = None) 
 def muestrear_ocupacion(db: Session) -> None:
     """Guarda un punto de la serie de ocupación con los cajones que una cámara ya observa."""
     estados = db.scalars(select(Espacio.estado).where(Espacio.monitoreado.is_(True))).all()
-    historial.registrar(sum(e == EstadoEspacio.libre for e in estados), sum(e == EstadoEspacio.ocupado for e in estados), len(estados))
+    historial.registrar(sum(e == EstadoEspacio.libre for e in estados), sum(e == EstadoEspacio.ocupado for e in estados), len(estados), obstruidos=sum(e == EstadoEspacio.obstruido for e in estados))
 
 
 async def muestrear(session_factory, cada_s: int = 10) -> None:

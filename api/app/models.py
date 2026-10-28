@@ -35,6 +35,7 @@ class EstadoEspacio(str, enum.Enum):
     ocupado = "ocupado"
     reservado = "reservado"
     fuera_de_servicio = "fuera_de_servicio"
+    obstruido = "obstruido"  # sin vehículo, pero con un objeto dentro del cajón (persona, maleta...)
 
 
 class TipoEspacio(str, enum.Enum):
@@ -65,6 +66,8 @@ class TipoEvento(str, enum.Enum):
     error_deteccion = "error_deteccion"
     camara_desconectada = "camara_desconectada"
     camara_restablecida = "camara_restablecida"
+    obstruccion = "obstruccion"
+    obstruccion_retirada = "obstruccion_retirada"
 
 
 class Usuario(Base):
@@ -146,6 +149,11 @@ class Espacio(Base):
     # False hasta que una cámara reporta este cajón por primera vez: antes de eso su "libre" es solo el valor inicial,
     # no una observación, y la interfaz lo muestra como "sin monitoreo".
     monitoreado: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Desde cuándo está el cajón en su estado actual. `inicio_observado` indica si la cámara vio el cambio (entonces la
+    # duración es exacta) o si es solo cuándo empezó a observarlo (la duración real es "al menos" esa).
+    estado_desde: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    inicio_observado: Mapped[bool] = mapped_column(Boolean, default=False)
+    objeto: Mapped[str | None] = mapped_column(String(40))  # qué obstruye el cajón, si está "obstruido"
     # Referencia de la ROI para humanos/herramientas; la fuente de verdad de la detección es vision/config.
     roi: Mapped[list | None] = mapped_column(JSON)
     usuario_asignado_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))

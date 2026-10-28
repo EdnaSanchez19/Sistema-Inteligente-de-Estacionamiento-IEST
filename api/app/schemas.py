@@ -1,9 +1,10 @@
 """Esquemas de respuesta. Los nombres coinciden con los tipos de mobile/src/types.ts."""
 from datetime import datetime, timezone
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, Field
 
+from .tiempo import segundos_desde
 from .models import Camara, Colgante, Espacio, Evento, Notificacion, Rol, TipoColgante, TipoEspacio, EstadoEspacio, Usuario, Vehiculo
 
 
@@ -36,10 +37,19 @@ class EspacioOut(BaseModel):
     estado: str
     monitoreado: bool = False  # False: ninguna cámara ha reportado este cajón, su estado no es una observación
     actualizado: UtcDatetime | None = None
+    desde: UtcDatetime | None = None  # desde cuándo está en este estado
+    duracion_s: int | None = None  # segundos en este estado (para un coche, cuánto lleva estacionado)
+    desde_observado: bool = False  # True: la cámara vio el cambio y la duración es exacta; False: es "al menos" esa duración
+    objeto: str | None = None  # qué obstruye el cajón cuando está obstruido
 
     @classmethod
     def of(cls, e: Espacio) -> "EspacioOut":
-        return cls(id=e.id, numero=e.numero, zona=e.zona.nombre, tipo=e.tipo.value, estado=e.estado.value, monitoreado=bool(e.monitoreado), actualizado=e.actualizado_en)
+        vigilado = bool(e.monitoreado)
+        return cls(
+            id=e.id, numero=e.numero, zona=e.zona.nombre, tipo=e.tipo.value, estado=e.estado.value, monitoreado=vigilado, actualizado=e.actualizado_en,
+            desde=e.estado_desde if vigilado else None, duracion_s=segundos_desde(e.estado_desde) if vigilado else None,
+            desde_observado=bool(e.inicio_observado), objeto=e.objeto if e.estado == EstadoEspacio.obstruido else None,
+        )
 
 
 class ColganteOut(BaseModel):
@@ -113,6 +123,10 @@ class TokenOut(BaseModel):
 class EspacioIn(BaseModel):
     numero: str = Field(max_length=20)
     ocupado: bool
+    # libre / ocupado / obstruido. Si viene, manda sobre `ocupado` (que se conserva para los clientes que solo distinguen
+    # ocupado de lo demás).
+    estado: Literal["libre", "ocupado", "obstruido"] | None = None
+    objeto: str | None = Field(default=None, max_length=40)  # qué obstruye el cajón (solo con estado "obstruido")
     confianza: float | None = Field(default=None, ge=0, le=1)
     colgante_codigo: str | None = Field(default=None, max_length=40)
     colgante_tipo: str | None = Field(default=None, max_length=30)

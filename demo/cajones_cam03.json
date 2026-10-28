@@ -890,6 +890,380 @@
     ]
    ],
    "fuente": "autos del video"
+  },
+  {
+   "id": "C-41",
+   "polygon": [
+    [
+     1080,
+     200
+    ],
+    [
+     1128,
+     200
+    ],
+    [
+     1131,
+     224
+    ],
+    [
+     1077,
+     224
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-42",
+   "polygon": [
+    [
+     214,
+     262
+    ],
+    [
+     283,
+     262
+    ],
+    [
+     286,
+     288
+    ],
+    [
+     211,
+     288
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-43",
+   "polygon": [
+    [
+     288,
+     243
+    ],
+    [
+     340,
+     243
+    ],
+    [
+     343,
+     262
+    ],
+    [
+     285,
+     262
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-44",
+   "polygon": [
+    [
+     349,
+     265
+    ],
+    [
+     413,
+     265
+    ],
+    [
+     416,
+     286
+    ],
+    [
+     346,
+     286
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-45",
+   "polygon": [
+    [
+     492,
+     260
+    ],
+    [
+     544,
+     260
+    ],
+    [
+     547,
+     285
+    ],
+    [
+     489,
+     285
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-46",
+   "polygon": [
+    [
+     532,
+     245
+    ],
+    [
+     569,
+     245
+    ],
+    [
+     572,
+     264
+    ],
+    [
+     529,
+     264
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-47",
+   "polygon": [
+    [
+     629,
+     264
+    ],
+    [
+     678,
+     264
+    ],
+    [
+     681,
+     286
+    ],
+    [
+     626,
+     286
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-48",
+   "polygon": [
+    [
+     699,
+     266
+    ],
+    [
+     743,
+     266
+    ],
+    [
+     746,
+     291
+    ],
+    [
+     696,
+     291
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-49",
+   "polygon": [
+    [
+     765,
+     265
+    ],
+    [
+     811,
+     265
+    ],
+    [
+     814,
+     290
+    ],
+    [
+     762,
+     290
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-50",
+   "polygon": [
+    [
+     909,
+     268
+    ],
+    [
+     960,
+     268
+    ],
+    [
+     963,
+     291
+    ],
+    [
+     906,
+     291
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-51",
+   "polygon": [
+    [
+     953,
+     240
+    ],
+    [
+     1004,
+     240
+    ],
+    [
+     1007,
+     263
+    ],
+    [
+     950,
+     263
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-52",
+   "polygon": [
+    [
+     1037,
+     261
+    ],
+    [
+     1104,
+     261
+    ],
+    [
+     1107,
+     291
+    ],
+    [
+     1034,
+     291
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-53",
+   "polygon": [
+    [
+     150,
+     313
+    ],
+    [
+     217,
+     313
+    ],
+    [
+     220,
+     328
+    ],
+    [
+     147,
+     328
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-54",
+   "polygon": [
+    [
+     1206,
+     317
+    ],
+    [
+     1275,
+     317
+    ],
+    [
+     1278,
+     347
+    ],
+    [
+     1203,
+     347
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-55",
+   "polygon": [
+    [
+     581,
+     328
+    ],
+    [
+     644,
+     328
+    ],
+    [
+     647,
+     357
+    ],
+    [
+     578,
+     357
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-56",
+   "polygon": [
+    [
+     771,
+     326
+    ],
+    [
+     826,
+     326
+    ],
+    [
+     829,
+     358
+    ],
+    [
+     768,
+     358
+    ]
+   ],
+   "fuente": "auto del video (completado)"
+  },
+  {
+   "id": "C-57",
+   "polygon": [
+    [
+     1086,
+     578
+    ],
+    [
+     1257,
+     578
+    ],
+    [
+     1260,
+     669
+    ],
+    [
+     1083,
+     669
+    ]
+   ],
+   "fuente": "auto del video (completado)"
   }
  ]
 }

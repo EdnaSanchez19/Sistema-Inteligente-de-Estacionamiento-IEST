@@ -3,6 +3,7 @@
     python -m app.seed            # zonas, cámaras, espacios y usuario admin
     python -m app.seed --demo     # además usuarios/vehículos de ejemplo
     python -m app.seed --demo --muestra 150   # además 150 usuarios, vehículos y colgantes inventados (demostración)
+    python -m app.seed --cajones ../demo/cameras_demo.json   # registra los cajones que definen las cámaras y aún no existen
 
 Ejecutar desde la carpeta api/. La contraseña del admin sale de SEED_ADMIN_PASSWORD;
 si no existe se genera una aleatoria y se imprime una sola vez.
@@ -14,7 +15,7 @@ import sys
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .db import Base, engine
+from .db import Base, engine, migrar_esquema
 from .models import (Camara, Colgante, Espacio, EstadoCamara, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
 from .security import hash_password
 
@@ -49,6 +50,31 @@ def seed_base(db: Session) -> None:
             print(f"Contraseña generada para admin@iest.edu.mx: {password}  (guárdala, no se vuelve a mostrar)")
         db.add(Usuario(nombre="Administrador", correo="admin@iest.edu.mx", password_hash=hash_password(password), rol=Rol.admin))
     db.commit()
+
+
+def sincronizar_cajones(db: Session, config: str) -> int:
+    """Registra los cajones que la configuración de las cámaras define y la base de datos aún no tiene (idempotente).
+
+    Una isla tiene "alrededor de 40" cajones: si una cámara ve más (o menos), la configuración manda. El cajón nuevo queda
+    en la isla de su letra (B-45 -> isla B) y asociado a la cámara de esa isla; empieza "sin monitoreo" hasta que la cámara lo vea.
+    """
+    import json
+
+    cfg = json.loads(open(config, encoding="utf-8").read())
+    creados = 0
+    for cam in cfg["cameras"]:
+        for sp in cam.get("spaces", []):
+            isla = sp["id"].split("-")[0]
+            zona = db.scalar(select(Zona).where(Zona.nombre == isla))
+            if zona is None:
+                continue
+            if db.scalar(select(Espacio).where(Espacio.zona_id == zona.id, Espacio.numero == sp["id"])):
+                continue
+            camara = db.scalar(select(Camara).where(Camara.zona_id == zona.id))
+            db.add(Espacio(numero=sp["id"], zona_id=zona.id, camara_id=camara.id if camara else None, tipo=TipoEspacio.general))
+            creados += 1
+    db.commit()
+    return creados
 
 
 def seed_demo(db: Session) -> None:
@@ -114,8 +140,11 @@ def seed_muestra(db: Session, n: int) -> int:
 
 def main() -> None:
     Base.metadata.create_all(engine)
+    migrar_esquema()
     with Session(engine) as db:
         seed_base(db)
+        if "--cajones" in sys.argv:
+            print(f"Cajones nuevos desde la configuración de las cámaras: {sincronizar_cajones(db, sys.argv[sys.argv.index('--cajones') + 1])}")
         if "--demo" in sys.argv:
             seed_demo(db)
         if "--muestra" in sys.argv:

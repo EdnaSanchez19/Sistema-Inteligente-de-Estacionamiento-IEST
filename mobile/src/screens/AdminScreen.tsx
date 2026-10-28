@@ -13,6 +13,8 @@ const eventoColor: Record<TipoEvento, string> = {
   error_deteccion: colors.occupied,
   camara_desconectada: colors.occupied,
   camara_restablecida: colors.free,
+  obstruccion: colors.blocked,
+  obstruccion_retirada: colors.free,
 };
 
 function Eventos() {

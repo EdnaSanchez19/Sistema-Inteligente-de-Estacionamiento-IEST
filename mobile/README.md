@@ -9,7 +9,7 @@ Interfaz en React Native (Expo + TypeScript). Por ahora funciona con datos de ej
 |---|---|---|
 | Login | todos | Acceso con correo institucional |
 | Inicio | todos | Resumen general y disponibilidad por zona |
-| Zonas | todos | Mapa de cajones por zona (libre / ocupado / reservado / fuera de servicio) |
+| Zonas | todos | Mapa de cajones por zona (libre / ocupado / obstruido / reservado / fuera de servicio); al tocar un cajón se ve cuánto lleva en su estado |
 | Avisos | todos | Notificaciones del estacionamiento |
 | Mi cuenta | todos | Espacio asignado y datos de vehículo/colgante |
 | Admin | administradores | Historial de eventos y alertas de cámaras |

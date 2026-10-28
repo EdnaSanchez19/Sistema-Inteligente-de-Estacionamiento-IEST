@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Card, Legend, Screen, estadoColor, useLoad } from '../components/ui';
+import { Card, Legend, Screen, estadoColor, estadoTexto, useLoad } from '../components/ui';
+import { duracionDe } from '../format';
 import { api } from '../services/api';
 import { colors, radius, spacing } from '../theme';
 import { TipoEspacio } from '../types';
@@ -16,6 +17,7 @@ const tipoEtiqueta: Record<TipoEspacio, string> = {
 export default function ZonesScreen() {
   const state = useLoad(api.espacios, 15_000);
   const [zona, setZona] = useState<string | null>(null);
+  const [elegido, setElegido] = useState<string | null>(null);
 
   return (
     <Screen state={state}>
@@ -40,12 +42,21 @@ export default function ZonesScreen() {
               <Legend />
               <View style={s.grid}>
                 {lista.map((e) => (
-                  <View key={e.id} style={[s.cell, e.monitoreado ? { backgroundColor: estadoColor[e.estado] } : s.cellSin]}>
+                  <Pressable key={e.id} onPress={() => setElegido(e.numero)} style={[s.cell, e.monitoreado ? { backgroundColor: estadoColor[e.estado] } : s.cellSin, e.numero === elegido && s.cellElegida]}>
                     <Text style={[s.cellNum, !e.monitoreado && { color: colors.muted, fontWeight: '500' }]}>{e.numero.split('-')[1]}</Text>
                     {tipoEtiqueta[e.tipo] ? <Text style={[s.cellTipo, !e.monitoreado && { color: colors.muted }]}>{tipoEtiqueta[e.tipo]}</Text> : null}
-                  </View>
+                  </Pressable>
                 ))}
               </View>
+              {(() => {
+                const e = lista.find((x) => x.numero === elegido);
+                if (!e) return <Text style={s.cobertura}>Toca un cajón para ver cuánto tiempo lleva en su estado.</Text>;
+                if (!e.monitoreado) return <Text style={s.detalle}>{e.numero} · sin monitoreo (ninguna cámara lo observa)</Text>;
+                const tiempo = duracionDe(e);
+                const que = e.estado === 'obstruido' && e.objeto ? ` (${e.objeto})` : '';
+                const verbo = e.estado === 'ocupado' ? 'estacionado' : 'así';
+                return <Text style={s.detalle}>{e.numero} · {estadoTexto[e.estado]}{que}{tiempo ? ` · lleva ${verbo} ${tiempo}` : ''}</Text>;
+              })()}
             </Card>
           </>
         );
@@ -61,6 +72,8 @@ const s = StyleSheet.create({
   chipText: { fontWeight: '600', color: colors.text },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   cell: { width: 40, height: 46, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  cellElegida: { borderWidth: 2, borderColor: colors.text },
+  detalle: { color: colors.text, fontWeight: '600', fontSize: 14 },
   cellSin: { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.offline, backgroundColor: colors.bg },
   cobertura: { color: colors.muted, fontSize: 13 },
   cellNum: { color: '#fff', fontWeight: '800', fontSize: 16 },

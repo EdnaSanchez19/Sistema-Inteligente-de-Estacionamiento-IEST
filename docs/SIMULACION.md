@@ -20,8 +20,9 @@ Por eso el informe de 4.3 debe decir que el piloto fue **simulado con video** y 
 | Herramienta | Para qué |
 |---|---|
 | `parking_vision.tools.define_spaces` | Dibujar los cajones sobre un fotograma del video (`--source video.mp4`) |
-| `parking_vision.tools.etiquetar` | Marcar a mano qué cajones están ocupados en fotogramas del video (la verdad) |
-| `parking_vision.tools.procesar_video` | Procesa el video completo, genera video con cajones, línea de tiempo, eventos y métricas |
+| `parking_vision.tools.etiquetar` | Marcar a mano el estado de cada cajón (clic: libre → ocupado → obstruido) en fotogramas del video (la verdad) |
+| `parking_vision.tools.obstaculos_sinteticos` | Inserta objetos (persona, cono, caja) en cajones vacíos con tiempos conocidos y mide si se marcan obstruidos |
+| `parking_vision.tools.procesar_video` | Procesa el video completo con el mismo pipeline del servidor, genera video con cajones (verde/rojo/amarillo), línea de tiempo, eventos y, con etiquetas, la matriz de confusión de los 3 estados |
 | `parking_vision.tools.condiciones` | Degrada el video: `noche`, `lluvia`, `niebla`, `sol`, `ruido` |
 | `parking_vision.tools.comparar_condiciones` | Sin etiquetas: cuántos vehículos de la imagen original sigue encontrando el modelo en cada condición |
 | `procesar_video --estabilizar` | Los cajones acompañan el movimiento de la cámara (dron, viento, vibración) |
@@ -162,6 +163,37 @@ La retención se mide contra lo que el modelo detecta en la imagen limpia, no co
 filtros solo aproximan el clima real. En esta escena muchos autos son pequeños y lejanos, que es lo primero que se
 pierde; con cámaras más cercanas a los cajones debería ser mejor, pero eso hay que comprobarlo. Si la noche y la
 niebla resultan críticas, habrá que probar un modelo mayor (yolov8s/m) y reentrenar con video nocturno real.
+
+## Tres estados: libre, ocupado, obstruido
+
+Las etiquetas (`--etiquetas`) son un CSV `t_seg,espacio,estado` con `libre`, `ocupado` u `obstruido` (el formato antiguo con
+`ocupado` 0/1 se sigue leyendo). `procesar_video` imprime la matriz de confusión de los tres estados con precisión y recall de
+cada uno; una clase sin casos aparece como "n/d", no como 0 %.
+
+**Los videos disponibles no tienen obstrucciones reales**: se detectaron los objetos que no son vehículos en los cuatro
+videos y casi nunca hay algo dentro de un cajón vacío (solo personas, y 2 detecciones sueltas en CAM-03). Por eso se creó
+`obstaculos_sinteticos`, una prueba **controlada con montaje** (el objeto se pega sobre el video, la verdad es conocida).
+Resultado sobre CAM-02, cajones B-27 y B-38 (videos de demostración, no las cámaras del IEST):
+
+| Objeto insertado | ¿Se marcó obstruido? | Detalle |
+|---|---|---|
+| Persona (recortada del propio video), 25 s | Sí | a los 2.5 s de aparecer, 100 % del tiempo posterior, vuelve a libre al retirarla |
+| Cono naranja dibujado, 27 s | **No** | YOLO no tiene la clase "cono" |
+| Caja de cartón dibujada, 30 s | **No** | YOLO no tiene la clase "caja" |
+| Los otros 50 cajones durante todo el video | 0 falsos amarillos | 15 250 observaciones |
+
+Conclusión honesta: la lógica y los umbrales funcionan y no inventan obstrucciones, pero **solo se detectan los objetos de las
+clases COCO**. Los objetos genéricos (conos, cajas, escombro) requieren un modelo propio o comparar contra el aspecto vacío
+del cajón, y para ajustarlo hacen falta grabaciones reales del estacionamiento con obstrucciones de verdad.
+
+## Tiempo en el estado (cuánto lleva un coche sin moverse)
+
+Cada cajón guarda desde cuándo está en su estado (`desde`, `duracion_s`). Si la cámara **vio** la llegada, la duración es
+exacta; si el coche ya estaba cuando la cámara empezó a observar (o durante el calentamiento), es un **mínimo** y se muestra
+como "al menos 3 h" (`desde_observado: false`). La salida registra cuánto estuvo (`Salida de B-12 (estuvo 3 h 2 min)`). El panel
+lo muestra en cada cajón y lista los que llevan más tiempo estacionados (`GET /sistema/estancias`). Es el tiempo que el
+**cajón** lleva ocupado: si un coche se va y otro llega en menos de lo que tarda en confirmarse el cambio, cuenta como uno
+solo; seguir cada vehículo (por colgante) queda para cuando haya lectura de colgantes.
 
 ## Qué debería pedir el informe de validación (propuesta)
 

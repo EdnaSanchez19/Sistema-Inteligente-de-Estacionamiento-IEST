@@ -1,5 +1,24 @@
 # Cambios
 
+## Sin versión — tres estados por cajón y tiempo en el estado (27/10/2026)
+
+- **Libre, ocupado u obstruido.** *Obstruido* (amarillo) es un cajón sin vehículo con un objeto que no lo es dentro (persona,
+  maleta, bicicleta, mochila... las clases COCO de YOLO). Un vehículo manda sobre cualquier objeto; alguien que solo cruza no
+  cuenta (hacen falta 6 observaciones seguidas) y *obstruido* nunca es el estado inicial. Nuevo estado en la API y la base de
+  datos (con migración automática de SQLite y `db/migraciones/002_obstruido.sql` para PostgreSQL), eventos `obstruccion` y
+  `obstruccion_retirada`, y amarillo en el panel y la app (el color de *reservado* pasa a azul).
+- **Cuánto lleva cada cajón en su estado** (para un coche, cuánto lleva estacionado): `desde`, `duracion_s` y `desde_observado`
+  (exacto si la cámara vio la llegada, "al menos" si no). Las salidas dicen cuánto estuvo; el panel lista los que llevan más
+  tiempo (`GET /sistema/estancias`) y la app lo muestra al tocar un cajón.
+- **Más cajones etiquetados.** Nuevo `scripts/completar_cajones.py` agrega los coches estacionados que habían quedado fuera de
+  los cajones: CAM-02 pasa de 40 a 52 cajones y CAM-03 de 40 a 57. Las islas ya no están fijas en 40: los cajones que define la
+  configuración se registran solos en la base de datos. Los cajones vacíos de zonas muy lejanas siguen sin vigilarse.
+- **Validación con tres clases.** `procesar_video` usa ahora el mismo pipeline que el servidor (con histéresis) y calcula la
+  matriz de confusión de libre/ocupado/obstruido; `etiquetar` marca los tres estados. Nueva prueba controlada
+  `obstaculos_sinteticos` (los videos no tienen obstrucciones reales): una persona insertada se marca obstruido en 2.5 s, sin
+  falsos amarillos en 15 250 observaciones; un cono o una caja **no** se detectan (límite documentado en `docs/SIMULACION.md`).
+- Pruebas: 55 de API, 54 de visión y 21 end-to-end, más la verificación de tipos de la app.
+
 ## Sin versión — el sistema pasa a trabajar con datos reales (27/10/2026)
 
 - **Cajones "sin monitoreo".** Un cajón que ninguna cámara ha observado ya no aparece como libre: la API expone

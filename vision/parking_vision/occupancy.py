@@ -9,7 +9,9 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
-from .config import Space
+from .config import OBSTACULOS_COCO, Space
+
+LIBRE, OCUPADO, OBSTRUIDO = "libre", "ocupado", "obstruido"
 
 
 @dataclass(frozen=True)
@@ -31,8 +33,16 @@ class Detection:
 class SpaceState:
     id: str
     occupied: bool
-    confidence: float = 0.0  # confianza de la detección que lo ocupa (0 si está libre)
+    confidence: float = 0.0  # confianza de la detección que lo ocupa u obstruye (0 si está libre)
     detection_index: int | None = None  # índice del vehículo asignado
+    obstructed: bool = False  # hay un objeto que no es vehículo dentro del cajón vacío
+    obstacle: str | None = None  # qué objeto es ("persona", "maleta"...)
+    obstacle_box: tuple[float, float, float, float] | None = None
+
+    @property
+    def estado(self) -> str:
+        """libre / ocupado / obstruido. Un vehículo manda sobre cualquier objeto que haya a su lado o dentro."""
+        return OCUPADO if self.occupied else OBSTRUIDO if self.obstructed else LIBRE
 
 
 def _intersection_area(a: np.ndarray, b: np.ndarray) -> float:
@@ -69,37 +79,97 @@ def compute_occupancy(
     return states
 
 
+def compute_states(
+    spaces: list[Space],
+    vehicles: list[Detection],
+    obstacles: list[Detection],
+    occupied_ratio: float = 0.30,
+    footprint: float = 0.6,
+    obstacle_ratio: float = 0.50,
+    obstacle_footprint: float = 0.30,
+) -> list[SpaceState]:
+    """Marca cada cajón como libre, ocupado u obstruido.
+
+    Primero se decide qué cajones tienen un vehículo (`compute_occupancy`). Después, un objeto que no es vehículo
+    deja "obstruido" al cajón donde apoya su base (la parte baja de su recuadro) si ese cajón no está ocupado: un
+    objeto asignado a un cajón con auto, o que apenas roza el cajón, no cuenta. Cada objeto se asigna a un solo cajón.
+    """
+    states = compute_occupancy(spaces, vehicles, occupied_ratio, footprint)
+    for det in obstacles:
+        base = det.footprint(obstacle_footprint)
+        base_area = max(cv2.contourArea(base), 1e-6)
+        inter = [_intersection_area(sp.polygon, base) for sp in spaces]
+        if not inter:
+            continue
+        best = int(np.argmax(inter))
+        st = states[best]
+        if st.occupied or inter[best] / base_area < obstacle_ratio:
+            continue
+        if not st.obstructed or det.conf > st.confidence:
+            states[best] = SpaceState(st.id, False, det.conf, None, True, OBSTACULOS_COCO.get(det.cls, "objeto"), (det.x1, det.y1, det.x2, det.y2))
+    return states
+
+
 @dataclass(frozen=True)
 class Change:
     space_id: str
     occupied: bool
     previous: bool | None  # None = primera observación
+    estado: str = ""  # libre / ocupado / obstruido
+    estado_previo: str | None = None
+
+
+def con_estado_confirmado(states: list[SpaceState], estados: dict[str, str]) -> list[SpaceState]:
+    """Estado confirmado por el tracker (con antirrebote) y, de lo observado en este fotograma, el detalle que lo acompaña."""
+    out = []
+    for s in states:
+        e = estados[s.id]
+        obstruido = e == OBSTRUIDO
+        out.append(SpaceState(s.id, e == OCUPADO, s.confidence, s.detection_index, obstruido, s.obstacle if obstruido else None, s.obstacle_box if obstruido else None))
+    return out
+
+
+def _como_estado(valor: bool | str) -> str:
+    """Acepta el valor antiguo (True = ocupado) o el estado en texto."""
+    return valor if isinstance(valor, str) else OCUPADO if valor else LIBRE
 
 
 class OccupancyTracker:
-    """Antirrebote temporal: un cajón cambia de estado solo tras N observaciones consistentes."""
+    """Antirrebote temporal: un cajón cambia de estado solo tras N observaciones consistentes del mismo estado nuevo."""
 
-    def __init__(self, confirm_occupied: int = 2, confirm_free: int = 3):
-        self.confirm_occupied = confirm_occupied
-        self.confirm_free = confirm_free
-        self.state: dict[str, bool] = {}
-        self._pending: dict[str, int] = {}
+    def __init__(self, confirm_occupied: int = 2, confirm_free: int = 3, confirm_obstructed: int = 6):
+        self.confirm = {OCUPADO: confirm_occupied, LIBRE: confirm_free, OBSTRUIDO: confirm_obstructed}
+        self.estado: dict[str, str] = {}
+        self._cand: dict[str, tuple[str, int]] = {}
 
-    def update(self, observed: dict[str, bool]) -> list[Change]:
+    @property
+    def state(self) -> dict[str, bool]:
+        """Vista booleana (True = ocupado) para quien solo distingue ocupado de lo demás."""
+        return {k: v == OCUPADO for k, v in self.estado.items()}
+
+    def update(self, observed: dict[str, bool | str]) -> list[Change]:
         changes: list[Change] = []
-        for sid, obs in observed.items():
-            if sid not in self.state:
-                self.state[sid] = obs
-                self._pending[sid] = 0
-                changes.append(Change(sid, obs, None))
+        for sid, raw in observed.items():
+            obs = _como_estado(raw)
+            if sid not in self.estado:
+                # Un objeto visto en el primer fotograma puede ser alguien que solo pasa: "obstruido" nunca es el estado
+                # inicial, tiene que persistir como cualquier otro cambio (el cajón empieza libre).
+                inicial = LIBRE if obs == OBSTRUIDO else obs
+                self.estado[sid] = inicial
+                if obs != inicial:
+                    self._cand[sid] = (obs, 1)
+                changes.append(Change(sid, inicial == OCUPADO, None, inicial, None))
                 continue
-            if obs == self.state[sid]:
-                self._pending[sid] = 0
+            actual = self.estado[sid]
+            if obs == actual:
+                self._cand.pop(sid, None)
                 continue
-            self._pending[sid] += 1
-            needed = self.confirm_occupied if obs else self.confirm_free
-            if self._pending[sid] >= needed:
-                changes.append(Change(sid, obs, self.state[sid]))
-                self.state[sid] = obs
-                self._pending[sid] = 0
+            cand, n = self._cand.get(sid, (obs, 0))
+            n = n + 1 if cand == obs else 1  # si cambia el estado candidato, la cuenta vuelve a empezar
+            if n >= self.confirm[obs]:
+                self.estado[sid] = obs
+                self._cand.pop(sid, None)
+                changes.append(Change(sid, obs == OCUPADO, actual == OCUPADO, obs, actual))
+            else:
+                self._cand[sid] = (obs, n)
         return changes

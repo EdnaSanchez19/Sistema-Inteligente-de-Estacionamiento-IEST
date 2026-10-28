@@ -27,7 +27,7 @@ import numpy as np
 from .config import CameraConfig, Config, load_config, load_dotenv
 from .detector import VehicleDetector
 from .draw import draw_result
-from .occupancy import Detection, OccupancyTracker, SpaceState
+from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, con_estado_confirmado
 from .publisher import ApiPublisher
 from .run import process_frame
 
@@ -42,7 +42,7 @@ class CamaraDemo:
 
     def __init__(self, cam: CameraConfig, cfg: Config, detector: VehicleDetector, det_lock: threading.Lock, publisher: ApiPublisher | None, modelo: str):
         self.cam, self.cfg, self.detector, self.det_lock, self.publisher, self.modelo = cam, cfg, detector, det_lock, publisher, modelo
-        self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free)
+        self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free, cam.confirm_obstruido)
         self._frame: np.ndarray | None = None
         self._lock = threading.Lock()
         self._jpeg: bytes | None = None
@@ -135,29 +135,38 @@ class CamaraDemo:
                 states, vehicles, _ = process_frame(cam, self.detector, frame, self.tracker.state)
             ms = (time.time() - t0) * 1000
             self._lat = (self._lat + [ms])[-20:]
-            changes = self.tracker.update({s.id: s.occupied for s in states})
-            confirmados = [SpaceState(s.id, self.tracker.state[s.id], s.confidence, s.detection_index) for s in states]
+            changes = self.tracker.update({s.id: s.estado for s in states})
+            confirmados = con_estado_confirmado(states, self.tracker.estado)
             self._resultado = (confirmados, vehicles)
-            libres = sum(not s.occupied for s in confirmados)
+            ocupados = sum(s.occupied for s in confirmados)
+            obstruidos = sum(s.obstructed for s in confirmados)
+            libres = len(confirmados) - ocupados - obstruidos
             self.stats = {
                 "camara": cam.id, "modelo": self.modelo, "dispositivo": str(self.detector.model.device), "imgsz": self.detector.imgsz,
                 "fps_video": round(self.fps_video, 1), "fps_deteccion": round(1000 / (sum(self._lat) / len(self._lat)), 1) if self._lat else 0.0,
                 "latencia_ms": round(sum(self._lat) / len(self._lat), 1), "vehiculos": len(vehicles), "libres": libres,
-                "ocupados": len(confirmados) - libres, "espacios": len(confirmados), "resolucion": self.resolucion, "umbral_confianza": cam.conf,
+                "ocupados": ocupados, "obstruidos": obstruidos, "espacios": len(confirmados), "resolucion": self.resolucion, "umbral_confianza": cam.conf,
                 "ids": [s.id for s in confirmados],  # cajones que esta cámara vigila de verdad
             }
             for c in changes:
-                if c.previous is not None:
-                    log.info("%s %s -> %s", cam.id, c.space_id, "OCUPADO" if c.occupied else "libre")
+                if c.estado_previo is not None:
+                    log.info("%s %s -> %s", cam.id, c.space_id, c.estado.upper() if c.estado != "libre" else "libre")
             if self.publisher:
                 ahora = time.time()
                 if changes or ahora - ultimo_envio >= 10:
-                    payload = [{"numero": s.id, "ocupado": self.tracker.state[s.id], "confianza": round(s.confidence, 3) if s.occupied else None} for s in confirmados]
+                    payload = [self._item(s) for s in confirmados]
                     if self.publisher.occupancy(cam.id, payload, calentamiento=ahora < self.calentando_hasta):
                         ultimo_envio = ahora
                 if ahora - ultimo_modelo >= 2:
                     if self.publisher.model_stats(self.stats):
                         ultimo_modelo = ahora
+
+    @staticmethod
+    def _item(s: SpaceState) -> dict:
+        item = {"numero": s.id, "ocupado": s.occupied, "estado": s.estado, "confianza": round(s.confidence, 3) if s.estado != "libre" else None}
+        if s.obstructed and s.obstacle:
+            item["objeto"] = s.obstacle
+        return item
 
     # --- dibujo y emisión --------------------------------------------------------------------
     def _dibujar(self, frame: np.ndarray, states: list[SpaceState], dets: list[Detection]) -> np.ndarray:
@@ -165,15 +174,15 @@ class CamaraDemo:
             out = draw_result(frame, self.cam.spaces, states, None)
         else:
             out = frame.copy()
-        for d in dets:  # recuadros finos de los vehículos detectados
-            cv2.rectangle(out, (int(d.x1), int(d.y1)), (int(d.x2), int(d.y2)), (0, 215, 255), 1, cv2.LINE_AA)
+        for d in dets:  # recuadros finos de los vehículos detectados (el amarillo queda para los obstruidos)
+            cv2.rectangle(out, (int(d.x1), int(d.y1)), (int(d.x2), int(d.y2)), (230, 230, 230), 1, cv2.LINE_AA)
         h, w = out.shape[:2]
         cv2.rectangle(out, (0, 0), (w, 34), (20, 14, 12), -1)
         cv2.circle(out, (18, 17), 6, (60, 60, 230), -1)
         s = self.stats
         texto = f"{self.cam.id}  EN VIVO"
         if s:
-            texto += f"   |   {s['modelo']}  {s['latencia_ms']:.0f} ms  |   {s['vehiculos']} vehiculos  |   {s['libres']} libres / {s['ocupados']} ocupados"
+            texto += f"   |   {s['modelo']}  {s['latencia_ms']:.0f} ms  |   {s['vehiculos']} vehiculos  |   {s['libres']} libres / {s['ocupados']} ocupados / {s.get('obstruidos', 0)} obstruidos"
         cv2.putText(out, texto, (34, 23), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
         return out
 
@@ -250,7 +259,7 @@ def main() -> None:
     if publisher and not cfg.api_key:
         raise SystemExit("Falta INGEST_API_KEY (variable de entorno o .env)")
 
-    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes)
+    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
     modelo = Path(cfg.model).stem.replace("yolov", "YOLOv")  # yolov8n -> YOLOv8n
     det_lock = threading.Lock()
     disponibles = []

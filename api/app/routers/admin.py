@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ..auth import require_admin
 from ..db import get_db
-from ..models import Colgante, Espacio, EstadoEspacio, Evento, Notificacion, TipoEvento, Usuario, Vehiculo
+from ..models import Colgante, Espacio, EstadoEspacio, Evento, Notificacion, TipoEvento, Usuario, Vehiculo, utcnow
 from ..schemas import (
     ColganteAdminOut,
     ColganteIn,
@@ -131,6 +131,7 @@ def editar_espacio(espacio_id: int, data: EspacioPatch, admin: Usuario = Depends
     if data.estado is not None and data.estado != esp.estado:
         db.add(Evento(tipo=TipoEvento.cambio_ocupacion, descripcion=f"{admin.correo} cambió {esp.numero}: {esp.estado.value} -> {data.estado.value}", espacio_id=esp.id))
         esp.estado = data.estado
+        esp.estado_desde, esp.inicio_observado, esp.objeto = utcnow(), True, None
         if data.estado != EstadoEspacio.ocupado:
             esp.colgante_actual_id = None
     db.commit()

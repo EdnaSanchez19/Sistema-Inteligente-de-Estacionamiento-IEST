@@ -6,6 +6,7 @@ import { EstadoEspacio } from '../types';
 export const estadoColor: Record<EstadoEspacio, string> = {
   libre: colors.free,
   ocupado: colors.occupied,
+  obstruido: colors.blocked,
   reservado: colors.reserved,
   fuera_de_servicio: colors.offline,
 };
@@ -13,6 +14,7 @@ export const estadoColor: Record<EstadoEspacio, string> = {
 export const estadoTexto: Record<EstadoEspacio, string> = {
   libre: 'Libre',
   ocupado: 'Ocupado',
+  obstruido: 'Obstruido',
   reservado: 'Reservado',
   fuera_de_servicio: 'Fuera de servicio',
 };
@@ -29,11 +31,12 @@ export function Badge({ text, color }: { text: string; color: string }) {
   );
 }
 
-export function OccupancyBar({ libres, ocupados, total }: { libres: number; ocupados: number; total: number }) {
+export function OccupancyBar({ libres, ocupados, total, obstruidos = 0 }: { libres: number; ocupados: number; total: number; obstruidos?: number }) {
   const pct = (n: number) => (total === 0 ? 0 : (n / total) * 100);
   return (
     <View style={s.barTrack}>
       <View style={{ width: `${pct(ocupados)}%`, backgroundColor: colors.occupied }} />
+      <View style={{ width: `${pct(obstruidos)}%`, backgroundColor: colors.blocked }} />
       <View style={{ width: `${pct(libres)}%`, backgroundColor: colors.free }} />
     </View>
   );

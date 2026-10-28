@@ -60,6 +60,7 @@ export const resumenPorZona = (espacios: Espacio[]): ResumenZona[] => {
       monitoreados: delaZona.filter((e) => e.monitoreado).length,
       libres: vistos.filter((e) => e.estado === 'libre').length,
       ocupados: vistos.filter((e) => e.estado === 'ocupado').length,
+      obstruidos: vistos.filter((e) => e.estado === 'obstruido').length,
     };
   });
 };

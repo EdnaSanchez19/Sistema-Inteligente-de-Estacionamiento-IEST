@@ -7,17 +7,19 @@ from .occupancy import Detection
 
 
 class VehicleDetector:
-    def __init__(self, model_path: str = "yolov8n.pt", device: str | None = None, imgsz: int = 960, classes: tuple[int, ...] = (2, 3, 5, 7), min_conf: float = 0.10):
+    """Detecta vehículos y, si se le piden, también objetos que no lo son (`obstacle_classes`) en una sola pasada del modelo."""
+
+    def __init__(self, model_path: str = "yolov8n.pt", device: str | None = None, imgsz: int = 960, classes: tuple[int, ...] = (2, 3, 5, 7), min_conf: float = 0.10, obstacle_classes: tuple[int, ...] = ()):
         from ultralytics import YOLO  # import perezoso: las pruebas de lógica no lo necesitan
 
         self.model = YOLO(model_path)
         self.device = device
         self.imgsz = imgsz
-        self.classes = list(classes)
+        self.classes = list(dict.fromkeys([*classes, *obstacle_classes]))
         self.min_conf = min_conf
 
     def detect(self, frame: np.ndarray) -> list[Detection]:
-        """Devuelve todas las detecciones con confianza >= min_conf; el filtrado final lo hace quien llama."""
+        """Devuelve todas las detecciones con confianza >= min_conf (vehículos y obstáculos; `cls` dice cuál es); el filtrado final lo hace quien llama."""
         result = self.model.predict(frame, conf=self.min_conf, classes=self.classes, imgsz=self.imgsz, device=self.device, verbose=False)[0]
         out = []
         for box in result.boxes:

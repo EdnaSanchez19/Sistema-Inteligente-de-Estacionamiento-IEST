@@ -3,8 +3,9 @@
     python -m parking_vision.tools.etiquetar --config config/cameras.json --camera CAM-01 \
         --video ../datasets/estacionamiento.mp4 --cada 30 --salida ../datasets/etiquetas.csv
 
-Se muestra un fotograma cada `--cada` segundos con los cajones numerados (verde = libre, rojo = ocupado).
-Controles: clic en un cajón = alternar libre/ocupado · Enter o espacio = guardar y pasar al siguiente ·
+Se muestra un fotograma cada `--cada` segundos con los cajones numerados (verde = libre, rojo = ocupado, amarillo =
+obstruido: hay un objeto que no es un vehículo dentro del cajón vacío).
+Controles: clic en un cajón = cambiar libre → ocupado → obstruido → libre · Enter o espacio = guardar y pasar al siguiente ·
 s = saltar el fotograma sin guardarlo · q o Esc = terminar (lo guardado se conserva).
 Por defecto todos empiezan "libres" para que cada etiqueta sea una decisión tuya; --prellenar usa el modelo
 como punto de partida (más rápido, pero corrige con cuidado: si aceptas sus errores, la medición sale inflada).
@@ -21,7 +22,9 @@ import numpy as np
 
 from ..config import Space, load_config
 from ..draw import draw_result
-from ..occupancy import SpaceState
+from ..occupancy import LIBRE, OBSTRUIDO, OCUPADO, SpaceState
+
+CICLO = {LIBRE: OCUPADO, OCUPADO: OBSTRUIDO, OBSTRUIDO: LIBRE}
 
 
 def espacio_en(x: float, y: float, spaces: list[Space]) -> int | None:
@@ -32,15 +35,23 @@ def espacio_en(x: float, y: float, spaces: list[Space]) -> int | None:
     return None
 
 
-def escribir_filas(path: Path, t: float, spaces: list[Space], ocupados: list[bool]) -> None:
+def _estado(valor: bool | str) -> str:
+    return valor if isinstance(valor, str) else OCUPADO if valor else LIBRE
+
+
+def escribir_filas(path: Path, t: float, spaces: list[Space], estados: list[bool | str]) -> None:
+    """Agrega una fila por cajón. `estados`: "libre"/"ocupado"/"obstruido" (o True/False, el formato antiguo)."""
     nuevo = not path.exists()
     path.parent.mkdir(parents=True, exist_ok=True)
+    if not nuevo and "estado" not in path.read_text(encoding="utf-8").splitlines()[0]:
+        raise SystemExit(f"{path} usa el formato antiguo (sin la columna estado); usa otro archivo de salida.")
     with path.open("a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         if nuevo:
-            w.writerow(["t_seg", "espacio", "ocupado"])
-        for sp, occ in zip(spaces, ocupados):
-            w.writerow([round(t, 2), sp.id, int(occ)])
+            w.writerow(["t_seg", "espacio", "estado", "ocupado"])
+        for sp, e in zip(spaces, estados):
+            e = _estado(e)
+            w.writerow([round(t, 2), sp.id, e, int(e == OCUPADO)])
 
 
 def main() -> None:
@@ -67,18 +78,18 @@ def main() -> None:
     detector = None
     if args.prellenar:
         from ..detector import VehicleDetector
-        from ..occupancy import compute_occupancy
+        from ..run import process_frame
 
-        detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes)
+        detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
 
-    ocupados: list[bool] = []
-    win = "Etiquetar (clic = alternar, Enter = guardar, s = saltar, q = salir)"
+    ocupados: list[str] = []
+    win = "Etiquetar (clic = cambiar estado, Enter = guardar, s = saltar, q = salir)"
 
     def on_mouse(event, x, y, *_):
         if event == cv2.EVENT_LBUTTONDOWN:
             i = espacio_en(x, y, cam.spaces)
             if i is not None:
-                ocupados[i] = not ocupados[i]
+                ocupados[i] = CICLO[ocupados[i]]
 
     cv2.namedWindow(win)
     cv2.setMouseCallback(win, on_mouse)
@@ -90,13 +101,12 @@ def main() -> None:
         if not ok:
             break
         if detector:
-            dets = [d for d in detector.detect(frame) if d.conf >= cam.conf]
-            ocupados = [s.occupied for s in compute_occupancy(cam.spaces, dets, cam.occupied_ratio, cam.footprint)]
+            ocupados = [s.estado for s in process_frame(cam, detector, frame)[0]]
         else:
-            ocupados = [False] * len(cam.spaces)
+            ocupados = [LIBRE] * len(cam.spaces)
         accion = None
         while accion is None:
-            estados = [SpaceState(sp.id, o) for sp, o in zip(cam.spaces, ocupados)]
+            estados = [SpaceState(sp.id, o == OCUPADO, 0.0, None, o == OBSTRUIDO) for sp, o in zip(cam.spaces, ocupados)]
             vista = draw_result(frame, cam.spaces, estados)
             cv2.putText(vista, f"t = {t:.0f} s ({guardados} guardados)", (8, vista.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
             cv2.imshow(win, vista)

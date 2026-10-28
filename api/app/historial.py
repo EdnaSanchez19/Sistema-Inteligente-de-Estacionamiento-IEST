@@ -12,9 +12,9 @@ _serie: deque[dict] = deque(maxlen=MAX_PUNTOS)
 _lock = Lock()
 
 
-def registrar(libres: int, ocupados: int, monitoreados: int, ahora: datetime | None = None) -> None:
+def registrar(libres: int, ocupados: int, monitoreados: int, ahora: datetime | None = None, obstruidos: int = 0) -> None:
     with _lock:
-        _serie.append({"t": (ahora or datetime.now(timezone.utc)).isoformat(), "libres": libres, "ocupados": ocupados, "monitoreados": monitoreados})
+        _serie.append({"t": (ahora or datetime.now(timezone.utc)).isoformat(), "libres": libres, "ocupados": ocupados, "obstruidos": obstruidos, "monitoreados": monitoreados})
 
 
 def ultimos(minutos: int) -> list[dict]:

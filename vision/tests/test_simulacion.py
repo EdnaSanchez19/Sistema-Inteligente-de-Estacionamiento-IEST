@@ -30,8 +30,8 @@ def test_etiquetas_ida_y_vuelta_y_busqueda_por_tiempo(tmp_path):
     escribir_filas(csv_path, 10.0, SPACES, [True, False])
     escribir_filas(csv_path, 40.0, SPACES, [False, False])  # agrega filas, no sobrescribe
     et = cargar_etiquetas(csv_path)
-    assert et["A-01"] == [(10.0, True), (40.0, False)] and et["A-02"] == [(10.0, False), (40.0, False)]
-    assert etiqueta_en(11.0, et["A-01"], tolerancia=2.0) is True
+    assert et["A-01"] == [(10.0, "ocupado"), (40.0, "libre")] and et["A-02"] == [(10.0, "libre"), (40.0, "libre")]
+    assert etiqueta_en(11.0, et["A-01"], tolerancia=2.0) == "ocupado"
     assert etiqueta_en(25.0, et["A-01"], tolerancia=2.0) is None  # lejos de cualquier etiqueta
 
 

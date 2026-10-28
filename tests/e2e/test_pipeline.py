@@ -165,3 +165,40 @@ def test_modelo_yolo_real_sobre_una_foto(api):
         assert not [e for e in api.get("/eventos", admin) if e["tipo"] == "entrada" and "B-01" in e["descripcion"]]
     finally:
         detener(w)
+
+
+def test_un_objeto_que_se_queda_en_un_cajon_vacio_lo_deja_obstruido(api, escena):
+    """Una persona parada en A-01 (clase COCO 0) deja el cajón obstruido, con su evento; al irse vuelve a libre."""
+    source, spaces = escena
+    admin, demo = api.admin, api.demo
+    det = FakeDetector()
+    w = arrancar(api, "CAM-01", source, spaces, det)
+    try:
+        wait_until(lambda: {"A-01", "A-02", "A-03"} <= api.monitoreados(demo))
+        det.dets = [Detection(40, 220, 90, 390, 0.9, cls=0)]  # persona con los pies dentro de A-01
+        wait_until(lambda: api.estados(demo)["A-01"] == "obstruido", timeout=15)
+        assert api.estados(demo)["A-02"] == "libre"
+        espacio = next(e for e in api.get("/espacios?zona=A", demo) if e["numero"] == "A-01")
+        assert espacio["objeto"] == "persona" and espacio["desde_observado"] is True
+        assert any(e["tipo"] == "obstruccion" and "A-01" in e["descripcion"] for e in api.get("/eventos", admin))
+        assert not any(e["tipo"] == "entrada" and "A-01" in e["descripcion"] for e in api.get("/eventos", admin))  # no es un vehículo
+        det.dets = []
+        wait_until(lambda: api.estados(demo)["A-01"] == "libre", timeout=15)
+        assert any(e["tipo"] == "obstruccion_retirada" and "A-01" in e["descripcion"] for e in api.get("/eventos", admin))
+    finally:
+        detener(w)
+
+
+def test_alguien_que_solo_cruza_no_obstruye_un_cajon(api, escena):
+    source, spaces = escena
+    demo = api.demo
+    det = FakeDetector()
+    w = arrancar(api, "CAM-01", source, spaces, det)
+    try:
+        wait_until(lambda: {"A-01", "A-02", "A-03"} <= api.monitoreados(demo))
+        det.una_vez = [Detection(240, 220, 290, 390, 0.9, cls=0)]  # un solo fotograma sobre A-02
+        wait_until(lambda: det.una_vez is None)
+        time.sleep(1.5)
+        assert api.estados(demo)["A-02"] == "libre"
+    finally:
+        detener(w)

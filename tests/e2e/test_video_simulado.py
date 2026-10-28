@@ -31,8 +31,8 @@ def banco(tmp_path_factory):
 
 
 def exactitud(cam, detector, video, etiquetas):
-    _, eventos, (tp, fp, tn, fn) = procesar(cam, detector, video, 1.0, None, None, etiquetas, 2.0, None)
-    return (tp + tn) / (tp + fp + tn + fn), eventos
+    _, eventos, pares = procesar(cam, detector, video, 1.0, None, None, etiquetas, 2.0, None)
+    return sum(real == predicho for real, predicho in pares) / len(pares), eventos
 
 
 def test_video_de_dia_se_mide_con_buena_exactitud(banco):

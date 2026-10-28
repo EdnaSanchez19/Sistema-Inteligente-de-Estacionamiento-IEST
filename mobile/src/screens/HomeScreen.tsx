@@ -48,7 +48,7 @@ export default function HomeScreen() {
                     <Text style={[s.free, z.libres === 0 && { color: colors.occupied }]}>{z.libres} libres</Text>
                   )}
                 </View>
-                <OccupancyBar libres={z.libres} ocupados={z.ocupados} total={z.monitoreados} />
+                <OccupancyBar libres={z.libres} ocupados={z.ocupados} obstruidos={z.obstruidos} total={z.monitoreados} />
                 {z.monitoreados > 0 && z.monitoreados < z.total ? <Text style={s.muted}>{z.monitoreados} de {z.total} cajones monitoreados</Text> : null}
               </Card>
             ))}

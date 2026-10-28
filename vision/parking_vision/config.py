@@ -13,6 +13,12 @@ from pathlib import Path
 
 import numpy as np
 
+# Objetos que NO son vehículos y que, dentro de un cajón vacío, lo dejan "obstruido" (clases COCO que reconoce YOLO).
+OBSTACULOS_COCO: dict[int, str] = {
+    0: "persona", 1: "bicicleta", 13: "banca", 15: "gato", 16: "perro", 24: "mochila", 25: "paraguas",
+    26: "bolsa", 28: "maleta", 32: "pelota", 56: "silla", 57: "sillón", 58: "planta",
+}
+
 _ENV_REF = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
@@ -59,6 +65,10 @@ class CameraConfig:
     footprint: float = 0.6  # parte inferior del recuadro usada como "huella" en el suelo (0-1)
     confirm_occupied: int = 2  # observaciones seguidas para pasar a ocupado
     confirm_free: int = 3  # observaciones seguidas para pasar a libre
+    detectar_obstaculos: bool = True  # un objeto que no es vehículo dentro de un cajón vacío lo deja "obstruido"
+    conf_obstaculo: float = 0.40  # confianza mínima para considerar un objeto como obstáculo
+    obstaculo_ratio: float = 0.50  # fracción de la base del objeto que debe quedar dentro del cajón
+    confirm_obstruido: int = 6  # observaciones seguidas para pasar a obstruido (más que ocupado: alguien que solo cruza no cuenta)
     offline_after_s: float = 30.0  # sin fotogramas durante este tiempo => cámara desconectada
     calentamiento_s: float = 20.0  # tras arrancar, los cambios de estado se toman como estado inicial (un auto tapando a otro, etc.)
 
@@ -72,6 +82,7 @@ class Config:
     device: str | None = None  # None = automático (GPU si hay), "cpu", "0"
     imgsz: int = 960
     vehicle_classes: tuple[int, ...] = (2, 3, 5, 7)  # COCO: auto, moto, bus, camión
+    obstacle_classes: tuple[int, ...] = tuple(OBSTACULOS_COCO)  # COCO: persona, bicicleta, maleta, mochila...
     pendant_model: str | None = None  # modelo YOLO propio que detecta colgantes (opcional)
     pendant_code_regex: str = r"[A-Z0-9]{2,6}-?\d{3,8}"
     save_low_confidence: bool = False  # guarda fotogramas dudosos para reentrenar (desactivado por defecto)
@@ -107,6 +118,8 @@ def load_config(path: str | Path) -> Config:
             setattr(cfg, key, raw[key])
     if "vehicle_classes" in raw:
         cfg.vehicle_classes = tuple(raw["vehicle_classes"])
+    if "obstacle_classes" in raw:
+        cfg.obstacle_classes = tuple(raw["obstacle_classes"])
     if "low_confidence_range" in raw:
         cfg.low_confidence_range = tuple(raw["low_confidence_range"])
     return cfg

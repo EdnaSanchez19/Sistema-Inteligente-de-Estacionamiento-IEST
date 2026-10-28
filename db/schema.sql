@@ -83,6 +83,9 @@ CREATE TABLE espacios (
 	tipo VARCHAR(30) NOT NULL, 
 	estado VARCHAR(30) NOT NULL, 
 	monitoreado BOOLEAN NOT NULL, 
+	estado_desde TIMESTAMP WITH TIME ZONE, 
+	inicio_observado BOOLEAN NOT NULL, 
+	objeto VARCHAR(40), 
 	roi JSON, 
 	usuario_asignado_id INTEGER, 
 	colgante_actual_id INTEGER, 
@@ -92,7 +95,7 @@ CREATE TABLE espacios (
 	FOREIGN KEY(zona_id) REFERENCES zonas (id), 
 	FOREIGN KEY(camara_id) REFERENCES camaras (id) ON DELETE SET NULL, 
 	CONSTRAINT tipoespacio CHECK (tipo IN ('general', 'discapacidad', 'directivo', 'visitante', 'motocicleta')), 
-	CONSTRAINT estadoespacio CHECK (estado IN ('libre', 'ocupado', 'reservado', 'fuera_de_servicio')), 
+	CONSTRAINT estadoespacio CHECK (estado IN ('libre', 'ocupado', 'reservado', 'fuera_de_servicio', 'obstruido')), 
 	FOREIGN KEY(usuario_asignado_id) REFERENCES usuarios (id) ON DELETE SET NULL, 
 	FOREIGN KEY(colgante_actual_id) REFERENCES colgantes (id) ON DELETE SET NULL
 );
@@ -109,7 +112,7 @@ CREATE TABLE eventos (
 	confianza FLOAT, 
 	creado_en TIMESTAMP WITH TIME ZONE NOT NULL, 
 	PRIMARY KEY (id), 
-	CONSTRAINT tipoevento CHECK (tipo IN ('entrada', 'salida', 'cambio_ocupacion', 'error_deteccion', 'camara_desconectada', 'camara_restablecida')), 
+	CONSTRAINT tipoevento CHECK (tipo IN ('entrada', 'salida', 'cambio_ocupacion', 'error_deteccion', 'camara_desconectada', 'camara_restablecida', 'obstruccion', 'obstruccion_retirada')), 
 	FOREIGN KEY(espacio_id) REFERENCES espacios (id) ON DELETE SET NULL, 
 	FOREIGN KEY(camara_id) REFERENCES camaras (id) ON DELETE SET NULL, 
 	FOREIGN KEY(colgante_id) REFERENCES colgantes (id) ON DELETE SET NULL

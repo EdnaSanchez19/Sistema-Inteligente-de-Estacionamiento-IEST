@@ -8,7 +8,9 @@ from ..db import get_db
 from ..models import Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, Notificacion, TipoEvento, Zona, utcnow
 from .. import estado_vision
 from ..schemas import CamaraEstadoIn, ModeloIn, OcupacionIn
+from ..tiempo import formatear, segundos_desde
 
+ESTADOS_DE_CAMARA = (EstadoEspacio.libre, EstadoEspacio.ocupado, EstadoEspacio.obstruido)  # los demás estados los fija un administrador
 UMBRAL_CASI_LLENA = 3  # libres a partir de los cuales se avisa a todos los usuarios
 
 router = APIRouter(prefix="/ingest", tags=["ingest"], dependencies=[Depends(require_ingest_key)])
@@ -67,21 +69,42 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         primera_vez = not esp.monitoreado or data.calentamiento
         esp.monitoreado = True
         # Reservados y fuera de servicio los decide un administrador, no la cámara.
-        if esp.estado not in (EstadoEspacio.libre, EstadoEspacio.ocupado):
+        if esp.estado not in ESTADOS_DE_CAMARA:
             continue
-        nuevo = EstadoEspacio.ocupado if item.ocupado else EstadoEspacio.libre
+        nuevo = EstadoEspacio(item.estado) if item.estado else EstadoEspacio.ocupado if item.ocupado else EstadoEspacio.libre
+        objeto = (item.objeto or "objeto") if nuevo == EstadoEspacio.obstruido else None
+        ahora = utcnow()
         if primera_vez:
             # Primera observación del cajón (o la cámara está reajustando su estado tras un arranque): es el estado
-            # inicial, no una entrada ni una salida. No genera evento ni se queda con un colgante anterior.
+            # inicial, no una entrada ni una salida. No genera evento ni se queda con un colgante anterior. Su duración
+            # empieza a contar desde ahora y es solo "al menos": no se sabe cuánto llevaba así antes de verlo.
             if esp.estado != nuevo:
                 esp.colgante_actual = None
-            esp.estado = nuevo
+                esp.estado_desde, esp.inicio_observado = ahora, False
+            elif esp.estado_desde is None:
+                esp.estado_desde, esp.inicio_observado = ahora, False
+            esp.estado, esp.objeto = nuevo, objeto
             continue
         if nuevo == esp.estado:
+            if esp.estado_desde is None:  # cajón registrado antes de que existiera la duración: empieza a contar al verlo
+                esp.estado_desde, esp.inicio_observado = ahora, False
+            if objeto and objeto != esp.objeto:
+                esp.objeto = objeto  # el mismo cajón obstruido, ahora por otro objeto
             continue
         cambios += 1
+        anterior, anterior_objeto = esp.estado, esp.objeto
+        segundos = segundos_desde(esp.estado_desde, ahora)
+        estancia = "" if segundos is None else f" ({'estuvo' if esp.inicio_observado else 'al menos'} {formatear(segundos)})"
         colgante_previo = esp.colgante_actual
-        if item.ocupado:
+        if anterior == EstadoEspacio.ocupado:
+            desc = f"Salida de {esp.numero}" + (f": colgante {colgante_previo.codigo}" if colgante_previo else "") + estancia
+            esp.colgante_actual = None
+            db.add(Evento(tipo=TipoEvento.salida, descripcion=desc, espacio_id=esp.id, camara_id=cam.id, colgante_id=colgante_previo.id if colgante_previo else None))
+        elif anterior == EstadoEspacio.obstruido:
+            db.add(Evento(tipo=TipoEvento.obstruccion_retirada, descripcion=f"Se retiró {anterior_objeto or 'el objeto'} de {esp.numero}{estancia}", espacio_id=esp.id, camara_id=cam.id))
+        if nuevo == EstadoEspacio.obstruido:
+            db.add(Evento(tipo=TipoEvento.obstruccion, descripcion=f"Obstrucción en {esp.numero}: {objeto}", espacio_id=esp.id, camara_id=cam.id, confianza=item.confianza))
+        elif nuevo == EstadoEspacio.ocupado:
             colgante = db.scalar(select(Colgante).where(Colgante.codigo == item.colgante_codigo, Colgante.activo.is_(True))) if item.colgante_codigo else None
             if colgante:
                 desc = f"Entrada en {esp.numero}: colgante {colgante.codigo}"
@@ -91,11 +114,8 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
                 desc = f"Entrada en {esp.numero}: vehículo sin colgante identificado"
             esp.colgante_actual = colgante
             db.add(Evento(tipo=TipoEvento.entrada, descripcion=desc, espacio_id=esp.id, camara_id=cam.id, colgante_id=colgante.id if colgante else None, confianza=item.confianza))
-        else:
-            desc = f"Salida de {esp.numero}" + (f": colgante {colgante_previo.codigo}" if colgante_previo else "")
-            esp.colgante_actual = None
-            db.add(Evento(tipo=TipoEvento.salida, descripcion=desc, espacio_id=esp.id, camara_id=cam.id, colgante_id=colgante_previo.id if colgante_previo else None))
-        esp.estado = nuevo
+        esp.estado, esp.objeto = nuevo, objeto
+        esp.estado_desde, esp.inicio_observado = ahora, True  # la cámara vio el cambio: de aquí en adelante la duración es exacta
     if cambios:
         db.flush()
         _avisar_cambio_de_zona(db, cam.zona_id, libres_antes, _libres(db, cam.zona_id))

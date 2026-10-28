@@ -16,10 +16,10 @@ from pathlib import Path
 import cv2
 
 from .capture import CameraStream
-from .config import CameraConfig, Config, load_config, load_dotenv
+from .config import OBSTACULOS_COCO, CameraConfig, Config, load_config, load_dotenv
 from .detector import VehicleDetector
 from .draw import draw_result
-from .occupancy import Detection, OccupancyTracker, SpaceState, compute_occupancy
+from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, compute_occupancy, compute_states
 from .pendant import PendantInfo, PendantReader
 from .publisher import ApiPublisher
 
@@ -31,7 +31,7 @@ LOW_CONF_MAX_FILES = 500
 
 
 def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_previos: dict[str, bool] | None = None) -> tuple[list[SpaceState], list[Detection], list[Detection]]:
-    """Devuelve (estado de cada cajón, vehículos confiables, todas las detecciones incluso dudosas).
+    """Devuelve (estado de cada cajón, vehículos confiables, todas las detecciones incluso dudosas y obstáculos).
 
     Con `ocupados_previos` (el estado confirmado hasta ahora) aplica histéresis: para MARCAR un cajón como ocupado se
     exige la confianza normal (`conf`), pero un cajón que ya estaba ocupado se conserva mientras siga habiendo una
@@ -39,10 +39,12 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     el cajón entre ocupado y libre ni genera entradas y salidas falsas.
     """
     all_dets = detector.detect(frame)
-    vehicles = [d for d in all_dets if d.conf >= cam.conf]
-    states = compute_occupancy(cam.spaces, vehicles, cam.occupied_ratio, cam.footprint)
+    es_obstaculo = lambda d: d.cls in OBSTACULOS_COCO  # noqa: E731
+    vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
+    obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
+    states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio)
     if ocupados_previos:
-        debiles = [d for d in all_dets if d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
+        debiles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
         con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint)}
         for i, s in enumerate(states):
             if not s.occupied and ocupados_previos.get(s.id) and con_debiles[s.id].occupied:
@@ -57,7 +59,7 @@ class CameraWorker(threading.Thread):
         self.detector, self.det_lock, self.pendants, self.publisher = detector, det_lock, pendants, publisher
         self.stream = CameraStream(cam.source)
         self.stop_event = threading.Event()
-        self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free)
+        self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free, cam.confirm_obstruido)
         self._last_low_conf = 0.0
         self._inicio = time.time()
 
@@ -67,9 +69,12 @@ class CameraWorker(threading.Thread):
     def _payload(self, states: list[SpaceState], pend: dict[int, PendantInfo]) -> list[dict]:
         by_id = {s.id: s for s in states}
         out = []
-        for sid, occupied in self.tracker.state.items():
+        for sid, estado in self.tracker.estado.items():
             st = by_id[sid]
-            item = {"numero": sid, "ocupado": occupied, "confianza": round(st.confidence, 3) if occupied else None}
+            occupied = estado == OCUPADO
+            item = {"numero": sid, "ocupado": occupied, "estado": estado, "confianza": round(st.confidence, 3) if estado != "libre" else None}
+            if estado == OBSTRUIDO and st.obstacle:
+                item["objeto"] = st.obstacle
             info = pend.get(st.detection_index) if (occupied and st.detection_index is not None) else None
             if info:
                 item.update(colgante_tipo=info.tipo, colgante_codigo=info.codigo)
@@ -113,10 +118,10 @@ class CameraWorker(threading.Thread):
             except Exception:
                 log.exception("%s: fallo al procesar el fotograma", cam.id)
                 continue
-            changes = self.tracker.update({s.id: s.occupied for s in states})
+            changes = self.tracker.update({s.id: s.estado for s in states})
             for c in changes:
-                if c.previous is not None:
-                    log.info("%s %s -> %s", cam.id, c.space_id, "OCUPADO" if c.occupied else "libre")
+                if c.estado_previo is not None:
+                    log.info("%s %s -> %s", cam.id, c.space_id, c.estado.upper() if c.estado != "libre" else "libre")
             low_conf = self._maybe_save_low_conf(frame, all_dets)
             if self.publisher and (changes or low_conf or time.time() - last_send >= HEARTBEAT_S):
                 calentando = time.time() - self._inicio < cam.calentamiento_s
@@ -126,7 +131,7 @@ class CameraWorker(threading.Thread):
 
 
 def build(cfg: Config) -> tuple[VehicleDetector, PendantReader | None]:
-    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes)
+    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
     pendants = PendantReader(cfg.pendant_model, cfg.pendant_code_regex, cfg.device) if cfg.pendant_model else None
     return detector, pendants
 
@@ -146,8 +151,8 @@ def run_once(cfg: Config, out_dir: Path) -> None:
             print(f"{cam.id}: no se obtuvo fotograma de {cam.source!r}")
             continue
         states, vehicles, all_dets = process_frame(cam, detector, frame)
-        libres = sum(not s.occupied for s in states)
-        print(f"{cam.id}: {libres} libres / {len(states)-libres} ocupados ({len(vehicles)} vehículos)")
+        n = {e: sum(s.estado == e for s in states) for e in ("libre", "ocupado", "obstruido")}
+        print(f"{cam.id}: {n['libre']} libres / {n['ocupado']} ocupados / {n['obstruido']} obstruidos ({len(vehicles)} vehículos)")
         cv2.imwrite(str(out_dir / f"{cam.id}.jpg"), draw_result(frame, cam.spaces, states, vehicles))
 
 
