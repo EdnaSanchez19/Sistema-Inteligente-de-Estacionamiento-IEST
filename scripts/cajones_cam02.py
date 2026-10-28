@@ -71,7 +71,7 @@ def main() -> None:
         c["id"] = f"{args.isla}-{k:02d}"
         c["polygon"] = [[int(x), int(y)] for x, y in c["polygon"]]
     args.salida.parent.mkdir(parents=True, exist_ok=True)
-    args.salida.write_text(json.dumps({"camara": "CAM-02", "cajones": [{"id": c["id"], "polygon": c["polygon"], "fuente": c["fuente"]} for c in todos]}, indent=1) + "\n", encoding="utf-8")
+    args.salida.write_text(json.dumps({"camara": "CAM-02", "isla": args.isla, "video": "../demo/camara2_cctv.mp4", "cajones": [{"id": c["id"], "polygon": c["polygon"], "fuente": c["fuente"]} for c in todos]}, indent=1) + "\n", encoding="utf-8")
     print(f"{len(todos)} cajones ({len(cercanos)} con autos del video, {len(lejanos)} marcados vacíos) -> {args.salida}")
 
     if args.imagen:

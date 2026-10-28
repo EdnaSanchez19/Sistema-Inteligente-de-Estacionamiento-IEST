@@ -122,6 +122,9 @@ class OcupacionIn(BaseModel):
     camara: str = Field(max_length=40)
     espacios: list[EspacioIn] = Field(max_length=500)
     baja_confianza: bool = False
+    # True mientras el servidor de visión reajusta el estado (arranque, reinicio de la cámara): los cambios que lleguen
+    # así se toman como estado inicial, no como entradas ni salidas.
+    calentamiento: bool = False
 
 
 class ModeloIn(BaseModel):

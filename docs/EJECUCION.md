@@ -22,16 +22,30 @@ la app móvil.
 
 ## Qué cámaras hay
 
-El estacionamiento son **8 islas de 40 cajones** (320 en total), una cámara por isla. Hoy hay video para dos:
+El estacionamiento son **8 islas de 40 cajones** (320 en total), una cámara por isla. Hoy hay video para cuatro:
 
 | Cámara | Isla | Video | Cajones vigilados |
 |---|---|---|---|
 | CAM-01 | A | Toma aérea **generada con IA**, estabilizada para que parezca fija | 12 de 40 (9 con auto y 3 sobre asfalto vacío) |
-| CAM-02 | B | **Cámara de seguridad real** y fija | 40 de 40 (23 ocupados y 17 vacíos al inicio) |
-| CAM-03 a CAM-08 | C a H | — | Ninguno |
+| CAM-02 | B | **Cámara de seguridad real** y fija (estacionamiento al aire libre, 152 s) | 40 de 40 (23 ocupados y 17 vacíos al inicio) |
+| CAM-03 | C | Otra vista de esa cámara de seguridad (52 s) | 40 de 40 (23 ocupados y 17 vacíos al inicio) |
+| CAM-04 | D | Estacionamiento techado, cámara fija (22 s), con un jeep que cruza el pasillo | 8 de 40 (todos ocupados: es lo único que se ve) |
+| CAM-05 a CAM-08 | E a H | — | Ninguno |
 
-El video de CAM-02 es de terceros y **no se incluye en el repositorio**: cópialo a `demo/camara2_cctv.mp4`. Sin él, CAM-02
-no se activa y la isla B queda sin monitoreo. Los cajones de CAM-02 (`demo/cajones_cam02.json`) sí están en el repo.
+Los videos de CAM-02, CAM-03 y CAM-04 son de terceros y **no se incluyen en el repositorio**: cópialos a `demo/` con los
+nombres `camara2_cctv.mp4`, `camara3_cctv.mp4` y `camara4_garaje.mp4`. Sin su video, esa cámara no se activa y su isla queda
+sin monitoreo. Los cajones de cada una (`demo/cajones_cam0N.json`) sí están en el repo.
+
+### Agregar otra cámara
+
+```bash
+python scripts/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-05 --isla E \
+    --region-marcas 380,180,1000,240 --excluir 990,620,1280,720 --imagen revisar.jpg
+```
+
+Copia el video a `demo/`, descubre los cajones con autos (YOLO sobre todo el video), arma los cajones vacíos marcados entre
+las rayas blancas de la zona indicada y regenera la configuración. **Revisa la imagen** que genera: los cajones se proponen
+automáticamente. Requiere una cámara **fija** (con una toma que se mueve los cajones no sirven).
 
 ### "Sin monitoreo" no es "libre"
 
@@ -60,7 +74,9 @@ en general. Los avisos "isla casi llena" y "isla llena" solo se generan cuando l
    haga parpadear el estado).
 3. Cuando algo cambia (o cada 10 s) publica la ocupación en la API (`POST /ingest/ocupacion`, con su clave).
 4. La **primera** observación de un cajón fija su estado inicial: no genera evento. Solo los cambios posteriores son
-   entradas o salidas.
+   entradas o salidas. Lo mismo ocurre durante el **calentamiento** (unos 20 s tras arrancar y 10 s cada vez que un video en
+   bucle se reinicia): un auto que estaba tapado y aparece, o el salto de la escena al reiniciar, se toman como estado
+   inicial y no como entradas ni salidas.
 5. Cada 2 s reporta cómo va el modelo (`POST /ingest/modelo`): latencia, detecciones por segundo, vehículos.
 6. La API guarda ocupación y eventos en la base de datos y los sirve al panel y a la app. El video anotado se emite aparte
    (`http://localhost:8100/stream/CAM-01`).
@@ -70,7 +86,10 @@ fuente es un archivo de video y no una cámara RTSP.
 
 ## Límites que hay que tener presentes
 
-- Los videos no son las cámaras del IEST. CAM-01 es generado con IA; CAM-02 es una cámara real, pero de otro lugar.
+- Los videos no son las cámaras del IEST. CAM-01 es generado con IA; CAM-02 a CAM-04 son cámaras reales, pero de otros
+  lugares. Los videos son cortos y se repiten en bucle, así que los eventos de un ciclo se repiten en el siguiente.
+- El video emitido se dibuja y comprime solo mientras alguien lo mira (panel abierto en Resumen o Cámaras); con nadie viendo, toda
+  la capacidad queda para el modelo.
 - No hay lectura de colgantes: los vehículos aparecen como "sin colgante identificado" hasta que exista un modelo entrenado.
 - Los cajones de CAM-01 y CAM-02 se dibujaron a partir de los videos (ver `scripts/cajones_cam02.py`); la precisión real
   del sistema solo se podrá medir con etiquetas propias (`docs/SIMULACION.md`).

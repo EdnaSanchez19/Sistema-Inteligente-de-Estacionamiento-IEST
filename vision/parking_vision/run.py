@@ -59,6 +59,7 @@ class CameraWorker(threading.Thread):
         self.stop_event = threading.Event()
         self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free)
         self._last_low_conf = 0.0
+        self._inicio = time.time()
 
     def stop(self) -> None:
         self.stop_event.set()
@@ -118,7 +119,8 @@ class CameraWorker(threading.Thread):
                     log.info("%s %s -> %s", cam.id, c.space_id, "OCUPADO" if c.occupied else "libre")
             low_conf = self._maybe_save_low_conf(frame, all_dets)
             if self.publisher and (changes or low_conf or time.time() - last_send >= HEARTBEAT_S):
-                if self.publisher.occupancy(cam.id, self._payload(states, pend), baja_confianza=low_conf):
+                calentando = time.time() - self._inicio < cam.calentamiento_s
+                if self.publisher.occupancy(cam.id, self._payload(states, pend), baja_confianza=low_conf, calentamiento=calentando):
                     last_send = time.time()
         self.stream.stop()
 

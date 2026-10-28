@@ -1,0 +1,191 @@
+{
+ "camara": "CAM-04",
+ "isla": "D",
+ "video": "../demo/camara4_garaje.mp4",
+ "parametros": {
+  "interval_s": 1.0,
+  "conf": 0.35,
+  "occupied_ratio": 0.3,
+  "footprint": 0.6,
+  "confirm_occupied": 3,
+  "confirm_free": 6
+ },
+ "cajones": [
+  {
+   "id": "D-01",
+   "polygon": [
+    [
+     719,
+     89
+    ],
+    [
+     818,
+     89
+    ],
+    [
+     821,
+     125
+    ],
+    [
+     716,
+     125
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-02",
+   "polygon": [
+    [
+     830,
+     90
+    ],
+    [
+     941,
+     90
+    ],
+    [
+     944,
+     111
+    ],
+    [
+     827,
+     111
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-03",
+   "polygon": [
+    [
+     325,
+     97
+    ],
+    [
+     462,
+     97
+    ],
+    [
+     465,
+     132
+    ],
+    [
+     322,
+     132
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-04",
+   "polygon": [
+    [
+     453,
+     103
+    ],
+    [
+     673,
+     103
+    ],
+    [
+     676,
+     157
+    ],
+    [
+     450,
+     157
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-05",
+   "polygon": [
+    [
+     738,
+     153
+    ],
+    [
+     970,
+     153
+    ],
+    [
+     973,
+     225
+    ],
+    [
+     735,
+     225
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-06",
+   "polygon": [
+    [
+     1074,
+     152
+    ],
+    [
+     1159,
+     152
+    ],
+    [
+     1162,
+     210
+    ],
+    [
+     1071,
+     210
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-07",
+   "polygon": [
+    [
+     953,
+     198
+    ],
+    [
+     1129,
+     198
+    ],
+    [
+     1132,
+     287
+    ],
+    [
+     950,
+     287
+    ]
+   ],
+   "fuente": "autos del video"
+  },
+  {
+   "id": "D-08",
+   "polygon": [
+    [
+     1191,
+     256
+    ],
+    [
+     1271,
+     256
+    ],
+    [
+     1274,
+     339
+    ],
+    [
+     1188,
+     339
+    ]
+   ],
+   "fuente": "autos del video"
+  }
+ ]
+}

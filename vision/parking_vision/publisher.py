@@ -24,9 +24,13 @@ class ApiPublisher:
             log.warning("No se pudo enviar a %s: %s", path, e)
             return False
 
-    def occupancy(self, camara: str, espacios: list[dict], baja_confianza: bool = False) -> bool:
-        """espacios: [{numero, ocupado, confianza, colgante_codigo?, colgante_tipo?}]"""
-        return self._post("/ingest/ocupacion", {"camara": camara, "espacios": espacios, "baja_confianza": baja_confianza})
+    def occupancy(self, camara: str, espacios: list[dict], baja_confianza: bool = False, calentamiento: bool = False) -> bool:
+        """espacios: [{numero, ocupado, confianza, colgante_codigo?, colgante_tipo?}]
+
+        `calentamiento`: el servidor está reajustando el estado (arranque, reinicio): la API lo toma como estado
+        inicial y no como entradas ni salidas.
+        """
+        return self._post("/ingest/ocupacion", {"camara": camara, "espacios": espacios, "baja_confianza": baja_confianza, "calentamiento": calentamiento})
 
     def camera_status(self, camara: str, en_linea: bool) -> bool:
         return self._post("/ingest/camara-estado", {"camara": camara, "en_linea": en_linea})

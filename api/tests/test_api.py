@@ -184,3 +184,15 @@ def test_una_base_antigua_sin_la_columna_monitoreado_se_migra():
     assert "monitoreado" in {c["name"] for c in inspect(eng).get_columns("espacios")}
     with eng.connect() as con:
         assert con.execute(text("SELECT monitoreado FROM espacios")).scalar() in (0, False)  # lo existente queda como "sin monitoreo"
+
+
+def test_en_calentamiento_los_cambios_son_estado_inicial_no_entradas_ni_salidas(client):
+    admin = login(client, "admin@iest.edu.mx", "admin-pass-123")
+    establecer(client, "CAM-01", ["A-01", "A-02"])  # libres
+    r = client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-01", "calentamiento": True, "espacios": [{"numero": "A-01", "ocupado": True}]}).json()
+    assert r["actualizados"] == 0  # el auto que estaba tapado aparece al despejarse: no es una entrada
+    assert {e["numero"]: e["estado"] for e in client.get("/espacios", headers=admin).json()}["A-01"] == "ocupado"
+    assert not [e for e in client.get("/eventos", headers=admin).json() if e["tipo"] in ("entrada", "salida")]
+    # pasado el calentamiento, los cambios vuelven a ser eventos reales
+    client.post("/ingest/ocupacion", headers=KEY, json={"camara": "CAM-01", "espacios": [{"numero": "A-01", "ocupado": False}]})
+    assert [e["tipo"] for e in client.get("/eventos", headers=admin).json() if "A-01" in e["descripcion"]] == ["salida"]

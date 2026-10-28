@@ -14,6 +14,12 @@
 - `scripts/iniciar_sistema.py` levanta todo con datos reales; la simulación pasa a ser opcional (`--con-simulacion`).
 - Nuevos endpoints: `GET /espacios/{numero}`, `GET /sistema/historial`; migración automática de la columna `monitoreado`.
 - Análisis del dataset de Kaggle (sintético, sin imágenes): `docs/DATASET_KAGGLE.md`.
+- **CAM-03** (isla C, otra vista de la cámara de seguridad, 40 cajones) y **CAM-04** (isla D, estacionamiento techado, 8
+  cajones, con un vehículo que cruza). `scripts/agregar_camara.py` agrega cualquier cámara fija: descubre los cajones con
+  autos, arma los vacíos entre las rayas blancas y regenera la configuración.
+- **Calentamiento:** tras arrancar o reiniciar un video, los cambios de estado se toman como estado inicial y no como
+  entradas o salidas falsas (p. ej., un auto tapado por un vehículo que pasa).
+- **Rendimiento:** el servidor de visión solo dibuja y comprime el video cuando alguien lo mira.
 
 ## Sin versión — panel de demostración (27/10/2026)
 

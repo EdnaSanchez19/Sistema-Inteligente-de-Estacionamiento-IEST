@@ -1,5 +1,7 @@
 {
  "camara": "CAM-02",
+ "isla": "B",
+ "video": "../demo/camara2_cctv.mp4",
  "cajones": [
   {
    "id": "B-01",

@@ -59,7 +59,7 @@ def escena(tmp_path):
 
 
 def arrancar(api, cam_id, source, spaces, detector, pendants=None) -> CameraWorker:
-    cam = CameraConfig(id=cam_id, source=source, spaces=spaces, interval_s=0.2, confirm_occupied=2, confirm_free=2, offline_after_s=2.0)
+    cam = CameraConfig(id=cam_id, source=source, spaces=spaces, interval_s=0.2, confirm_occupied=2, confirm_free=2, offline_after_s=2.0, calentamiento_s=0.0)  # sin calentamiento: aquí sí queremos eventos de inmediato
     worker = CameraWorker(cam, Config(cameras=[cam]), detector, threading.Lock(), pendants, ApiPublisher(api.base, "clave-ingesta-e2e"))
     worker.start()
     return worker
@@ -85,7 +85,7 @@ def test_entrada_y_salida_de_un_vehiculo_con_colgante(api, escena):
         det.dets = [Detection(225, 160, 395, 390, 0.91)]
         wait_until(lambda: api.estados(demo)["A-02"] == "ocupado")
         assert api.estados(demo)["A-01"] == "libre" and api.estados(demo)["A-03"] == "libre"
-        entrada = next(e for e in api.get("/eventos", admin) if e["tipo"] == "entrada")
+        entrada = next(e for e in api.get("/eventos", admin) if e["tipo"] == "entrada" and "A-02" in e["descripcion"])
         assert "A-02" in entrada["descripcion"] and "IEST-004512" in entrada["descripcion"]
 
         # El auto se va

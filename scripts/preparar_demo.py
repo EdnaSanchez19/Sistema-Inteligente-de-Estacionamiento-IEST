@@ -49,7 +49,16 @@ def main() -> None:
     ap.add_argument("--salida", type=Path, default=ROOT / "demo")
     ap.add_argument("--hasta", type=float, default=3.5, help="segundos del video que se usan (la toma se aleja después)")
     ap.add_argument("--recorte", type=float, default=0.10, help="fracción que se recorta por cada lado")
+    ap.add_argument("--forzar", action="store_true", help="rehace el video de CAM-01 aunque ya exista")
     args = ap.parse_args()
+
+    args.salida.mkdir(parents=True, exist_ok=True)
+    video_out = args.salida / "camara1_estatica.mp4"
+    if video_out.exists() and not args.forzar:
+        # No se reescribe el video si ya existe: otro proceso (el servidor de visión) puede estar leyéndolo.
+        escribir_configuracion(args.salida)
+        print(f"Video existente ({video_out.name}) conservado; solo se regeneró cameras_demo.json (usa --forzar para rehacerlo)")
+        return
 
     cap = cv2.VideoCapture(str(args.video))
     if not cap.isOpened():
@@ -73,29 +82,33 @@ def main() -> None:
     cap.release()
     print(f"{len(frames)} fotogramas alineados; movimiento no estimado en {est.perdidos}")
 
-    args.salida.mkdir(parents=True, exist_ok=True)
-    video_out = args.salida / "camara1_estatica.mp4"
     out = cv2.VideoWriter(str(video_out), cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
     for f in frames + frames[-2:0:-1]:  # ida y vuelta: el bucle no tiene saltos
         out.write(f)
     out.release()
 
+    camaras = escribir_configuracion(args.salida)
+    cv2.imwrite(str(args.salida / "camara1_fotograma0.jpg"), frames[0])
+    cv2.imwrite(str(args.salida / "camara1_fotograma_final.jpg"), frames[-1])
+    print(f"Listo en {args.salida}: camara1_estatica.mp4 ({len(frames) * 2 - 2} fotogramas), cameras_demo.json con {len(camaras)} cámara(s)")
+
+
+def escribir_configuracion(salida: Path) -> list[dict]:
+    """Genera cameras_demo.json: CAM-01 (video generado con IA) más las cámaras de demo/cajones_cam*.json."""
     spaces = [{"id": k, "polygon": v} for k, v in CAJONES.items()]
     camaras = [
         {"id": "CAM-01", "source": "../demo/camara1_estatica.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "spaces": spaces},
     ]
-    # CAM-02: cámara de seguridad real y fija. Sus 40 cajones los arma scripts/cajones_cam02.py; el video (de terceros)
-    # no se incluye en el repositorio: se copia a demo/camara2_cctv.mp4 (ver docs/EJECUCION.md).
-    cajones2 = ROOT / "demo" / "cajones_cam02.json"
-    if cajones2.exists():
-        c2 = json.loads(cajones2.read_text(encoding="utf-8"))["cajones"]
-        camaras.append({"id": "CAM-02", "source": "../demo/camara2_cctv.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 3, "confirm_free": 6,
-                        "spaces": [{"id": c["id"], "polygon": c["polygon"]} for c in c2]})
+    # Las demás cámaras salen de demo/cajones_cam*.json (scripts/cajones_cam02.py y scripts/agregar_camara.py). Sus videos son
+    # de terceros y NO se incluyen en el repositorio: se copian a demo/ (ver docs/EJECUCION.md).
+    por_defecto = {"interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 3, "confirm_free": 6}
+    for archivo in sorted((ROOT / "demo").glob("cajones_cam*.json")):
+        d = json.loads(archivo.read_text(encoding="utf-8"))
+        camaras.append({"id": d["camara"], "source": d.get("video", "../demo/camara2_cctv.mp4"), **{**por_defecto, **d.get("parametros", {})},
+                        "spaces": [{"id": c["id"], "polygon": c["polygon"]} for c in d["cajones"]]})
     cfg = {"model": "models/yolov8n.pt", "imgsz": 1280, "cameras": camaras}
-    (args.salida / "cameras_demo.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
-    cv2.imwrite(str(args.salida / "camara1_fotograma0.jpg"), frames[0])
-    cv2.imwrite(str(args.salida / "camara1_fotograma_final.jpg"), frames[-1])
-    print(f"Listo en {args.salida}: camara1_estatica.mp4 ({len(frames) * 2 - 2} fotogramas), cameras_demo.json con {len(camaras)} cámara(s)")
+    (salida / "cameras_demo.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    return camaras
 
 
 if __name__ == "__main__":

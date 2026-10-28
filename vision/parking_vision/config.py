@@ -60,6 +60,7 @@ class CameraConfig:
     confirm_occupied: int = 2  # observaciones seguidas para pasar a ocupado
     confirm_free: int = 3  # observaciones seguidas para pasar a libre
     offline_after_s: float = 30.0  # sin fotogramas durante este tiempo => cámara desconectada
+    calentamiento_s: float = 20.0  # tras arrancar, los cambios de estado se toman como estado inicial (un auto tapando a otro, etc.)
 
 
 @dataclass

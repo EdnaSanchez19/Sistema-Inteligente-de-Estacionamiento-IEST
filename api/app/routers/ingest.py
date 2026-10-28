@@ -64,14 +64,17 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         if esp is None:
             desconocidos.append(item.numero)
             continue
-        primera_vez = not esp.monitoreado
+        primera_vez = not esp.monitoreado or data.calentamiento
         esp.monitoreado = True
         # Reservados y fuera de servicio los decide un administrador, no la cámara.
         if esp.estado not in (EstadoEspacio.libre, EstadoEspacio.ocupado):
             continue
         nuevo = EstadoEspacio.ocupado if item.ocupado else EstadoEspacio.libre
         if primera_vez:
-            # Primera observación del cajón: es su estado inicial, no una entrada ni una salida. No genera evento.
+            # Primera observación del cajón (o la cámara está reajustando su estado tras un arranque): es el estado
+            # inicial, no una entrada ni una salida. No genera evento ni se queda con un colgante anterior.
+            if esp.estado != nuevo:
+                esp.colgante_actual = None
             esp.estado = nuevo
             continue
         if nuevo == esp.estado:

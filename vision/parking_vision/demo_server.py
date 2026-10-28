@@ -33,6 +33,8 @@ from .run import process_frame
 
 log = logging.getLogger("demo")
 CAFE, NARANJA = (35, 47, 106), (40, 140, 242)  # BGR de los colores institucionales aproximados
+REAJUSTE_BUCLE_S = 10.0  # segundos de reajuste silencioso tras reiniciar un video en bucle
+FPS_EMISION = 15  # el video emitido va a este ritmo como máximo; la detección no depende de él
 
 
 class CamaraDemo:
@@ -51,6 +53,9 @@ class CamaraDemo:
         self._stop = threading.Event()
         self.fps_video = 25.0
         self.resolucion = ""
+        self.calentando_hasta = time.time() + cam.calentamiento_s  # al arrancar y en cada reinicio del video
+        self._espectadores = 0  # clientes mirando el video: sin nadie, no se dibuja ni se comprime (ahorra CPU para el modelo)
+        self._esp_lock = threading.Lock()
 
     # --- hilos -------------------------------------------------------------------------------
     def start(self) -> None:
@@ -59,6 +64,21 @@ class CamaraDemo:
 
     def stop(self) -> None:
         self._stop.set()
+
+    def espectador(self):
+        """Contexto que cuenta a un cliente mirando el video mientras dure."""
+        cam = self
+
+        class _Espectador:
+            def __enter__(self):
+                with cam._esp_lock:
+                    cam._espectadores += 1
+
+            def __exit__(self, *exc):
+                with cam._esp_lock:
+                    cam._espectadores -= 1
+
+        return _Espectador()
 
     def _reproducir(self) -> None:
         """Lee el video a su velocidad real, dibuja el resultado más reciente y codifica el JPEG."""
@@ -71,19 +91,26 @@ class CamaraDemo:
             self.fps_video = cap.get(cv2.CAP_PROP_FPS) or 25.0
             self.resolucion = f"{int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))}x{int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
             t_next = time.time()
+            salto = max(1, round(self.fps_video / FPS_EMISION))
+            n_cuadro = 0
             while not self._stop.is_set():
                 ok, frame = cap.read()
                 if not ok:
-                    break  # fin del video: volver a empezar
+                    # Fin del video: al volver a empezar la escena "salta" (los autos aparecen o desaparecen de golpe),
+                    # lo cual no son entradas ni salidas reales; el estado se reajusta en silencio unos segundos.
+                    self.calentando_hasta = max(self.calentando_hasta, time.time() + REAJUSTE_BUCLE_S)
+                    break
                 with self._lock:
                     self._frame = frame
-                states, dets = self._resultado
-                vista = self._dibujar(frame, states, dets)
-                ok_jpg, buf = cv2.imencode(".jpg", vista, [cv2.IMWRITE_JPEG_QUALITY, 78])
-                if ok_jpg:
-                    with self._cond:
-                        self._jpeg = buf.tobytes()
-                        self._cond.notify_all()
+                n_cuadro += 1
+                if self._espectadores > 0 and n_cuadro % salto == 0:
+                    states, dets = self._resultado
+                    vista = self._dibujar(frame, states, dets)
+                    ok_jpg, buf = cv2.imencode(".jpg", vista, [cv2.IMWRITE_JPEG_QUALITY, 78])
+                    if ok_jpg:
+                        with self._cond:
+                            self._jpeg = buf.tobytes()
+                            self._cond.notify_all()
                 t_next += 1.0 / self.fps_video
                 espera = t_next - time.time()
                 if espera > 0:
@@ -125,8 +152,8 @@ class CamaraDemo:
             if self.publisher:
                 ahora = time.time()
                 if changes or ahora - ultimo_envio >= 10:
-                    payload = [{"numero": s.id, "ocupado": s.occupied, "confianza": round(s.confidence, 3) if s.occupied else None} for s in confirmados]
-                    if self.publisher.occupancy(cam.id, payload):
+                    payload = [{"numero": s.id, "ocupado": self.tracker.state[s.id], "confianza": round(s.confidence, 3) if s.occupied else None} for s in confirmados]
+                    if self.publisher.occupancy(cam.id, payload, calentamiento=ahora < self.calentando_hasta):
                         ultimo_envio = ahora
                 if ahora - ultimo_modelo >= 2:
                     if self.publisher.model_stats(self.stats):
@@ -178,7 +205,8 @@ def crear_manejador(camaras: dict[str, CamaraDemo]):
             if len(partes) == 2 and partes[0] in ("stream", "snapshot") and partes[1].removesuffix(".jpg") in camaras:
                 cam = camaras[partes[1].removesuffix(".jpg")]
                 if partes[0] == "snapshot":
-                    jpg = cam.esperar_jpeg(None, 5)
+                    with cam.espectador():
+                        jpg = cam.esperar_jpeg(None, 5)
                     if not jpg:
                         return self._json({"error": "sin imagen"}, 503)
                     self.send_response(200)
@@ -193,12 +221,13 @@ def crear_manejador(camaras: dict[str, CamaraDemo]):
                 self.end_headers()
                 ultimo = None
                 try:
-                    while True:
-                        jpg = cam.esperar_jpeg(ultimo)
-                        if jpg is None or jpg is ultimo:
-                            continue
-                        ultimo = jpg
-                        self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + str(len(jpg)).encode() + b"\r\n\r\n" + jpg + b"\r\n")
+                    with cam.espectador():
+                        while True:
+                            jpg = cam.esperar_jpeg(ultimo)
+                            if jpg is None or jpg is ultimo:
+                                continue
+                            ultimo = jpg
+                            self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + str(len(jpg)).encode() + b"\r\n\r\n" + jpg + b"\r\n")
                 except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                     return
             self._json({"error": "no encontrado", "camaras": list(camaras)}, 404)

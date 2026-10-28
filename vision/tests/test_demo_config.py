@@ -21,9 +21,15 @@ def test_la_demo_define_las_camaras_esperadas():
     assert len(cams["CAM-01"].spaces) == 12  # isla A: 9 con auto + 3 de asfalto vacío (video generado con IA)
     if "CAM-02" in cams:  # isla B: cámara de seguridad real
         assert [s.id for s in cams["CAM-02"].spaces] == [f"B-{i:02d}" for i in range(1, 41)]
+    if "CAM-03" in cams:  # isla C: otra vista de la cámara de seguridad
+        assert [s.id for s in cams["CAM-03"].spaces] == [f"C-{i:02d}" for i in range(1, 41)]
+    if "CAM-04" in cams:  # isla D: estacionamiento techado (solo se ven 8 cajones)
+        assert all(s.id.startswith("D-") for s in cams["CAM-04"].spaces) and 1 <= len(cams["CAM-04"].spaces) <= 40
+    ids = [s.id for c in cams.values() for s in c.spaces]
+    assert len(ids) == len(set(ids)), "un cajón no puede pertenecer a dos cámaras"
 
 
-@pytest.mark.parametrize("camara", ["CAM-01", "CAM-02"])
+@pytest.mark.parametrize("camara", ["CAM-01", "CAM-02", "CAM-03", "CAM-04"])
 def test_los_cajones_son_poligonos_convexos_dentro_de_la_imagen(camara):
     cams = {c.id: c for c in load_config(CONFIG).cameras}
     if camara not in cams:
