@@ -1,5 +1,16 @@
 # Cambios
 
+## Sin versión — distribución real del estacionamiento y mapa (29/10/2026)
+
+- **391 cajones, como el estacionamiento real.** 8 islas (A y G de 32, B a F de 36, H de 27) y 6 zonas del perímetro: lateral
+  caseta (16), esquina motos (8), lateral biblioteca (42), lateral gimnasio (18), entrada lateral (4) y lateral callejón (32).
+  Antes eran 8 islas de 40 más cajones extra que dibujaban los videos de demostración. Al iniciar se quitan los que no existen
+  en la realidad (conservando sus eventos); el perímetro aparece "sin monitoreo" hasta que tenga cámaras. Se retiró
+  `--cajones` del seed y de `sincronizar_cajones`: los videos de demostración ya no agregan cajones.
+- **Mapa** en el panel: plano esquemático con las islas y el perímetro y cada cajón en su color en vivo (la posición de los
+  bloques es aproximada, no está a escala). La app y el panel nombran "Isla A" o "Lateral caseta" según corresponda.
+- **Botón de modo claro/oscuro** en el panel y en el inicio de sesión, y nuevo inicio de sesión con la foto del campus.
+
 ## Sin versión — tres estados por cajón y tiempo en el estado (27/10/2026)
 
 - **Libre, ocupado u obstruido.** *Obstruido* (amarillo) es un cajón sin vehículo con un objeto que no lo es dentro (persona,

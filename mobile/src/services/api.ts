@@ -1,4 +1,5 @@
 import * as mock from '../data/mock';
+import { ordenarZonas } from '../format';
 import { AlertaCamara, Espacio, Evento, Notificacion, ResumenZona, Usuario, Vehiculo } from '../types';
 
 const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
@@ -49,7 +50,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 const delay = <T,>(v: T, ms = 250) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 
 export const resumenPorZona = (espacios: Espacio[]): ResumenZona[] => {
-  const zonas = [...new Set(espacios.map((e) => e.zona))].sort();
+  const zonas = ordenarZonas([...new Set(espacios.map((e) => e.zona))]);
   return zonas.map((zona) => {
     const delaZona = espacios.filter((e) => e.zona === zona);
     // Solo cuentan los cajones que una cámara ya observó: los demás no tienen un estado real que mostrar.

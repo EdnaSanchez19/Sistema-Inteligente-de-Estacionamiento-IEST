@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import { colors, spacing } from '../theme';
 import { TipoEvento } from '../types';
 import { formatoFecha } from './NotificationsScreen';
+import { rotuloZona } from '../format';
 
 const eventoColor: Record<TipoEvento, string> = {
   entrada: colors.free,
@@ -45,7 +46,7 @@ function Camaras() {
           <Card key={c.id} style={{ gap: 6 }}>
             <View style={s.row}>
               <Text style={s.cam}>
-                {c.camara} · Isla {c.zona}
+                {c.camara} · {rotuloZona(c.zona)}
               </Text>
               <Badge text={c.estado === 'en_linea' ? 'En línea' : 'Desconectada'} color={c.estado === 'en_linea' ? colors.free : colors.occupied} />
             </View>

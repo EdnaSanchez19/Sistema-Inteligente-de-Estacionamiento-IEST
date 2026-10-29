@@ -19,7 +19,7 @@ def test_el_modelo_reporta_y_el_panel_lo_ve(client):
     v = despues["vision"][0]
     assert v["camara"] == "CAM-01" and v["modelo"] == "YOLOv8n" and v["vehiculos"] == 79 and v["hace_s"] < 5
     assert v["ids"] == ["A-01", "A-02"]  # el panel marca estos cajones como vigilados por el modelo
-    assert despues["camaras"]["total"] == 8 and despues["espacios"]["total"] == 320 and despues["espacios"]["monitoreados"] == 0
+    assert despues["camaras"]["total"] == 8 and despues["espacios"]["total"] == 391 and despues["espacios"]["monitoreados"] == 0
     estado_vision.limpiar()
 
 

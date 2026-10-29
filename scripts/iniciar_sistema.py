@@ -65,9 +65,9 @@ def asegurar_env() -> None:
 
 def asegurar_base_de_datos(con_simulacion: bool) -> None:
     base = ROOT / "api" / "dev.db"
-    cajones = ["--cajones", str(ROOT / "demo" / "cameras_demo.json")]  # los cajones que ven las cámaras (más o menos de 40 por isla)
+    cajones: list[str] = []  # los cajones son los del estacionamiento real (api/app/seed.py), no los que dibujan los videos de demostración
     if base.exists() and CREDENCIALES.exists():
-        # idempotente: solo agrega lo que falte (cajones nuevos, colgantes de muestra) y pone al día el esquema
+        # idempotente: solo agrega lo que falte (colgantes de muestra), quita los cajones que la distribución real no tiene y pone al día el esquema
         r = subprocess.run([PY, "-m", "app.seed", *cajones] + (["--muestra", "150"] if con_simulacion else []), cwd=ROOT / "api", env=ENV, capture_output=True, text=True, encoding="utf-8")
         if r.returncode != 0:
             raise SystemExit("No se pudo actualizar la base de datos: " + r.stderr[-800:])

@@ -106,6 +106,22 @@
   .cajon.sin { background: repeating-linear-gradient(45deg, var(--sin) 0 2px, transparent 2px 5px); color: var(--suave); border: 1px solid var(--sin); font-weight: 500; }
   .cajon.cambio { animation: destello 2.4s ease-out; }
   @keyframes destello { 0% { box-shadow: 0 0 0 0 var(--naranja); transform: scale(1.2); } 60% { box-shadow: 0 0 0 9px #f8692300; } 100% { transform: scale(1); } }
+  /* ---------- mapa: plano esquemático del estacionamiento ---------- */
+  .plano { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; padding: 14px; border: 2px dashed var(--borde); border-radius: 14px; background: color-mix(in srgb, var(--hover) 55%, transparent); }
+  .plano .zona { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px; padding: 11px 12px 12px; min-width: 0; align-self: start; }
+  .plano .zona .isla-cab h4 { font-family: var(--marca-fuente); font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  .plano .zona .isla-cab span { font-size: 11.5px; }
+  .plano .cajones { margin-top: 9px; gap: 3px; grid-template-columns: repeat(auto-fill, minmax(25px, 1fr)); }
+  .plano .cajon { height: 25px; border-radius: 4px; font-size: 10px; }
+  .plano .z-caseta { grid-column: 1 / 5; grid-row: 1; } .plano .z-entrada { grid-column: 5 / 7; grid-row: 1; } .plano .z-biblioteca { grid-column: 7 / 13; grid-row: 1; }
+  .plano .z-gimnasio { grid-column: 1 / 3; grid-row: 2; } .plano .z-callejon { grid-column: 11 / 13; grid-row: 2; } .plano .z-motos { grid-column: 1 / 5; grid-row: 3; }
+  .plano .z-islas { grid-column: 3 / 11; grid-row: 2; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .plano .z-islas .zona { align-self: stretch; }
+  .nota-plano { color: var(--suave); font-size: 12.5px; margin-top: 10px; }
+  @media (max-width: 1100px) {
+    .plano { display: flex; flex-direction: column; }
+    .plano .z-islas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
   .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .filtros button { border: 1px solid var(--borde); background: var(--tarjeta); padding: 6px 13px; border-radius: 999px; cursor: pointer; font-size: 13px; }
   .filtros button.sel { background: var(--naranja); border-color: var(--naranja); color: #fff; }
@@ -286,12 +302,13 @@ function cerrarSesion() { token = null; sessionStorage.removeItem("token"); Obje
 const ICONOS = {
   resumen: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
   camaras: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg>',
+  mapa: '<svg viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>',
   islas: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
   eventos: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   admin: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M17 11a3 3 0 100-6M18.5 14.3c1.9.7 3 2.4 3 5.7"/></svg>',
   sistema: '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg>',
 };
-const VISTAS = [["resumen", "Resumen"], ["camaras", "Cámaras"], ["islas", "Islas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
+const VISTAS = [["resumen", "Resumen"], ["mapa", "Mapa"], ["camaras", "Cámaras"], ["islas", "Islas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
 
 /* tema claro / oscuro: por omisión el del sistema; el botón fija uno y lo recuerda en este navegador */
 function temaActual() {
@@ -323,7 +340,7 @@ function armarEstructura() {
       h("button", { onclick: cerrarSesion, text: "Cerrar sesión" })));
   const main = h("main", null,
     h("div", { class: "cabecera" }, h("div", null, h("h2", { id: "titulo" }), h("div", { class: "sub", id: "subtitulo" })), h("div", { class: "chips", id: "chips" })),
-    vistaResumen(), vistaCamaras(), vistaIslas(), vistaEventos(), ...(S.yo.rol === "admin" ? [vistaAdmin()] : []), vistaSistema());
+    vistaResumen(), vistaMapa(), vistaCamaras(), vistaIslas(), vistaEventos(), ...(S.yo.rol === "admin" ? [vistaAdmin()] : []), vistaSistema());
   app.append(aside, main);
   textoBotonTema();
 }
@@ -332,7 +349,7 @@ function ir(vista) {
   S.vista = vista; history.replaceState(null, "", "#" + vista);
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("sel", b.dataset.vista === vista));
   document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + vista));
-  const nombres = { resumen: ["Resumen", "Estado actual del estacionamiento"], camaras: ["Cámaras", "Video en vivo con las detecciones del modelo"], islas: ["Islas", "Cajones libres, ocupados y sin monitoreo"], eventos: ["Eventos", "Entradas, salidas y alertas registradas"], admin: ["Administración", "Usuarios, vehículos y colgantes"], sistema: ["Sistema", "Componentes y modelo de visión"] }[vista];
+  const nombres = { resumen: ["Resumen", "Estado actual del estacionamiento"], mapa: ["Mapa", "Plano del estacionamiento con el estado de cada cajón en vivo"], camaras: ["Cámaras", "Video en vivo con las detecciones del modelo"], islas: ["Islas", "Cajones libres, ocupados y sin monitoreo"], eventos: ["Eventos", "Entradas, salidas y alertas registradas"], admin: ["Administración", "Usuarios, vehículos y colgantes"], sistema: ["Sistema", "Componentes y modelo de visión"] }[vista];
   $("titulo").textContent = nombres[0]; $("subtitulo").textContent = nombres[1];
   if (vista === "eventos" && S.eventos) S.eventos.forEach((e) => S.vistos.add(e.id));
   gestionarVideos(); if (vista === "admin") cargarAdmin(); pintar();
@@ -409,11 +426,11 @@ function pintarResumen() {
 
   const est = $("estancias"); est.replaceChildren();
   if (!S.estancias.length) est.append(h("div", { class: "vacio", text: "Aún no hay coches observados." }));
-  else est.append(h("ul", { class: "lista", style: "max-height:210px" }, S.estancias.map((x) => h("li", { style: "cursor:pointer", onclick: () => abrirCajon(x.numero) }, h("span", null, h("b", { text: x.numero + " " }), "· isla " + x.zona), h("time", { text: (x.desde_observado ? "" : "al menos ") + dur(x.duracion_s) })))));
+  else est.append(h("ul", { class: "lista", style: "max-height:210px" }, S.estancias.map((x) => h("li", { style: "cursor:pointer", onclick: () => abrirCajon(x.numero) }, h("span", null, h("b", { text: x.numero + " " }), "· " + rotulo(x.zona)), h("time", { text: (x.desde_observado ? "" : "al menos ") + dur(x.duracion_s) })))));
 
   const islas = agruparIslas();
   $("cobertura-islas").replaceChildren(...islas.map((i) => h("div", { style: "cursor:pointer", onclick: () => { S.isla = i.nombre; ir("islas"); } },
-    h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: "Isla " + i.nombre }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") + ` · ${i.monit}/${i.total}` : `sin cámara · 0/${i.total}` })),
+    h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: rotulo(i.nombre) }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") + ` · ${i.monit}/${i.total}` : `sin cámara · 0/${i.total}` })),
     h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })))));
 
   const ev = S.eventos, cont = $("ultimos-eventos"); cont.replaceChildren();
@@ -429,6 +446,8 @@ function filaEvento(e) {
   const ins = h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` });
   return h("li", { class: S.vistos.size && e.id > 0 && !S.vistos.has(e.id) ? "nuevo" : "" }, h("span", null, ins, " " + e.descripcion), h("time", { text: hora(e.fecha) }));
 }
+/* una isla es "Isla A"; las zonas del perímetro se llaman por su nombre ("Lateral caseta") */
+function rotulo(nombre) { return nombre.length === 1 ? "Isla " + nombre : nombre; }
 function agruparIslas() {
   const m = new Map();
   for (const e of S.espacios) {
@@ -436,7 +455,7 @@ function agruparIslas() {
     const i = m.get(e.zona); i.total++; i.lista.push(e);
     if (e.monitoreado) { i.monit++; if (e.estado === "libre") i.libres++; if (e.estado === "ocupado") i.ocupados++; if (e.estado === "obstruido") i.obstruidos++; }
   }
-  return [...m.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  return [...m.values()].sort((a, b) => (a.nombre.length > 1) - (b.nombre.length > 1) || a.nombre.localeCompare(b.nombre));  // primero las islas, luego el perímetro
 }
 function dibujarSerie(canvas, pts) {
   const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, hh = canvas.clientHeight;
@@ -464,7 +483,7 @@ function pintarCamaras() {
     let t = cont.querySelector(`[data-tarjeta="${c.codigo}"]`);
     const v = vision.get(c.codigo);
     if (!t) { t = h("div", { class: "tarjeta camara-tarj", "data-tarjeta": c.codigo }, h("div", { class: "camara-cab" }), h("div", { class: "cuerpo-video" }), h("div", { class: "datos" })); cont.append(t); }
-    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.isla ? ` · Isla ${c.isla}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
+    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.isla ? ` · ${rotulo(c.isla)}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
     const cv = t.querySelector(".cuerpo-video");
     if (v && !cv.querySelector("img")) {
       const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
@@ -493,23 +512,45 @@ function vistaIslas() {
 function pintarIslas() {
   const islas = agruparIslas(), f = $("filtro-islas");
   const opciones = ["todas", ...islas.map((i) => i.nombre)];
-  if (f.dataset.lista !== opciones.join()) { f.dataset.lista = opciones.join(); f.replaceChildren(...opciones.map((o) => h("button", { "data-isla": o, text: o === "todas" ? "Todas" : "Isla " + o, onclick: () => { S.isla = o; pintarIslas(); } }))); }
+  if (f.dataset.lista !== opciones.join()) { f.dataset.lista = opciones.join(); f.replaceChildren(...opciones.map((o) => h("button", { "data-isla": o, text: o === "todas" ? "Todas" : rotulo(o), onclick: () => { S.isla = o; pintarIslas(); } }))); }
   [...f.children].forEach((b) => b.classList.toggle("sel", b.dataset.isla === S.isla));
   const cont = $("islas"); cont.replaceChildren();
   for (const i of islas.filter((x) => S.isla === "todas" || x.nombre === S.isla)) {
     const clase = i.monit === 0 ? "nula" : i.monit === i.total ? "total" : "";
-    const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: "Isla " + i.nombre }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") : "sin cámara" })),
+    const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(i.nombre) }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") : "sin cámara" })),
       h("span", { class: "cobertura " + clase, text: `Cobertura ${i.monit}/${i.total} · ${pct(i.monit, i.total)} %` }),
       h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })));
-    const g = h("div", { class: "cajones" });
-    for (const e of i.lista) {
-      const cambio = !S.primera && S.previo.has(e.numero) && S.previo.get(e.numero) !== e.estado + e.monitoreado;
-      const c = h("button", { class: "cajon " + (e.monitoreado || e.estado !== "libre" ? e.estado : "") + (e.monitoreado ? "" : " sin") + (cambio ? " cambio" : ""), title: `${e.numero} · ${e.monitoreado ? ESTADO[e.estado] + (e.objeto ? " (" + e.objeto + ")" : "") + " desde hace " + textoDuracion(e) : "sin monitoreo"} · ${TIPO_ESPACIO[e.tipo] || e.tipo}`, onclick: () => abrirCajon(e.numero) }, e.numero.split("-")[1]);
-      if (MARCA_TIPO[e.tipo]) c.append(h("small", { text: MARCA_TIPO[e.tipo] }));
-      g.append(c);
-    }
-    t.append(g); cont.append(t);
+    t.append(h("div", { class: "cajones" }, i.lista.map(botonCajon))); cont.append(t);
   }
+}
+function botonCajon(e) {
+  const cambio = !S.primera && S.previo.has(e.numero) && S.previo.get(e.numero) !== e.estado + e.monitoreado;
+  const c = h("button", { class: "cajon " + (e.monitoreado || e.estado !== "libre" ? e.estado : "") + (e.monitoreado ? "" : " sin") + (cambio ? " cambio" : ""), title: `${e.numero} · ${e.monitoreado ? ESTADO[e.estado] + (e.objeto ? " (" + e.objeto + ")" : "") + " desde hace " + textoDuracion(e) : "sin monitoreo"} · ${TIPO_ESPACIO[e.tipo] || e.tipo}`, onclick: () => abrirCajon(e.numero) }, e.numero.split("-")[1]);
+  if (MARCA_TIPO[e.tipo]) c.append(h("small", { text: MARCA_TIPO[e.tipo] }));
+  return c;
+}
+
+/* ============================== VISTA: mapa ============================== */
+const ZONA_DEL_PLANO = { "Lateral caseta": "caseta", "Entrada lateral": "entrada", "Lateral biblioteca": "biblioteca", "Lateral gimnasio": "gimnasio", "Lateral callejón": "callejon", "Esquina motos": "motos" };
+function vistaMapa() {
+  return h("section", { class: "vista", id: "vista-mapa" },
+    h("div", { class: "tarjeta" },
+      h("div", { class: "titulo" }, h("span", { text: "Plano del estacionamiento" }),
+        h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
+      h("div", { class: "plano", id: "plano" }),
+      h("p", { class: "nota-plano", id: "nota-plano" })));
+}
+function zonaDelMapa(z, clase) {
+  const detalle = z.monit ? `${z.libres} libres · ${z.ocupados} ocupados` + (z.obstruidos ? ` · ${z.obstruidos} obstruidos` : "") : `sin cámara · ${z.total} cajones`;
+  return h("div", { class: "zona " + (clase || "") }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(z.nombre) }), h("span", { text: detalle })), h("div", { class: "cajones" }, z.lista.map(botonCajon)));
+}
+function pintarMapa() {
+  const zonas = agruparIslas(), islas = zonas.filter((z) => z.nombre.length === 1), perimetro = zonas.filter((z) => z.nombre.length > 1);
+  const total = zonas.reduce((a, z) => a + z.total, 0), vigilados = zonas.reduce((a, z) => a + z.monit, 0);
+  $("plano").replaceChildren(
+    ...perimetro.map((z) => zonaDelMapa(z, "z-" + (ZONA_DEL_PLANO[z.nombre] || "otra"))),
+    h("div", { class: "z-islas" }, islas.map((z) => zonaDelMapa(z))));
+  $("nota-plano").textContent = `Esquema: muestra cuántos cajones tiene cada zona y su estado en vivo; la posición de cada bloque es aproximada y no está a escala. ${total} cajones, ${vigilados} con cámara. Toca un cajón para ver su detalle.`;
 }
 async function abrirCajon(numero) {
   abrirModal(h("p", { class: "vacio", text: "Cargando…" }));
@@ -651,7 +692,7 @@ function pintarComun() {
 function pintar() {
   if (!S.estado) return;
   pintarComun();
-  ({ resumen: pintarResumen, camaras: pintarCamaras, islas: pintarIslas, eventos: pintarEventos, sistema: pintarSistema, admin: () => {} })[S.vista]();
+  ({ resumen: pintarResumen, mapa: pintarMapa, camaras: pintarCamaras, islas: pintarIslas, eventos: pintarEventos, sistema: pintarSistema, admin: () => {} })[S.vista]();
 }
 function conexion(ok) {
   const p = $("punto-conexion"); if (!p) return; p.className = "punto " + (ok ? "ok vivo" : "mal"); $("texto-conexion").textContent = ok ? "Conectado" : "Sin conexión con la API";

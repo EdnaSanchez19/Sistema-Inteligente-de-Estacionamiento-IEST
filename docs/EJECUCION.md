@@ -42,8 +42,9 @@ usan los mismos puertos (8000 y 8100). Para probarlo sin instalar nada: `python 
 
 ## Qué cámaras hay
 
-El estacionamiento son **8 islas de alrededor de 40 cajones** (320 de base), una cámara por isla; si una cámara ve más o menos, la
-configuración manda y la base de datos registra los cajones al iniciar. Hoy hay video para cuatro:
+El estacionamiento son **391 cajones**: 8 islas con una cámara por isla (271 cajones) y 6 zonas en el perímetro sin cámara todavía
+(120), según la distribución real (detalle en [`db/README.md`](../db/README.md)). Los videos de demostración dibujan sus propios
+cajones; los que pasan del tamaño real de la isla (B-37 en adelante, C-37 en adelante) la API los ignora. Hoy hay video para cuatro:
 
 | Cámara | Isla | Video | Cajones vigilados |
 |---|---|---|---|
@@ -92,8 +93,9 @@ cámara no vio la llegada, se muestra como "al menos".
 | Sección | Contenido |
 |---|---|
 | Resumen | Cajones monitoreados, libres, ocupados y obstruidos; los coches que llevan más tiempo estacionados; vehículos detectados; video con las detecciones; gráfica de ocupación en el tiempo (se llena mientras corre); cobertura por isla; últimos eventos y avisos |
+| Mapa | Plano esquemático del estacionamiento: las 8 islas al centro y las 6 zonas del perímetro alrededor, con cada cajón en su color en vivo; clic en un cajón para su detalle |
 | Cámaras | Una tarjeta por cámara con su video en vivo (clic para ampliar), latencia, vehículos y estado; las islas sin cámara se marcan "sin video configurado" |
-| Islas | Los 320 cajones por isla; clic en un cajón para ver su estado, su cámara y, a administradores, su historial y quién lo ocupa |
+| Islas | Los 391 cajones por isla y zona del perímetro; clic en un cajón para ver su estado, su cámara y, a administradores, su historial y quién lo ocupa |
 | Eventos | Entradas, salidas y alertas con filtros y búsqueda (solo administradores) |
 | Administración | Registrar usuarios, vehículos y colgantes; listados |
 | Sistema | Flujo cámara → modelo → API → base de datos → app, y el estado del modelo por cámara |

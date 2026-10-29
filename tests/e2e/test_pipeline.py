@@ -132,11 +132,11 @@ def test_camara_sin_senal_genera_alerta(api, escena):
 
 
 def test_aviso_cuando_la_isla_se_llena(api, escena):
-    """Isla C (40 cajones): al ocuparse los últimos, todos reciben el aviso en la app."""
+    """Isla C (36 cajones): al ocuparse los últimos, todos reciben el aviso en la app."""
     admin, demo = api.admin, api.demo
-    numeros = [f"C-{i:02d}" for i in range(1, 41)]
+    numeros = [f"C-{i:02d}" for i in range(1, 37)]
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": []})  # CAM-02 en línea
-    # la cámara observa primero los 40 cajones (todos libres) y después se van ocupando: solo así hay cambios reales
+    # la cámara observa primero los 36 cajones (todos libres) y después se van ocupando: solo así hay cambios reales
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
     api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": True} for n in numeros]})
     titulos = [n["titulo"] for n in api.get("/notificaciones", demo)]

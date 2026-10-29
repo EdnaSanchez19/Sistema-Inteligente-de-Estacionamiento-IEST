@@ -78,7 +78,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 (En PowerShell usa `$env:SEED_ADMIN_PASSWORD='...'` antes de cada comando.) El seed crea las 8 islas A a H
-(40 cajones cada una, 320 en total), las cámaras `CAM-01` a `CAM-08` (una por isla), el administrador `admin@iest.edu.mx` y, con `--demo`, el
+y las 6 zonas del perímetro (391 cajones en total, como el estacionamiento real; ver `db/README.md`), las cámaras `CAM-01` a `CAM-08` (una por isla), el administrador `admin@iest.edu.mx` y, con `--demo`, el
 usuario `demo@iest.edu.mx` con un vehículo y el colgante `IEST-004512`. Si no das contraseña, se genera una
 aleatoria y se imprime una sola vez.
 

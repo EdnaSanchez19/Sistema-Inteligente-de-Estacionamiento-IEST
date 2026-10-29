@@ -4,6 +4,7 @@ import { Card, Legend, OccupancyBar, Screen, Title, useLoad } from '../component
 import { useAuth } from '../context/AuthContext';
 import { api, resumenPorZona } from '../services/api';
 import { colors, spacing } from '../theme';
+import { rotuloZona } from '../format';
 
 export default function HomeScreen() {
   const { usuario } = useAuth();
@@ -37,11 +38,11 @@ export default function HomeScreen() {
                 <Text style={s.assigned}>{usuario.espacioAsignado}</Text>
               </Card>
             ) : null}
-            <Title>Por isla</Title>
+            <Title>Por zona</Title>
             {zonas.map((z) => (
               <Card key={z.zona} style={{ gap: spacing.sm }}>
                 <View style={s.row}>
-                  <Text style={s.zone}>Isla {z.zona}</Text>
+                  <Text style={s.zone}>{rotuloZona(z.zona)}</Text>
                   {z.monitoreados === 0 ? (
                     <Text style={s.muted}>Sin cámara</Text>
                   ) : (

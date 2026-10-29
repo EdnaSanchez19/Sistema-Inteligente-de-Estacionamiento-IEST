@@ -115,11 +115,16 @@ class Zona(Base):
     __tablename__ = "zonas"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(40), unique=True)  # "A", "B", ...
+    nombre: Mapped[str] = mapped_column(String(40), unique=True)  # una isla: "A", "B", ...; el perímetro: "Lateral caseta", ...
     descripcion: Mapped[str | None] = mapped_column(String(200))
 
     espacios: Mapped[list["Espacio"]] = relationship(back_populates="zona")
     camaras: Mapped[list["Camara"]] = relationship(back_populates="zona")
+
+    @property
+    def rotulo(self) -> str:
+        """Cómo se nombra para las personas: "Isla A", pero "Lateral caseta" a secas."""
+        return f"Isla {self.nombre}" if len(self.nombre) == 1 else self.nombre
 
 
 class Camara(Base):

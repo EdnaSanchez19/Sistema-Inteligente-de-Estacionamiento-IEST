@@ -1,9 +1,8 @@
 """Crea las tablas y carga datos iniciales.
 
-    python -m app.seed            # zonas, cámaras, espacios y usuario admin
+    python -m app.seed            # zonas, cámaras, espacios (391, como el estacionamiento real) y usuario admin
     python -m app.seed --demo     # además usuarios/vehículos de ejemplo
     python -m app.seed --demo --muestra 150   # además 150 usuarios, vehículos y colgantes inventados (demostración)
-    python -m app.seed --cajones ../demo/cameras_demo.json   # registra los cajones que definen las cámaras y aún no existen
 
 Ejecutar desde la carpeta api/. La contraseña del admin sale de SEED_ADMIN_PASSWORD;
 si no existe se genera una aleatoria y se imprime una sola vez.
@@ -16,17 +15,62 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, migrar_esquema
-from .models import (Camara, Colgante, Espacio, EstadoCamara, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
+from .models import (Camara, Colgante, Espacio, EstadoCamara, Evento, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
 from .security import hash_password
 
-# El estacionamiento son 8 islas (las "zonas" del modelo de datos) de 40 cajones, cada una vigilada por una cámara:
-# 8 x 40 = 320 cajones. Los 2 primeros cajones de cada isla son de un tipo especial.
-CAJONES_POR_ISLA = 40
+# El estacionamiento del IEST (medido por el plantel): 8 islas, cada una vigilada por una cámara, y 6 zonas en el perímetro.
+#   Isla A y G: 32 cajones · islas B a F: 32 + 2 por costado = 36 · isla H: 27   -> 271 en islas
+#   Perímetro: lateral caseta 16, esquina motos 8, lateral biblioteca 42, lateral gimnasio 18, entrada lateral 4,
+#   lateral callejón 32                                                         -> 120 en el perímetro
+# Total: 391 cajones. Las islas se llaman con su letra ("A"); las del perímetro con su nombre y un prefijo en el número
+# (CAS-01, MOT-01...). El perímetro aún no tiene cámaras: sus cajones salen "sin monitoreo" hasta que las tenga.
+# Los 2 primeros cajones de cada isla son de un tipo especial (provisional: pendiente de confirmar cuáles son los reales).
+CAJONES_POR_ISLA = {"A": 32, "B": 36, "C": 36, "D": 36, "E": 36, "F": 36, "G": 32, "H": 27}
 _ESPECIAL = {
     "A": TipoEspacio.discapacidad, "B": TipoEspacio.directivo, "C": TipoEspacio.visitante, "D": TipoEspacio.discapacidad,
-    "E": TipoEspacio.directivo, "F": TipoEspacio.visitante, "G": TipoEspacio.motocicleta, "H": TipoEspacio.directivo,
+    "E": TipoEspacio.directivo, "F": TipoEspacio.visitante, "G": TipoEspacio.discapacidad, "H": TipoEspacio.directivo,
 }
-ZONAS = [(isla, f"CAM-{i:02d}", CAJONES_POR_ISLA, _ESPECIAL[isla]) for i, isla in enumerate("ABCDEFGH", start=1)]  # (isla, cámara, cajones, tipo especial)
+ZONAS = [(isla, f"CAM-{i:02d}", CAJONES_POR_ISLA[isla], _ESPECIAL[isla]) for i, isla in enumerate("ABCDEFGH", start=1)]  # (isla, cámara, cajones, tipo especial)
+PERIMETRO = [  # (zona, prefijo del número, cajones, tipo de todos sus cajones)
+    ("Lateral caseta", "CAS", 16, TipoEspacio.general),
+    ("Esquina motos", "MOT", 8, TipoEspacio.motocicleta),
+    ("Lateral biblioteca", "BIB", 42, TipoEspacio.general),
+    ("Lateral gimnasio", "GIM", 18, TipoEspacio.general),
+    ("Entrada lateral", "ENT", 4, TipoEspacio.general),
+    ("Lateral callejón", "CAL", 32, TipoEspacio.general),
+]
+TOTAL_CAJONES = sum(CAJONES_POR_ISLA.values()) + sum(n for _, _, n, _ in PERIMETRO)  # 391
+
+
+def _crear_cajones(db: Session, zona: Zona, prefijo: str, cantidad: int, camara: Camara | None, tipo, primeros_especiales: bool) -> None:
+    for i in range(1, cantidad + 1):
+        numero = f"{prefijo}-{i:02d}"
+        if not db.scalar(select(Espacio).where(Espacio.zona_id == zona.id, Espacio.numero == numero)):
+            db.add(Espacio(numero=numero, zona_id=zona.id, camara_id=camara.id if camara else None,
+                           tipo=tipo if (not primeros_especiales or i <= 2) else TipoEspacio.general))
+
+
+def ajustar_cajones(db: Session) -> int:
+    """Quita los cajones que la distribución real no tiene (p. ej. una base creada cuando cada isla tenía 40). Devuelve cuántos quitó.
+
+    Sus eventos se conservan en el historial, solo pierden la referencia al cajón.
+    """
+    esperados = {nombre: (nombre, n) for nombre, n in CAJONES_POR_ISLA.items()} | {nombre: (pref, n) for nombre, pref, n, _ in PERIMETRO}
+    quitados = 0
+    for nombre, (prefijo, cantidad) in esperados.items():
+        zona = db.scalar(select(Zona).where(Zona.nombre == nombre))
+        if zona is None:
+            continue
+        validos = {f"{prefijo}-{i:02d}" for i in range(1, cantidad + 1)}
+        for esp in db.scalars(select(Espacio).where(Espacio.zona_id == zona.id)).all():
+            if esp.numero in validos:
+                continue
+            for ev in db.scalars(select(Evento).where(Evento.espacio_id == esp.id)):
+                ev.espacio_id = None
+            db.delete(esp)
+            quitados += 1
+    db.commit()
+    return quitados
 
 
 def seed_base(db: Session) -> None:
@@ -37,11 +81,14 @@ def seed_base(db: Session) -> None:
         camara = db.scalar(select(Camara).where(Camara.codigo == cam)) or Camara(codigo=cam, zona_id=zona.id, estado=EstadoCamara.desconectada)
         db.add(camara)
         db.flush()
-        for i in range(1, cantidad + 1):
-            numero = f"{nombre}-{i:02d}"
-            existe = db.scalar(select(Espacio).where(Espacio.zona_id == zona.id, Espacio.numero == numero))
-            if not existe:
-                db.add(Espacio(numero=numero, zona_id=zona.id, camara_id=camara.id, tipo=especial if i <= 2 else TipoEspacio.general))
+        _crear_cajones(db, zona, nombre, cantidad, camara, especial, primeros_especiales=True)
+    for nombre, prefijo, cantidad, tipo in PERIMETRO:
+        zona = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Perímetro: {nombre.lower()}")
+        db.add(zona)
+        db.flush()
+        _crear_cajones(db, zona, prefijo, cantidad, None, tipo, primeros_especiales=False)
+    db.flush()
+    ajustar_cajones(db)
 
     if not db.scalar(select(Usuario).where(Usuario.correo == "admin@iest.edu.mx")):
         password = os.environ.get("SEED_ADMIN_PASSWORD")
@@ -50,31 +97,6 @@ def seed_base(db: Session) -> None:
             print(f"Contraseña generada para admin@iest.edu.mx: {password}  (guárdala, no se vuelve a mostrar)")
         db.add(Usuario(nombre="Administrador", correo="admin@iest.edu.mx", password_hash=hash_password(password), rol=Rol.admin))
     db.commit()
-
-
-def sincronizar_cajones(db: Session, config: str) -> int:
-    """Registra los cajones que la configuración de las cámaras define y la base de datos aún no tiene (idempotente).
-
-    Una isla tiene "alrededor de 40" cajones: si una cámara ve más (o menos), la configuración manda. El cajón nuevo queda
-    en la isla de su letra (B-45 -> isla B) y asociado a la cámara de esa isla; empieza "sin monitoreo" hasta que la cámara lo vea.
-    """
-    import json
-
-    cfg = json.loads(open(config, encoding="utf-8").read())
-    creados = 0
-    for cam in cfg["cameras"]:
-        for sp in cam.get("spaces", []):
-            isla = sp["id"].split("-")[0]
-            zona = db.scalar(select(Zona).where(Zona.nombre == isla))
-            if zona is None:
-                continue
-            if db.scalar(select(Espacio).where(Espacio.zona_id == zona.id, Espacio.numero == sp["id"])):
-                continue
-            camara = db.scalar(select(Camara).where(Camara.zona_id == zona.id))
-            db.add(Espacio(numero=sp["id"], zona_id=zona.id, camara_id=camara.id if camara else None, tipo=TipoEspacio.general))
-            creados += 1
-    db.commit()
-    return creados
 
 
 def seed_demo(db: Session) -> None:
@@ -143,8 +165,6 @@ def main() -> None:
     migrar_esquema()
     with Session(engine) as db:
         seed_base(db)
-        if "--cajones" in sys.argv:
-            print(f"Cajones nuevos desde la configuración de las cámaras: {sincronizar_cajones(db, sys.argv[sys.argv.index('--cajones') + 1])}")
         if "--demo" in sys.argv:
             seed_demo(db)
         if "--muestra" in sys.argv:

@@ -1,6 +1,6 @@
 """Consultas que usa la app móvil."""
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..auth import get_current_user, require_admin
@@ -14,7 +14,8 @@ router = APIRouter(tags=["consulta"])
 
 @router.get("/espacios", response_model=list[EspacioOut])
 def espacios(zona: str | None = None, _: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
-    q = select(Espacio).join(Zona).options(selectinload(Espacio.zona)).order_by(Zona.nombre, Espacio.numero)
+    # primero las islas (nombre de una letra) y luego las zonas del perímetro, cada grupo por orden alfabético
+    q = select(Espacio).join(Zona).options(selectinload(Espacio.zona)).order_by(func.length(Zona.nombre) > 1, Zona.nombre, Espacio.numero)
     if zona:
         q = q.where(Zona.nombre == zona)
     return [EspacioOut.of(e) for e in db.scalars(q)]

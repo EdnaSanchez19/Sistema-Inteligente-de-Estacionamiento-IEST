@@ -25,9 +25,9 @@ def test_roles_en_endpoints_de_admin(client):
 def test_consultas_de_la_app(client):
     h = login(client, "demo@iest.edu.mx", "demo-pass-123")
     espacios = client.get("/espacios", headers=h).json()
-    assert len(espacios) == 320 and {"id", "numero", "zona", "tipo", "estado", "monitoreado"} <= espacios[0].keys()
+    assert len(espacios) == 391 and {"id", "numero", "zona", "tipo", "estado", "monitoreado"} <= espacios[0].keys()
     assert not any(e["monitoreado"] for e in espacios)  # ninguna cámara ha reportado nada todavía
-    assert len(client.get("/espacios?zona=C", headers=h).json()) == 40
+    assert len(client.get("/espacios?zona=C", headers=h).json()) == 36
     v = client.get("/vehiculos/mios", headers=h).json()
     assert v[0]["colgante"]["codigo"] == "IEST-004512"
 
@@ -147,11 +147,11 @@ def test_el_estado_del_sistema_cuenta_solo_cajones_monitoreados(client):
     historial.limpiar()
     h = login(client, "demo@iest.edu.mx", "demo-pass-123")
     e = client.get("/sistema/estado", headers=h).json()["espacios"]
-    assert e["total"] == 320 and e["monitoreados"] == 0 and e["sin_monitoreo"] == 320 and e["libre"] == 0 and e["ocupado"] == 0
+    assert e["total"] == 391 and e["monitoreados"] == 0 and e["sin_monitoreo"] == 391 and e["libre"] == 0 and e["ocupado"] == 0
     establecer(client, "CAM-01", [f"A-{i:02d}" for i in range(1, 11)])
     establecer(client, "CAM-01", ["A-01", "A-02", "A-03"], ocupado=True)  # ya observados: pasan a ocupado
     e = client.get("/sistema/estado", headers=h).json()["espacios"]
-    assert e["monitoreados"] == 10 and e["ocupado"] == 3 and e["libre"] == 7 and e["sin_monitoreo"] == 310
+    assert e["monitoreados"] == 10 and e["ocupado"] == 3 and e["libre"] == 7 and e["sin_monitoreo"] == 381
 
 
 def test_la_serie_de_ocupacion_se_muestrea_y_se_consulta(client):

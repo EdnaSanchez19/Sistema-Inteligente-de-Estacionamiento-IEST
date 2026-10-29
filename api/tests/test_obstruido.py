@@ -1,12 +1,12 @@
 """Tercer estado (obstruido) y tiempo que lleva cada cajón en su estado."""
 from datetime import timedelta
 
-from sqlalchemy import create_engine, inspect, select, text
+from sqlalchemy import create_engine, func, inspect, select, text
 from sqlalchemy.orm import Session
 
 from app.db import Base, get_db, migrar_esquema
 from app.main import app
-from app.models import Espacio, utcnow
+from app.models import Espacio, Evento, TipoEspacio, TipoEvento, Zona, utcnow
 from app.tiempo import formatear, segundos_desde
 from helpers import KEY, login
 
@@ -169,19 +169,18 @@ def test_migracion_de_una_base_antigua_conserva_los_datos(tmp_path):
         assert s.scalar(select(Espacio.numero)) == "A-01"
 
 
-# --- cajones definidos por la configuración de las cámaras ---------------------------------------------------
-def test_los_cajones_de_la_configuracion_se_registran_aunque_pasen_de_40(client, tmp_path):
-    import json
+# --- distribución real: los cajones que no existen se quitan ------------------------------------------------
+def test_ajustar_cajones_quita_los_que_la_distribucion_real_no_tiene(client):
+    from app import seed
 
-    from app.seed import sincronizar_cajones
-
-    cfg = tmp_path / "cams.json"
-    cfg.write_text(json.dumps({"cameras": [{"id": "CAM-02", "spaces": [{"id": "B-40", "polygon": []}, {"id": "B-41", "polygon": []}, {"id": "B-42", "polygon": []}]}]}), encoding="utf-8")
     db = next(app.dependency_overrides[get_db]())
-    assert sincronizar_cajones(db, str(cfg)) == 2  # B-40 ya existía
-    assert sincronizar_cajones(db, str(cfg)) == 0  # idempotente
-    nuevo = db.scalar(select(Espacio).where(Espacio.numero == "B-41"))
-    assert nuevo.zona.nombre == "B" and nuevo.camara.codigo == "CAM-02" and nuevo.monitoreado is False
-    admin = login(client, "admin@iest.edu.mx", "admin-pass-123")
-    assert len(client.get("/espacios?zona=B", headers=admin).json()) == 42
-    assert publicar(client, "CAM-02", B_41="ocupado")["desconocidos"] == []  # la cámara ya puede reportarlo
+    zona = db.scalar(select(Zona).where(Zona.nombre == "B"))
+    db.add_all([Espacio(numero="B-40", zona_id=zona.id, tipo=TipoEspacio.general), Espacio(numero="B-41", zona_id=zona.id, tipo=TipoEspacio.general)])  # una base de cuando las islas eran de 40
+    db.flush()
+    sobrante = db.scalar(select(Espacio).where(Espacio.numero == "B-41"))
+    db.add(Evento(tipo=TipoEvento.entrada, descripcion="Entrada en B-41", espacio_id=sobrante.id))
+    db.commit()
+    assert seed.ajustar_cajones(db) == 2
+    assert seed.ajustar_cajones(db) == 0  # idempotente
+    assert db.scalar(select(func.count()).select_from(Espacio).where(Espacio.zona_id == zona.id)) == 36
+    assert db.scalar(select(Evento.espacio_id).where(Evento.descripcion == "Entrada en B-41")) is None  # el historial se conserva

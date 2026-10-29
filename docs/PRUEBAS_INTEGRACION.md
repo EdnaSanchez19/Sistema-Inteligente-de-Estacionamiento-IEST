@@ -26,7 +26,7 @@ por HTTP, igual que en producción. La cámara es una imagen fija.
 | Entrada y salida con colgante | Un auto entra al cajón A-02: la API lo marca ocupado y solo ese cajón; el evento de entrada incluye el cajón y el código del colgante; al irse queda libre y se registra la salida |
 | Parpadeos | Un vehículo visible en un solo fotograma no cambia el estado ni genera eventos |
 | Cámara sin señal | Una cámara que pierde el video queda "desconectada" y genera el evento para el administrador |
-| Isla llena | Al ocuparse los 40 cajones de la isla C, todos los usuarios reciben el aviso "Isla C llena" |
+| Isla llena | Al ocuparse los 36 cajones de la isla C, todos los usuarios reciben el aviso "Isla C llena" |
 | **Modelo YOLO real** | Con una foto de un autobús: el modelo lo detecta (86 % de confianza, 178 ms en GPU), el cajón que lo cubre queda ocupado y uno vacío queda libre. Se omite si falta `vision/models/yolov8n.pt` o la foto |
 | Cámara RTSP simulada | Con ffmpeg + mediamtx se publica un video por RTSP; la captura lo recibe, detecta la caída de la "cámara" y se reconecta sola al volver. Se omite si falta ffmpeg o mediamtx |
 | Banco de simulación con video | Un video con verdad conocida se procesa con el modelo real y se miden las métricas; la versión nocturna simulada no mejora el resultado. Ver [`SIMULACION.md`](SIMULACION.md) |

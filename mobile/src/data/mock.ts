@@ -1,8 +1,19 @@
 import { AlertaCamara, Espacio, Evento, EstadoEspacio, Notificacion, TipoEspacio, Usuario, Vehiculo } from '../types';
 
-// 8 islas de 40 cajones (igual que la base de datos inicial); los 2 primeros de cada isla son de un tipo especial.
-const especial: TipoEspacio[] = ['discapacidad', 'directivo', 'visitante', 'discapacidad', 'directivo', 'visitante', 'motocicleta', 'directivo'];
-const zonas = 'ABCDEFGH'.split('').map((zona, i) => ({ zona, cantidad: 40, tipoEspecial: especial[i] }));
+// El estacionamiento real (igual que la base de datos inicial): 8 islas (32, 36 x5, 32 y 27 cajones) y 6 zonas del perímetro;
+// los 2 primeros de cada isla son de un tipo especial.
+const especial: TipoEspacio[] = ['discapacidad', 'directivo', 'visitante', 'discapacidad', 'directivo', 'visitante', 'discapacidad', 'directivo'];
+const cantidadIsla = [32, 36, 36, 36, 36, 36, 32, 27];
+const islas = 'ABCDEFGH'.split('').map((zona, i) => ({ zona, prefijo: zona, cantidad: cantidadIsla[i], tipoEspecial: especial[i] as TipoEspacio | null }));
+const perimetro = [
+  { zona: 'Lateral caseta', prefijo: 'CAS', cantidad: 16, tipoEspecial: null },
+  { zona: 'Esquina motos', prefijo: 'MOT', cantidad: 8, tipoEspecial: 'motocicleta' as TipoEspacio },
+  { zona: 'Lateral biblioteca', prefijo: 'BIB', cantidad: 42, tipoEspecial: null },
+  { zona: 'Lateral gimnasio', prefijo: 'GIM', cantidad: 18, tipoEspecial: null },
+  { zona: 'Entrada lateral', prefijo: 'ENT', cantidad: 4, tipoEspecial: null },
+  { zona: 'Lateral callejón', prefijo: 'CAL', cantidad: 32, tipoEspecial: null },
+];
+const zonas = [...islas, ...perimetro];
 
 // Estado pseudo-aleatorio pero estable (para que la UI no cambie en cada render)
 const estadoDe = (n: number): EstadoEspacio => {
@@ -12,16 +23,17 @@ const estadoDe = (n: number): EstadoEspacio => {
   return r < 6 ? 'ocupado' : 'libre';
 };
 
-export const espacios: Espacio[] = zonas.flatMap(({ zona, cantidad, tipoEspecial }, zi) =>
+export const espacios: Espacio[] = zonas.flatMap(({ zona, prefijo, cantidad, tipoEspecial }, zi) =>
   Array.from({ length: cantidad }, (_, i) => {
     const id = zi * 100 + i + 1;
     return {
       id,
-      numero: `${zona}-${String(i + 1).padStart(2, '0')}`,
+      numero: `${prefijo}-${String(i + 1).padStart(2, '0')}`,
       zona,
-      tipo: i < 2 ? tipoEspecial : ('general' as TipoEspacio),
+      // en las islas, los 2 primeros son especiales; en el perímetro, la zona entera (motos) o ninguno
+      tipo: tipoEspecial && (zi >= islas.length || i < 2) ? tipoEspecial : ('general' as TipoEspacio),
       estado: estadoDe(id),
-      monitoreado: zi < 5, // en el modo de ejemplo, las islas F a H no tienen cámara
+      monitoreado: zi < 5, // en el modo de ejemplo, solo las islas A a E tienen cámara
       actualizado: new Date().toISOString(),
     };
   }),

@@ -73,9 +73,9 @@ python -m parking_vision.run
 
 `python scripts/completar_cajones.py --camara CAM-02 --imagen revisar.jpg` agrega a una cámara los coches estacionados que
 quedaron fuera de sus cajones (los numera a continuación; los anteriores no cambian) y, con `--region-marcas x1,y1,x2,y2`,
-también los cajones vacíos pintados de una zona. Una isla ya no tiene exactamente 40 cajones: los que definen las cámaras
-se registran solos en la base de datos al iniciar (`python -m app.seed --cajones ../demo/cameras_demo.json`). Los cajones
-muy lejanos (rayas de pocos píxeles) no se vigilan: un auto ahí mide pocos píxeles y el modelo no lo distingue.
+también los cajones vacíos pintados de una zona. Los cajones que existen en el sistema son los del estacionamiento real
+(`api/app/seed.py`: 391); si un video de demostración dibuja más cajones que los reales de su isla, la API ignora los sobrantes.
+Los cajones muy lejanos (rayas de pocos píxeles) no se vigilan: un auto ahí mide pocos píxeles y el modelo no lo distingue.
 
 `python scripts/descubrir_cajones.py --video v.mp4` propone cajones a partir de dónde se estacionan los autos (solo donde
 hubo un auto); `scripts/cajones_cam02.py` es el ejemplo de cómo se combinaron con los cajones vacíos marcados en el pavimento

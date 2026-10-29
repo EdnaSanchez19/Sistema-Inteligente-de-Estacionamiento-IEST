@@ -15,3 +15,10 @@ export function duracionDe(e: { duracion_s?: number | null; desde_observado?: bo
   if (e.duracion_s == null) return null;
   return (e.desde_observado ? '' : 'al menos ') + duracion(e.duracion_s);
 }
+
+/** "Isla A" para una isla; las zonas del perímetro se llaman por su nombre ("Lateral caseta"). */
+export const rotuloZona = (zona: string): string => (zona.length === 1 ? `Isla ${zona}` : zona);
+
+/** Primero las islas (nombre de una letra) y luego el perímetro, cada grupo por orden alfabético. */
+export const ordenarZonas = (zonas: string[]): string[] =>
+  [...zonas].sort((a, b) => Number(a.length > 1) - Number(b.length > 1) || a.localeCompare(b));

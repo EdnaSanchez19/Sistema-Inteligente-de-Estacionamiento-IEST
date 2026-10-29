@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, Legend, Screen, estadoColor, estadoTexto, useLoad } from '../components/ui';
-import { duracionDe } from '../format';
+import { duracionDe, ordenarZonas, rotuloZona } from '../format';
 import { api } from '../services/api';
 import { colors, radius, spacing } from '../theme';
 import { TipoEspacio } from '../types';
@@ -22,7 +22,7 @@ export default function ZonesScreen() {
   return (
     <Screen state={state}>
       {(espacios) => {
-        const zonas = [...new Set(espacios.map((e) => e.zona))].sort();
+        const zonas = ordenarZonas([...new Set(espacios.map((e) => e.zona))]);
         const actual = zona ?? zonas[0];
         const lista = espacios.filter((e) => e.zona === actual);
         const monitoreados = lista.filter((e) => e.monitoreado).length;
@@ -31,13 +31,13 @@ export default function ZonesScreen() {
             <View style={s.chips}>
               {zonas.map((z) => (
                 <Pressable key={z} onPress={() => setZona(z)} style={[s.chip, z === actual && s.chipOn]}>
-                  <Text style={[s.chipText, z === actual && { color: '#fff' }]}>Isla {z}</Text>
+                  <Text style={[s.chipText, z === actual && { color: '#fff' }]}>{rotuloZona(z)}</Text>
                 </Pressable>
               ))}
             </View>
             <Card style={{ gap: spacing.md }}>
               <Text style={s.cobertura}>
-                {monitoreados === 0 ? 'Esta isla aún no tiene cámara' : `Cobertura: ${monitoreados} de ${lista.length} cajones monitoreados`}
+                {monitoreados === 0 ? 'Esta zona aún no tiene cámara' : `Cobertura: ${monitoreados} de ${lista.length} cajones monitoreados`}
               </Text>
               <Legend />
               <View style={s.grid}>
