@@ -32,6 +32,10 @@ class ApiPublisher:
         """
         return self._post("/ingest/ocupacion", {"camara": camara, "espacios": espacios, "baja_confianza": baja_confianza, "calentamiento": calentamiento})
 
+    def vehiculos(self, camara: str, vehiculos: list[dict], resumen: dict) -> bool:
+        """Coches que sigue la cámara: [{id, x, y, estado, quieto_s, visto_s, cajon}] y su resumen (total, quietos, en movimiento...)."""
+        return self._post("/ingest/vehiculos", {"camara": camara, "vehiculos": vehiculos, "resumen": resumen})
+
     def camera_status(self, camara: str, en_linea: bool) -> bool:
         return self._post("/ingest/camara-estado", {"camara": camara, "en_linea": en_linea})
 

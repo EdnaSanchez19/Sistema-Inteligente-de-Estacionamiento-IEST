@@ -60,6 +60,7 @@ class CameraConfig:
     spaces: list[Space]
     interval_s: float = 2.0  # procesa un fotograma cada N segundos
     conf: float = 0.35  # confianza mínima para marcar un cajón como ocupado
+    conf_seguimiento: float | None = None  # confianza mínima de los coches que se siguen y cuentan (por defecto `conf`); más baja que `conf` recupera coches dudosos y el seguimiento descarta los de un solo fotograma
     conf_baja: float | None = None  # histéresis: un cajón ya ocupado sigue ocupado mientras haya una detección con al menos esta confianza (por defecto 0.6 x conf)
     occupied_ratio: float = 0.30  # fracción del cajón cubierta para marcarlo ocupado
     footprint: float = 0.6  # parte inferior del recuadro usada como "huella" en el suelo (0-1)
@@ -69,6 +70,7 @@ class CameraConfig:
     conf_obstaculo: float = 0.40  # confianza mínima para considerar un objeto como obstáculo
     obstaculo_ratio: float = 0.50  # fracción de la base del objeto que debe quedar dentro del cajón
     confirm_obstruido: int = 6  # observaciones seguidas para pasar a obstruido (más que ocupado: alguien que solo cruza no cuenta)
+    mosaicos: tuple[int, int] | list[int] = (1, 1)  # (columnas, filas) en que se parte la imagen para detectar los coches chicos (lejanos o del lateral); (1, 1) = sin partir
     offline_after_s: float = 30.0  # sin fotogramas durante este tiempo => cámara desconectada
     calentamiento_s: float = 20.0  # tras arrancar, los cambios de estado se toman como estado inicial (un auto tapando a otro, etc.)
 

@@ -161,6 +161,31 @@ class ModeloIn(BaseModel):
     ids: list[str] = Field(default_factory=list, max_length=500)  # cajones que vigila esta cámara
 
 
+class VehiculoSeguidoIn(BaseModel):
+    """Un coche que sigue una cámara. x e y son su centro en la imagen, de 0 a 1."""
+
+    id: int = Field(ge=0)
+    x: float = Field(ge=0, le=1)
+    y: float = Field(ge=0, le=1)
+    estado: Literal["quieto", "en_movimiento"]
+    quieto_s: float = Field(ge=0, le=10_000_000)
+    visto_s: float = Field(ge=0, le=10_000_000)
+    cajon: str | None = Field(default=None, max_length=20)
+
+
+class ResumenSeguimientoIn(BaseModel):
+    total: int = Field(default=0, ge=0, le=10000)
+    quietos: int = Field(default=0, ge=0, le=10000)
+    en_movimiento: int = Field(default=0, ge=0, le=10000)
+    fuera_de_cajon: int = Field(default=0, ge=0, le=10000)
+
+
+class VehiculosIn(BaseModel):
+    camara: str = Field(max_length=40)
+    vehiculos: list[VehiculoSeguidoIn] = Field(default_factory=list, max_length=2000)
+    resumen: ResumenSeguimientoIn = Field(default_factory=ResumenSeguimientoIn)
+
+
 class CamaraEstadoIn(BaseModel):
     camara: str = Field(max_length=40)
     en_linea: bool

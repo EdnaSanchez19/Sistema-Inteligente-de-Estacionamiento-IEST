@@ -2,6 +2,19 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Seguimiento de coches.** Cada vehículo detectado recibe un número que conserva entre fotogramas (`vision/parking_vision/seguimiento.py`)
+  y se sabe si está en movimiento o quieto, desde cuándo y en qué cajón está (o si está fuera de todo cajón, también donde no hay
+  cajones dibujados). El servidor de visión lo publica (`POST /ingest/vehiculos`), la API lo guarda solo en memoria
+  (`GET /sistema/vehiculos`) y el panel lo muestra en Resumen ("Seguimiento de coches") y en el video (`#12`, y los minutos si lleva
+  más de uno quieto). Un coche que ven dos cámaras a la vez se cuenta en las dos. Aún no genera eventos de entrada y salida del
+  estacionamiento (la cámara `CAM-03` de la entrada es la candidata).
+- **Detección por mosaicos** (`mosaicos` por cámara): la imagen se parte en recortes que se traslapan y se detecta en cada uno, además de la
+  imagen completa; así se ven los coches chicos del lateral y del fondo. En la cámara general pasó de 21 a 58 coches con la misma
+  confianza (y a 78 con `conf_seguimiento` 0.2, la confianza mínima de los coches que se siguen, más baja que la de ocupar un cajón).
+  Siguen escapándose algunos coches grandes y cercanos vistos desde arriba (un SUV azul oscuro, un SUV blanco): para eso hace falta
+  ajustar el modelo con fotogramas etiquetados de estas cámaras.
+- **CAM-02 ve las filas 3 a 7 y el perímetro** (la fila 8 no la ve ninguna cámara). Los cajones que ninguna configuración de cámara define
+  se reinician a "sin monitoreo" al iniciar (`python -m app.seed --vigilados`), así no quedan estados viejos de los videos de demostración.
 - **"Fila" en lugar de "Isla"** en el panel, la app y los avisos: la isla A se muestra como "Fila 1", la B como "Fila 2", etc. (los
   cajones siguen llamándose `A-09`, `B-01`...), y la cámara `CAM-01` se llama "Fila 1 y 2". Internamente las zonas siguen siendo `A` a `H`.
 - **Las únicas cámaras son 3, con grabaciones reales**: `CAM-01` "Isla 1 y 2" (2688×1512, ojo de pez), `CAM-02` "Estacionamiento"

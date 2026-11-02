@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from ..auth import require_ingest_key
 from ..db import get_db
 from ..models import Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, Notificacion, TipoEvento, Zona, utcnow
-from .. import estado_vision
-from ..schemas import CamaraEstadoIn, ModeloIn, OcupacionIn
+from .. import estado_vision, seguimiento
+from ..schemas import CamaraEstadoIn, ModeloIn, OcupacionIn, VehiculosIn
 from ..tiempo import formatear, segundos_desde
 
 ESTADOS_DE_CAMARA = (EstadoEspacio.libre, EstadoEspacio.ocupado, EstadoEspacio.obstruido)  # los demás estados los fija un administrador
@@ -123,6 +123,14 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
             _avisar_cambio_de_zona(db, z, libres_antes[z], _libres(db, z))
     db.commit()
     return {"actualizados": cambios, "desconocidos": desconocidos}
+
+
+@router.post("/vehiculos")
+def vehiculos(data: VehiculosIn, db: Session = Depends(get_db)) -> dict:
+    """El servidor de visión reporta los coches que sigue una cámara (número, quieto o en movimiento, desde cuándo, en qué cajón)."""
+    _camara(db, data.camara)
+    seguimiento.registrar(data.camara, [v.model_dump() for v in data.vehiculos], data.resumen.model_dump())
+    return {"recibidos": len(data.vehiculos)}
 
 
 @router.post("/modelo")

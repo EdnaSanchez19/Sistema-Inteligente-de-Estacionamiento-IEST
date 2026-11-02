@@ -255,7 +255,7 @@ function dur(seg) {
   const d = Math.floor(hh / 24), h2 = hh % 24; return h2 ? `${d} d ${h2} h` : `${d} d`;
 }
 const textoDuracion = (e) => (e.monitoreado && e.duracion_s != null ? (e.desde_observado ? "" : "al menos ") + dur(e.duracion_s) : "—");
-const S = { yo: null, estado: null, estancias: [], espacios: [], eventos: null, camaras: null, avisos: [], serie: [], vista: "resumen", camSel: null, isla: "todas", filtroEvento: "todos", busqueda: "", previo: new Map(), vistos: new Set(), primera: true, latCam: {}, admin: {} };
+const S = { yo: null, estado: null, estancias: [], coches: null, espacios: [], eventos: null, camaras: null, avisos: [], serie: [], vista: "resumen", camSel: null, isla: "todas", filtroEvento: "todos", busqueda: "", previo: new Map(), vistos: new Set(), primera: true, latCam: {}, admin: {} };
 let timers = [];
 
 function toast(msg, tipo) {
@@ -392,6 +392,7 @@ function vistaResumen() {
       h("div", { class: "rejilla", style: "align-content:start" },
         h("div", { class: "tarjeta" }, h("h3", null, "Ocupación en el tiempo", h("span", { class: "nota", id: "nota-serie" })), h("canvas", { class: "grafica", id: "grafica" })),
         h("div", { class: "tarjeta" }, h("h3", null, "Más tiempo estacionados", h("span", { class: "nota", text: "sin moverse" })), h("div", { id: "estancias" })),
+        h("div", { class: "tarjeta" }, h("h3", null, "Seguimiento de coches", h("span", { class: "nota", text: "en vivo, por cámara" })), h("div", { id: "seguimiento" })),
         h("div", { class: "tarjeta" }, h("h3", null, "Cobertura por fila", h("span", { class: "nota", text: "cajones que una cámara observa" })), h("div", { id: "cobertura-islas", style: "display:grid;gap:9px" })))),
     h("div", { class: "rejilla dos-iguales" },
       h("div", { class: "tarjeta" }, h("h3", null, "Últimos eventos", h("a", { href: "#eventos", style: "text-transform:none;letter-spacing:0;font-weight:500;color:var(--naranja)", text: "ver todos", onclick: (e) => { e.preventDefault(); ir("eventos"); } })), h("div", { id: "ultimos-eventos" })),
@@ -428,9 +429,10 @@ function pintarResumen() {
   if (!S.estancias.length) est.append(h("div", { class: "vacio", text: "Aún no hay coches observados." }));
   else est.append(h("ul", { class: "lista", style: "max-height:210px" }, S.estancias.map((x) => h("li", { style: "cursor:pointer", onclick: () => abrirCajon(x.numero) }, h("span", null, h("b", { text: x.numero + " " }), "· " + rotulo(x.zona)), h("time", { text: (x.desde_observado ? "" : "al menos ") + dur(x.duracion_s) })))));
 
+  pintarSeguimiento();
   const islas = agruparIslas();
   $("cobertura-islas").replaceChildren(...islas.map((i) => h("div", { style: "cursor:pointer", onclick: () => { S.isla = i.nombre; ir("islas"); } },
-    h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: rotulo(i.nombre) }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") + ` · ${i.monit}/${i.total}` : `sin cámara · 0/${i.total}` })),
+    h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: rotulo(i.nombre) }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") + ` · ${i.monit}/${i.total}` : `sin monitorear · 0/${i.total}` })),
     h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })))));
 
   const ev = S.eventos, cont = $("ultimos-eventos"); cont.replaceChildren();
@@ -441,6 +443,16 @@ function pintarResumen() {
   av.append(S.avisos.length ? h("ul", { class: "lista", style: "max-height:300px" }, S.avisos.slice(0, 6).map((a) => h("li", null, h("span", null, h("b", { text: a.titulo + " " }), a.mensaje), h("time", { text: hace(a.fecha) })))) : h("div", { class: "vacio", text: "No hay avisos. Se generan cuando una fila con cobertura completa se llena." }));
   $("nota-serie").textContent = S.serie.length > 1 ? `últimos ${Math.max(1, Math.round((new Date(S.serie[S.serie.length - 1].t) - new Date(S.serie[0].t)) / 60000))} min` : "";
   dibujarSerie($("grafica"), S.serie);
+}
+function pintarSeguimiento() {
+  const cont = $("seguimiento"), c = S.coches;
+  cont.replaceChildren();
+  if (!c || !c.camaras.length) { cont.append(h("div", { class: "vacio", text: "Ninguna cámara está reportando coches todavía." })); return; }
+  const dato = (rot, val) => h("span", { style: "display:grid;gap:1px" }, h("small", { style: "color:var(--suave)", text: rot }), h("b", { style: "font-size:20px", text: String(val) }));
+  cont.append(h("div", { style: "display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px" }, dato("Coches", c.total), dato("Quietos", c.quietos), dato("En movimiento", c.en_movimiento), dato("Quietos fuera de cajón", c.fuera_de_cajon)));
+  cont.append(h("div", { style: "color:var(--suave);font-size:12px;margin-bottom:8px", text: c.camaras.map((x) => `${x.camara}${x.nombre ? " " + x.nombre : ""}: ${x.total}`).join(" · ") + ". Un coche que ven dos cámaras se cuenta en las dos." }));
+  if (c.mas_tiempo_quietos.length) cont.append(h("ul", { class: "lista", style: "max-height:190px" }, c.mas_tiempo_quietos.map((v) => h("li", null,
+    h("span", null, h("b", { text: `#${v.id} ` }), `· ${v.camara} · ` + (v.cajon ? "en " + v.cajon : "fuera de cajón")), h("time", { text: dur(v.quieto_s) + " quieto" })))));
 }
 function filaEvento(e) {
   const ins = h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` });
@@ -517,7 +529,7 @@ function pintarIslas() {
   const cont = $("islas"); cont.replaceChildren();
   for (const i of islas.filter((x) => S.isla === "todas" || x.nombre === S.isla)) {
     const clase = i.monit === 0 ? "nula" : i.monit === i.total ? "total" : "";
-    const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(i.nombre) }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") : "sin cámara" })),
+    const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(i.nombre) }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") : "sin monitorear" })),
       h("span", { class: "cobertura " + clase, text: `Cobertura ${i.monit}/${i.total} · ${pct(i.monit, i.total)} %` }),
       h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })));
     t.append(h("div", { class: "cajones" }, i.lista.map(botonCajon))); cont.append(t);
@@ -541,7 +553,7 @@ function vistaMapa() {
       h("p", { class: "nota-plano", id: "nota-plano" })));
 }
 function zonaDelMapa(z, clase) {
-  const detalle = z.monit ? `${z.libres} libres · ${z.ocupados} ocupados` + (z.obstruidos ? ` · ${z.obstruidos} obstruidos` : "") : `sin cámara · ${z.total} cajones`;
+  const detalle = z.monit ? `${z.libres} libres · ${z.ocupados} ocupados` + (z.obstruidos ? ` · ${z.obstruidos} obstruidos` : "") : `sin monitorear · ${z.total} cajones`;
   return h("div", { class: "zona " + (clase || "") }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(z.nombre) }), h("span", { text: detalle })), h("div", { class: "cajones" }, z.lista.map(botonCajon)));
 }
 function pintarMapa() {
@@ -698,8 +710,8 @@ function conexion(ok) {
   const p = $("punto-conexion"); if (!p) return; p.className = "punto " + (ok ? "ok vivo" : "mal"); $("texto-conexion").textContent = ok ? "Conectado" : "Sin conexión con la API";
 }
 async function cicloRapido() {
-  const [estado, espacios, estancias] = await Promise.all([api("/sistema/estado"), api("/espacios"), api("/sistema/estancias?limite=8")]);
-  S.estado = estado; S.espacios = espacios; S.estancias = estancias || [];
+  const [estado, espacios, estancias, coches] = await Promise.all([api("/sistema/estado"), api("/espacios"), api("/sistema/estancias?limite=8"), api("/sistema/vehiculos?limite=8").catch(() => null)]);
+  S.estado = estado; S.espacios = espacios; S.estancias = estancias || []; S.coches = coches;
   for (const x of estado.vision) { const a = (S.latCam[x.camara] = S.latCam[x.camara] || []); a.push(x.latencia_ms); if (a.length > 60) a.shift(); }
   pintar();
   S.previo = new Map(espacios.map((e) => [e.numero, e.estado + e.monitoreado])); S.primera = false; conexion(true);

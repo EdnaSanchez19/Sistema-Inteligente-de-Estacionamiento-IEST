@@ -63,9 +63,10 @@ def asegurar_env() -> None:
     print("Creado .env con claves aleatorias")
 
 
-def asegurar_base_de_datos(con_simulacion: bool) -> None:
+def asegurar_base_de_datos(con_simulacion: bool, config: str) -> None:
     base = ROOT / "api" / "dev.db"
-    cajones: list[str] = []  # los cajones son los del estacionamiento real (api/app/seed.py), no los que dibujan los videos de demostración
+    # los cajones son los del estacionamiento real (api/app/seed.py); los que la configuración de las cámaras no define quedan sin monitoreo
+    cajones = ["--vigilados", str((ROOT / "vision" / config).resolve())]
     if base.exists() and CREDENCIALES.exists():
         # idempotente: solo agrega lo que falte (colgantes de muestra), quita los cajones que la distribución real no tiene y pone al día el esquema
         r = subprocess.run([PY, "-m", "app.seed", *cajones] + (["--muestra", "150"] if con_simulacion else []), cwd=ROOT / "api", env=ENV, capture_output=True, text=True, encoding="utf-8")
@@ -123,9 +124,9 @@ def main() -> None:
     args = ap.parse_args()
 
     asegurar_env()
-    asegurar_base_de_datos(args.con_simulacion)
     reales = all((ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists() for x in "abc") and (ROOT / "demo" / "cameras_reales.json").exists()
     config = "../demo/cameras_reales.json" if reales else "../demo/cameras_demo.json"
+    asegurar_base_de_datos(args.con_simulacion, config)
     if reales:
         print("Usando los videos reales de las 3 cámaras del IEST (datasets/reales).")
     else:

@@ -38,7 +38,7 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     detección más débil (`conf_baja`). Así un auto parcialmente tapado, que el modelo ve a ratos, no hace parpadear
     el cajón entre ocupado y libre ni genera entradas y salidas falsas.
     """
-    all_dets = detector.detect(frame)
+    all_dets = detector.detect(frame, cam.mosaicos) if tuple(cam.mosaicos) != (1, 1) else detector.detect(frame)
     es_obstaculo = lambda d: d.cls in OBSTACULOS_COCO  # noqa: E731
     vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []

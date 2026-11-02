@@ -1,6 +1,6 @@
 {
-  "model": "models/yolov8s.pt",
-  "imgsz": 1920,
+  "model": "models/yolov8n.pt",
+  "imgsz": 1280,
   "cameras": [
     {
       "id": "CAM-01",
@@ -11,6 +11,11 @@
       "footprint": 0.6,
       "confirm_occupied": 2,
       "confirm_free": 5,
+      "mosaicos": [
+        3,
+        2
+      ],
+      "conf_seguimiento": 0.2,
       "spaces": [
         {
           "id": "A-16",
@@ -527,6 +532,11 @@
       "footprint": 0.6,
       "confirm_occupied": 2,
       "confirm_free": 5,
+      "mosaicos": [
+        3,
+        2
+      ],
+      "conf_seguimiento": 0.2,
       "spaces": []
     },
     {

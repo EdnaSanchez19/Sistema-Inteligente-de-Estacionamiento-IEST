@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from .. import estado_vision, historial
+from .. import estado_vision, historial, seguimiento
 from ..auth import get_current_user
 from ..db import get_db
 from ..models import Camara, Espacio, EstadoCamara, EstadoEspacio, Evento, Usuario, Zona
@@ -56,6 +56,26 @@ def estancias(estado: EstadoEspacio = EstadoEspacio.ocupado, limite: int = Query
     q = (select(Espacio, Zona.nombre).join(Zona).where(Espacio.monitoreado.is_(True), Espacio.estado == estado, Espacio.estado_desde.is_not(None))
          .order_by(Espacio.estado_desde).limit(limite))
     return [{"numero": e.numero, "zona": zona, "desde": _utc(e.estado_desde), "duracion_s": segundos_desde(e.estado_desde), "desde_observado": bool(e.inicio_observado), "objeto": e.objeto} for e, zona in db.execute(q).all()]
+
+
+@router.get("/vehiculos")
+def vehiculos(limite: int = Query(8, ge=1, le=50), _: Usuario = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+    """Seguimiento de coches en vivo: cuántos hay, cuáles se mueven y cuáles están quietos (y los que llevan más tiempo quietos).
+
+    Cuenta cada coche una vez por cámara: uno que ven dos cámaras a la vez se suma dos veces. Es información en vivo (no se
+    guarda): una cámara que dejó de reportar hace más de 30 s no aparece.
+    """
+    nombres = {c.codigo: c.nombre for c in db.scalars(select(Camara))}
+    camaras, todos = [], []
+    for r in seguimiento.listar():
+        camaras.append({"camara": r["camara"], "nombre": nombres.get(r["camara"]), "hace_s": r["hace_s"], **r["resumen"]})
+        todos += [{**v, "camara": r["camara"], "nombre_camara": nombres.get(r["camara"])} for v in r["vehiculos"]]
+    quietos = sorted((v for v in todos if v["estado"] == "quieto"), key=lambda v: -v["quieto_s"])
+    return {
+        "total": sum(c["total"] for c in camaras), "quietos": sum(c["quietos"] for c in camaras),
+        "en_movimiento": sum(c["en_movimiento"] for c in camaras), "fuera_de_cajon": sum(c["fuera_de_cajon"] for c in camaras),
+        "camaras": camaras, "mas_tiempo_quietos": quietos[:limite],
+    }
 
 
 @router.get("/historial")

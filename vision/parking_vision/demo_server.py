@@ -30,6 +30,7 @@ from .draw import draw_result
 from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, con_estado_confirmado
 from .publisher import ApiPublisher
 from .run import process_frame
+from .seguimiento import SeguidorVehiculos, Vehiculo
 
 log = logging.getLogger("demo")
 CAFE, NARANJA = (35, 47, 106), (40, 140, 242)  # BGR de los colores institucionales aproximados
@@ -43,6 +44,10 @@ class CamaraDemo:
     def __init__(self, cam: CameraConfig, cfg: Config, detector: VehicleDetector, det_lock: threading.Lock, publisher: ApiPublisher | None, modelo: str):
         self.cam, self.cfg, self.detector, self.det_lock, self.publisher, self.modelo = cam, cfg, detector, det_lock, publisher, modelo
         self.tracker = OccupancyTracker(cam.confirm_occupied, cam.confirm_free, cam.confirm_obstruido)
+        self.seguidor = SeguidorVehiculos()
+        self._seguidos: list[Vehiculo] = []
+        self._reiniciar_seguidor = False
+        self._tam_frame = (1, 1)
         self._frame: np.ndarray | None = None
         self._lock = threading.Lock()
         self._jpeg: bytes | None = None
@@ -99,6 +104,7 @@ class CamaraDemo:
                     # Fin del video: al volver a empezar la escena "salta" (los autos aparecen o desaparecen de golpe),
                     # lo cual no son entradas ni salidas reales; el estado se reajusta en silencio unos segundos.
                     self.calentando_hasta = max(self.calentando_hasta, time.time() + REAJUSTE_BUCLE_S)
+                    self._reiniciar_seguidor = True  # la escena salta: los números de coche de antes ya no valen
                     break
                 with self._lock:
                     self._frame = frame
@@ -125,6 +131,7 @@ class CamaraDemo:
             self.publisher.camera_status(cam.id, True)
         ultimo_envio = 0.0
         ultimo_modelo = 0.0
+        ultimo_seguimiento = 0.0
         while not self._stop.wait(cam.interval_s):
             with self._lock:
                 frame = None if self._frame is None else self._frame.copy()
@@ -132,19 +139,28 @@ class CamaraDemo:
                 continue
             t0 = time.time()
             with self.det_lock:
-                states, vehicles, _ = process_frame(cam, self.detector, frame, self.tracker.state)
+                states, vehicles, todas = process_frame(cam, self.detector, frame, self.tracker.state)
             ms = (time.time() - t0) * 1000
             self._lat = (self._lat + [ms])[-20:]
             changes = self.tracker.update({s.id: s.estado for s in states})
+            ahora_t = time.time()
+            if self._reiniciar_seguidor:
+                self.seguidor.reiniciar()
+                self._reiniciar_seguidor = False
+            self._tam_frame = (frame.shape[1], frame.shape[0])
+            minima = cam.conf_seguimiento if cam.conf_seguimiento is not None else cam.conf
+            candidatos = [d for d in todas if d.cls in self.cfg.vehicle_classes and d.conf >= minima]
+            self._seguidos = self.seguidor.actualizar(candidatos, ahora_t, cam.spaces)
+            resumen_seguimiento = self.seguidor.resumen(self._seguidos, ahora_t)
             confirmados = con_estado_confirmado(states, self.tracker.estado)
-            self._resultado = (confirmados, vehicles)
+            self._resultado = (confirmados, candidatos)
             ocupados = sum(s.occupied for s in confirmados)
             obstruidos = sum(s.obstructed for s in confirmados)
             libres = len(confirmados) - ocupados - obstruidos
             self.stats = {
                 "camara": cam.id, "modelo": self.modelo, "dispositivo": str(self.detector.model.device), "imgsz": self.detector.imgsz,
                 "fps_video": round(self.fps_video, 1), "fps_deteccion": round(1000 / (sum(self._lat) / len(self._lat)), 1) if self._lat else 0.0,
-                "latencia_ms": round(sum(self._lat) / len(self._lat), 1), "vehiculos": len(vehicles), "libres": libres,
+                "latencia_ms": round(sum(self._lat) / len(self._lat), 1), "vehiculos": len(self._seguidos), "libres": libres,
                 "ocupados": ocupados, "obstruidos": obstruidos, "espacios": len(confirmados), "resolucion": self.resolucion, "umbral_confianza": cam.conf,
                 "ids": [s.id for s in confirmados],  # cajones que esta cámara vigila de verdad
             }
@@ -160,6 +176,17 @@ class CamaraDemo:
                 if ahora - ultimo_modelo >= 2:
                     if self.publisher.model_stats(self.stats):
                         ultimo_modelo = ahora
+                if ahora - ultimo_seguimiento >= 3:
+                    if self.publisher.vehiculos(cam.id, self._items_seguimiento(ahora), resumen_seguimiento):
+                        ultimo_seguimiento = ahora
+
+    def _items_seguimiento(self, ahora: float) -> list[dict]:
+        w, h = self._tam_frame
+        minimo = self.seguidor.quieto_minimo_s
+        return [{
+            "id": v.id, "x": round(v.centro[0] / w, 4), "y": round(v.centro[1] / h, 4), "estado": v.estado(ahora, minimo),
+            "quieto_s": round(v.quieto_s(ahora), 1), "visto_s": round(ahora - v.primera_vez, 1), "cajon": v.cajon,
+        } for v in self._seguidos]
 
     @staticmethod
     def _item(s: SpaceState) -> dict:
@@ -176,6 +203,15 @@ class CamaraDemo:
             out = frame.copy()
         for d in dets:  # recuadros finos de los vehículos detectados (el amarillo queda para los obstruidos)
             cv2.rectangle(out, (int(d.x1), int(d.y1)), (int(d.x2), int(d.y2)), (230, 230, 230), 1, cv2.LINE_AA)
+        ahora = time.time()
+        escala = max(out.shape[1] / 1600.0, 0.6)
+        for v in self._seguidos:  # número del coche y, si lleva rato quieto, cuánto
+            quieto = v.quieto_s(ahora)
+            texto = f"#{v.id}" + (f" {int(quieto // 60)}m" if quieto >= 60 else "")
+            color = (255, 200, 60) if quieto < self.seguidor.quieto_minimo_s else (230, 230, 230)
+            x, y = int(v.caja[0]), int(v.caja[1])
+            cv2.putText(out, texto, (x, max(y - 4, 12)), cv2.FONT_HERSHEY_SIMPLEX, 0.45 * escala, (0, 0, 0), max(2, int(3 * escala)), cv2.LINE_AA)
+            cv2.putText(out, texto, (x, max(y - 4, 12)), cv2.FONT_HERSHEY_SIMPLEX, 0.45 * escala, color, max(1, int(1.2 * escala)), cv2.LINE_AA)
         h, w = out.shape[:2]
         cv2.rectangle(out, (0, 0), (w, 34), (20, 14, 12), -1)
         cv2.circle(out, (18, 17), 6, (60, 60, 230), -1)

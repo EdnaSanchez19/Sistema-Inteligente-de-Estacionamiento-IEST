@@ -27,7 +27,7 @@ def test_seed_crea_zonas_espacios_y_admin(db, monkeypatch):
     assert [por_zona[i] for i in "ABCDEFGH"] == [32, 36, 36, 36, 36, 36, 32, 27]
     assert {n: por_zona[n] for n in por_zona if len(n) > 1} == {"Lateral caseta": 16, "Esquina motos": 8, "Lateral biblioteca": 42, "Lateral gimnasio": 18, "Entrada lateral": 4, "Lateral callejón": 32}
     motos = db.scalars(select(Espacio).join(Zona).where(Zona.nombre == "Esquina motos")).all()
-    assert all(e.camara_id is None and e.numero.startswith("MOT-") for e in motos)  # el perímetro aún no tiene cámaras
+    assert all(e.camara.codigo == "CAM-02" and e.numero.startswith("MOT-") for e in motos)  # el perímetro lo ve la cámara general (aún sin cajones dibujados)
     admin = db.scalar(select(Usuario).where(Usuario.rol == Rol.admin))
     assert admin is not None and admin.password_hash != "x" * 12
 

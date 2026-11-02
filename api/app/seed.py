@@ -3,6 +3,7 @@
     python -m app.seed            # zonas, cámaras, espacios (391, como el estacionamiento real) y usuario admin
     python -m app.seed --demo     # además usuarios/vehículos de ejemplo
     python -m app.seed --demo --muestra 150   # además 150 usuarios, vehículos y colgantes inventados (demostración)
+    python -m app.seed --vigilados ../demo/cameras_reales.json   # deja sin monitoreo los cajones que esa configuración no define
 
 Ejecutar desde la carpeta api/. La contraseña del admin sale de SEED_ADMIN_PASSWORD;
 si no existe se genera una aleatoria y se imprime una sola vez.
@@ -15,7 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, migrar_esquema
-from .models import (Camara, Colgante, Espacio, EstadoCamara, Evento, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
+from .models import (Camara, Colgante, Espacio, EstadoCamara, EstadoEspacio, Evento, Rol, TipoColgante, TipoEspacio, Usuario, Vehiculo, Zona)
 from .security import hash_password
 
 # El estacionamiento del IEST (medido por el plantel): 8 islas, cada una vigilada por una cámara, y 6 zonas en el perímetro.
@@ -32,13 +33,15 @@ _ESPECIAL = {
 }
 # Las únicas cámaras que se usan son 3 (videos reales del IEST), y una ve varias islas. La isla 1 es la A, la 2 la B... la 8 la H
 # (se numeran de la más lejana a la más cercana a la cámara). Quién ve qué: la de "Isla 1 y 2" ve las islas A y B; la general
-# ("Estacionamiento") se supone que ve de la C a la G (por confirmar); la H aún no tiene grabaciones; la de la entrada no vigila
-# cajones, solo el flujo de vehículos.
+# ("Estacionamiento") ve de la C a la G (filas 3 a 7) y el perímetro; la H (fila 8) no la ve ninguna; la de la entrada no vigila cajones, solo el flujo de
+# vehículos. Que una cámara "vea" un cajón no significa que ya esté dibujado: sin su polígono en la configuración de la cámara
+# (demo/cameras_reales.json) el cajón sigue "sin monitoreo".
 CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vigila)
     ("CAM-01", "Fila 1 y 2", "A", "AB"),
     ("CAM-02", "Estacionamiento", "C", "CDEFG"),
     ("CAM-03", "Entrada", "Lateral caseta", ""),
 ]
+CAMARA_DEL_PERIMETRO = "CAM-02"
 _CAMARA_DE_ISLA = {isla: cam for cam, _, _, islas in CAMARAS for isla in islas}
 ZONAS = [(isla, _CAMARA_DE_ISLA.get(isla), CAJONES_POR_ISLA[isla], _ESPECIAL[isla]) for isla in "ABCDEFGH"]  # (isla, cámara o None, cajones, tipo especial)
 PERIMETRO = [  # (zona, prefijo del número, cajones, tipo de todos sus cajones)
@@ -95,13 +98,32 @@ def ajustar_camaras(db: Session) -> None:
             db.delete(cam)
     db.flush()
     por_codigo = {c.codigo: c for c in db.scalars(select(Camara))}
-    for isla, cam, _, _ in ZONAS:
-        zona = db.scalar(select(Zona).where(Zona.nombre == isla))
-        destino = por_codigo[cam].id if cam else None
+    destinos = [(isla, por_codigo[cam].id if cam else None) for isla, cam, _, _ in ZONAS]
+    destinos += [(nombre, por_codigo[CAMARA_DEL_PERIMETRO].id) for nombre, _, _, _ in PERIMETRO]
+    for nombre, destino in destinos:
+        zona = db.scalar(select(Zona).where(Zona.nombre == nombre))
         for esp in db.scalars(select(Espacio).where(Espacio.zona_id == zona.id)):
             if esp.camara_id != destino:
                 esp.camara_id = destino
     db.commit()
+
+
+def reiniciar_no_vigilados(db: Session, config: str) -> int:
+    """Deja "sin monitoreo" los cajones que la configuración de las cámaras no define (p. ej. los que vigilaban los videos de
+    demostración antes). No toca los reservados ni los fuera de servicio, que los fija un administrador. Devuelve cuántos reinició."""
+    import json
+
+    cfg = json.loads(open(config, encoding="utf-8").read())
+    vigilados = {sp["id"] for cam in cfg["cameras"] for sp in cam.get("spaces", [])}
+    n = 0
+    for esp in db.scalars(select(Espacio).where(Espacio.monitoreado.is_(True))):
+        if esp.numero in vigilados or esp.estado not in (EstadoEspacio.libre, EstadoEspacio.ocupado, EstadoEspacio.obstruido):
+            continue
+        esp.monitoreado, esp.estado = False, EstadoEspacio.libre
+        esp.estado_desde, esp.inicio_observado, esp.objeto, esp.colgante_actual = None, False, None, None
+        n += 1
+    db.commit()
+    return n
 
 
 def seed_base(db: Session) -> None:
@@ -123,7 +145,7 @@ def seed_base(db: Session) -> None:
     for isla, cam, cantidad, especial in ZONAS:
         _crear_cajones(db, zonas[isla], isla, cantidad, camaras[cam] if cam else None, especial, primeros_especiales=True)
     for nombre, prefijo, cantidad, tipo in PERIMETRO:
-        _crear_cajones(db, zonas[nombre], prefijo, cantidad, None, tipo, primeros_especiales=False)
+        _crear_cajones(db, zonas[nombre], prefijo, cantidad, camaras[CAMARA_DEL_PERIMETRO], tipo, primeros_especiales=False)
     db.flush()
     ajustar_cajones(db)
     ajustar_camaras(db)
@@ -203,6 +225,8 @@ def main() -> None:
     migrar_esquema()
     with Session(engine) as db:
         seed_base(db)
+        if "--vigilados" in sys.argv:
+            print(f"Cajones que ninguna cámara define y quedan sin monitoreo: {reiniciar_no_vigilados(db, sys.argv[sys.argv.index('--vigilados') + 1])}")
         if "--demo" in sys.argv:
             seed_demo(db)
         if "--muestra" in sys.argv:

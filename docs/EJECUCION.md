@@ -106,7 +106,7 @@ cámara no vio la llegada, se muestra como "al menos".
 
 | Sección | Contenido |
 |---|---|
-| Resumen | Cajones monitoreados, libres, ocupados y obstruidos; los coches que llevan más tiempo estacionados; vehículos detectados; video con las detecciones; gráfica de ocupación en el tiempo (se llena mientras corre); cobertura por isla; últimos eventos y avisos |
+| Resumen | Cajones monitoreados, libres, ocupados y obstruidos; los coches que llevan más tiempo estacionados; el seguimiento de coches (cuántos hay, cuáles están quietos o en movimiento y cuáles están quietos fuera de un cajón); vehículos detectados; video con las detecciones; gráfica de ocupación en el tiempo (se llena mientras corre); cobertura por isla; últimos eventos y avisos |
 | Mapa | Plano esquemático del estacionamiento: las 8 islas al centro y las 6 zonas del perímetro alrededor, con cada cajón en su color en vivo; clic en un cajón para su detalle |
 | Cámaras | Una tarjeta por cámara con su video en vivo (clic para ampliar), latencia, vehículos y estado; las islas sin cámara se marcan "sin video configurado" |
 | Islas | Los 391 cajones por isla y zona del perímetro; clic en un cajón para ver su estado, su cámara y, a administradores, su historial y quién lo ocupa |
