@@ -41,7 +41,12 @@ CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vi
     ("CAM-02", "Estacionamiento", "C", "CDEFG"),
     ("CAM-03", "Entrada", "Lateral caseta", ""),
 ]
-CAMARA_DEL_PERIMETRO = "CAM-02"
+CAMARA_DEL_PERIMETRO = "CAM-02"   # el perímetro lo ve la cámara general...
+CAMARA_DE_ZONA = {"Esquina motos": "CAM-01"}  # ...salvo la esquina de motos, que se ve en la cámara "Fila 1 y 2"
+
+
+def camara_del_perimetro(zona: str) -> str:
+    return CAMARA_DE_ZONA.get(zona, CAMARA_DEL_PERIMETRO)
 _CAMARA_DE_ISLA = {isla: cam for cam, _, _, islas in CAMARAS for isla in islas}
 ZONAS = [(isla, _CAMARA_DE_ISLA.get(isla), CAJONES_POR_ISLA[isla], _ESPECIAL[isla]) for isla in "ABCDEFGH"]  # (isla, cámara o None, cajones, tipo especial)
 PERIMETRO = [  # (zona, prefijo del número, cajones, tipo de todos sus cajones)
@@ -99,7 +104,7 @@ def ajustar_camaras(db: Session) -> None:
     db.flush()
     por_codigo = {c.codigo: c for c in db.scalars(select(Camara))}
     destinos = [(isla, por_codigo[cam].id if cam else None) for isla, cam, _, _ in ZONAS]
-    destinos += [(nombre, por_codigo[CAMARA_DEL_PERIMETRO].id) for nombre, _, _, _ in PERIMETRO]
+    destinos += [(nombre, por_codigo[camara_del_perimetro(nombre)].id) for nombre, _, _, _ in PERIMETRO]
     for nombre, destino in destinos:
         zona = db.scalar(select(Zona).where(Zona.nombre == nombre))
         for esp in db.scalars(select(Espacio).where(Espacio.zona_id == zona.id)):
@@ -145,7 +150,7 @@ def seed_base(db: Session) -> None:
     for isla, cam, cantidad, especial in ZONAS:
         _crear_cajones(db, zonas[isla], isla, cantidad, camaras[cam] if cam else None, especial, primeros_especiales=True)
     for nombre, prefijo, cantidad, tipo in PERIMETRO:
-        _crear_cajones(db, zonas[nombre], prefijo, cantidad, camaras[CAMARA_DEL_PERIMETRO], tipo, primeros_especiales=False)
+        _crear_cajones(db, zonas[nombre], prefijo, cantidad, camaras[camara_del_perimetro(nombre)], tipo, primeros_especiales=False)
     db.flush()
     ajustar_cajones(db)
     ajustar_camaras(db)

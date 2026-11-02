@@ -2,6 +2,10 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **CAM-01: esquina de motos (8 cajones) y fila d de la isla 1.** `MOT-01` a `MOT-08`, a lo largo del bordillo junto a la barda y, el último,
+  tras la esquina; las 5 motos del fotograma de prueba caen cada una en su cajón. La fila d (a la izquierda del camellón, `A-17` a `A-32`,
+  de lejos a cerca) se dibujó con perspectiva y entran los 7 más cercanos (`A-26` a `A-32`); el resto queda fuera del encuadre. "Esquina
+  motos" pasa a verse en la cámara "Fila 1 y 2". La isla 2 (`B`) sigue con cajones provisionales de los coches estacionados.
 - **Cajones de los extremos** de las islas 5 y 6 de CAM-02 (`E-33`, `E-34`, `F-33`, `F-34`): son dos cajones en paralelo al bordillo de
   remate del extremo cercano, uno junto al otro (en la isla 5 son el coche azul claro y la camioneta naranja; en la 6, la franja de
   asfalto libre). Los dos del extremo lejano (`35` y `36`) no se ven marcados en la imagen y quedan sin dibujar. La fila derecha de la
