@@ -70,6 +70,7 @@ class CameraConfig:
     confirm_free: int = 3  # observaciones seguidas para pasar a libre
     detectar_obstaculos: bool = True  # un objeto que no es vehículo dentro de un cajón vacío lo deja "obstruido"
     conf_obstaculo: float = 0.40  # confianza mínima para considerar un objeto como obstáculo
+    obstaculo_grande: float | None = None  # un "objeto" que cubre al menos esta fracción de un cajón se toma por un vehículo que el modelo no reconoció (ocupado, no obstruido)
     obstaculo_ratio: float = 0.50  # fracción de la base del objeto que debe quedar dentro del cajón
     confirm_obstruido: int = 6  # observaciones seguidas para pasar a obstruido (más que ocupado: alguien que solo cruza no cuenta)
     mosaicos: tuple[int, int] | list[int] = (1, 1)  # (columnas, filas) en que se parte la imagen para detectar los coches chicos (lejanos o del lateral); (1, 1) = sin partir

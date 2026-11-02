@@ -63,7 +63,7 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     es_obstaculo = lambda d: d.cls in OBSTACULOS_COCO  # noqa: E731
     vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
-    states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio, por_punto=cam.asignar_por_punto)
+    states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio, por_punto=cam.asignar_por_punto, obstaculo_grande=cam.obstaculo_grande)
     _marcar_por_detalle(cam.spaces, states, frame)
     if ocupados_previos:
         debiles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]

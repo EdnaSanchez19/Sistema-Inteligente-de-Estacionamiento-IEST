@@ -211,3 +211,13 @@ def test_un_estado_de_etiqueta_desconocido_se_rechaza(tmp_path):
     ruta.write_text("t_seg,espacio,estado\n0,A-01,reservado\n", encoding="utf-8")
     with pytest.raises(ValueError, match="desconocido"):
         cargar_etiquetas(ruta)
+
+
+def test_un_objeto_que_cubre_medio_cajon_es_un_vehiculo_no_una_obstruccion():
+    """Un sedán oscuro visto desde arriba sale como "maleta": si cubre buena parte del cajón es un vehículo que el modelo no reconoció."""
+    cajones = [Space("A-01", rect(0, 0, 100, 200))]
+    maleta_grande = Detection(5, 20, 95, 190, 0.4, MALETA)
+    maleta_chica = Detection(30, 140, 60, 190, 0.6, MALETA)
+    assert compute_states(cajones, [], [maleta_grande], obstaculo_grande=0.4)[0].estado == "ocupado"
+    assert compute_states(cajones, [], [maleta_grande])[0].estado == "obstruido"  # sin la regla se comporta como siempre
+    assert compute_states(cajones, [], [maleta_chica], obstaculo_grande=0.4)[0].estado == "obstruido"  # una maleta de verdad sigue siendo obstrucción

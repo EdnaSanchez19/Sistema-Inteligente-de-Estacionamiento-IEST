@@ -8,7 +8,7 @@ Deja en datasets/etiquetado/ (ignorado por Git: son imágenes de las cámaras de
     labels/*.txt   una caja por línea en formato YOLO: "clase x_centro y_centro ancho alto" (todo de 0 a 1)
     clases.txt     0 = coche (autos, camionetas, SUV, camiones, autobuses), 1 = moto
 
-Las cajas iniciales son las del modelo (detección por mosaicos, confianza >= --conf): falta corregirlas (borrar las falsas, dibujar
+Las cajas iniciales son las de los modelos YOLOv8n y YOLOv8s combinados (detección por mosaicos, confianza >= --conf): falta corregirlas (borrar las falsas, dibujar
 las que faltan) con `python scripts/etiquetar_coches.py`.
 """
 import argparse
@@ -19,7 +19,7 @@ import cv2
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "vision"))
-from parking_vision.detector import VehicleDetector  # noqa: E402
+from parking_vision.detector import DetectorCombinado, VehicleDetector  # noqa: E402
 
 CLASES = ["coche", "moto"]
 COCO_A_NUESTRA = {2: 0, 3: 1, 5: 0, 7: 0}  # coche, moto, autobús y camión (COCO) -> coche / moto
@@ -39,7 +39,8 @@ def main() -> None:
     (args.salida / "images").mkdir(parents=True, exist_ok=True)
     (args.salida / "labels").mkdir(parents=True, exist_ok=True)
     (args.salida / "clases.txt").write_text("\n".join(CLASES) + "\n", encoding="utf-8")
-    det = VehicleDetector(str(ROOT / "vision" / "models" / "yolov8n.pt"), "cuda:0", 1280, [2, 3, 5, 7], min_conf=0.10)
+    modelos = [m for m in ("yolov8n.pt", "yolov8s.pt") if (ROOT / "vision" / "models" / m).exists()]  # si están los dos se combinan: cada uno ve coches que el otro no
+    det = DetectorCombinado([VehicleDetector(str(ROOT / "vision" / "models" / m), "cuda:0", 1280, [2, 3, 5, 7], min_conf=0.10) for m in modelos])
 
     for nombre, n in (("real_a", args.a), ("real_b", args.b), ("real_c", args.c)):
         cap = cv2.VideoCapture(str(args.videos / f"{nombre}.mp4"))

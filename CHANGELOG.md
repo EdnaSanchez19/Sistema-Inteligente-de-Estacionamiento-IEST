@@ -2,7 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
-- **Lateral de la biblioteca (CAM-02): 20 cajones** (`BIB-01` a `BIB-20`, de izquierda a derecha) a lo largo del bordillo de abajo, perpendiculares
+- **Lateral de la biblioteca reajustada (18 cajones, `BIB-01` a `BIB-18`)**: los bordes de los cajones se anclaron a los coches (los míos salían
+  corridos ~40 px); `BIB-19` a `BIB-42` quedan sin monitoreo. Además, `obstaculo_grande` (CAM-02): un "objeto" que cubre al menos 40 % de un cajón se
+  toma por un vehículo que el modelo no reconoció (ocupado, no obstruido). Un sedán oscuro visto desde arriba salía como "maleta" (obstruido, amarillo).
+- **Etiquetado**: los 100 fotogramas se vuelven a pre-marcar con los dos modelos combinados (de 50 a 82 cajas por fotograma en las cámaras de cajones).
+- **Lateral de la biblioteca (CAM-02): 20 cajones** (`BIB-01` a `BIB-20`, de izquierda a derecha; reajustada abajo a 18) a lo largo del bordillo de abajo, perpendiculares
   al bordillo y con los huecos vacíos incluidos; el ancho de cada cajón sale de los coches (110 px al centro, menos a los lados). Los otros 22
   (`BIB-21` a `BIB-42`) no se ven en esta cámara y quedan sin monitoreo. El sedán oscuro (`BIB-09`) no lo detecta ningún modelo.
 - **Detector combinado** (`model_extra`): CAM-01 y CAM-02 corren YOLOv8n y YOLOv8s sobre el mismo fotograma y se queda lo que detecta cualquiera. Cada uno

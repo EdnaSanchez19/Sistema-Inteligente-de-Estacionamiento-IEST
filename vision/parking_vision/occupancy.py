@@ -100,6 +100,7 @@ def compute_states(
     obstacle_ratio: float = 0.50,
     obstacle_footprint: float = 0.30,
     por_punto: bool = False,
+    obstaculo_grande: float | None = None,
 ) -> list[SpaceState]:
     """Marca cada cajón como libre, ocupado u obstruido.
 
@@ -108,6 +109,21 @@ def compute_states(
     objeto asignado a un cajón con auto, o que apenas roza el cajón, no cuenta. Cada objeto se asigna a un solo cajón.
     """
     states = compute_occupancy(spaces, vehicles, occupied_ratio, footprint, por_punto)
+    if obstaculo_grande is not None:
+        # un "objeto" que cubre buena parte de un cajón no es una maleta: es un vehículo que el modelo no reconoció (p. ej. un sedán
+        # oscuro visto desde arriba sale como "maleta"). Cuenta como ocupado y no como obstruido.
+        areas = [max(cv2.contourArea(s.polygon.astype(np.float32)), 1e-6) for s in spaces]
+        restantes = []
+        for det in obstacles:
+            caja = np.array([[det.x1, det.y1], [det.x2, det.y1], [det.x2, det.y2], [det.x1, det.y2]], np.float32)
+            inter = [_intersection_area(sp.polygon, caja) for sp in spaces]
+            mejor = int(np.argmax(inter)) if inter else -1
+            if mejor >= 0 and inter[mejor] / areas[mejor] >= obstaculo_grande:
+                if not states[mejor].occupied:
+                    states[mejor] = SpaceState(spaces[mejor].id, True, det.conf)
+            else:
+                restantes.append(det)
+        obstacles = restantes
     for det in obstacles:
         base = det.footprint(obstacle_footprint)
         base_area = max(cv2.contourArea(base), 1e-6)
