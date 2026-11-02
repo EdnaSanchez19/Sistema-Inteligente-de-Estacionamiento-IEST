@@ -477,19 +477,19 @@ function dibujarSerie(canvas, pts) {
 function vistaCamaras() { return h("section", { class: "vista", id: "vista-camaras" }, h("div", { class: "camaras", id: "camaras" })); }
 function pintarCamaras() {
   const cont = $("camaras"), vision = new Map(S.estado.vision.map((v) => [v.camara, v]));
-  let lista = S.camaras ? S.camaras.map((c) => ({ codigo: c.camara, isla: c.zona, estado: c.estado, senal: c.ultimaSenal })) : S.estado.vision.map((v) => ({ codigo: v.camara, isla: null, estado: "en_linea", senal: null }));
+  let lista = S.camaras ? S.camaras.map((c) => ({ codigo: c.camara, nombre: c.nombre, isla: c.zona, estado: c.estado, senal: c.ultimaSenal })) : S.estado.vision.map((v) => ({ codigo: v.camara, isla: null, estado: "en_linea", senal: null }));
   lista = lista.sort((a, b) => a.codigo.localeCompare(b.codigo));
   for (const c of lista) {
     let t = cont.querySelector(`[data-tarjeta="${c.codigo}"]`);
     const v = vision.get(c.codigo);
     if (!t) { t = h("div", { class: "tarjeta camara-tarj", "data-tarjeta": c.codigo }, h("div", { class: "camara-cab" }), h("div", { class: "cuerpo-video" }), h("div", { class: "datos" })); cont.append(t); }
-    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.isla ? ` · ${rotulo(c.isla)}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
+    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.nombre ? ` · ${c.nombre}` : c.isla ? ` · ${rotulo(c.isla)}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
     const cv = t.querySelector(".cuerpo-video");
     if (v && !cv.querySelector("img")) {
       const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
       cv.replaceChildren(h("div", { class: "video" }, img, h("div", { class: "fuera", hidden: true }))); if (S.vista === "camaras") conectarVideo(img, c.codigo, img.nextElementSibling);
     } else if (!v && !cv.querySelector(".sinvideo")) {
-      cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: "Sin video configurado" }), h("span", { text: "Esta isla todavía no tiene una cámara conectada al modelo." })));
+      cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: "Sin video configurado" }), h("span", { text: "Esta cámara todavía no tiene video conectado al modelo." })));
     }
     const d = t.querySelector(".datos"); d.replaceChildren();
     if (v) for (const [k, val] of [["Vehículos", v.vehiculos], ["Vigilados", `${v.ocupados} ocupados · ${v.libres} libres` + (v.obstruidos ? ` · ${v.obstruidos} obstruidos` : "")], ["Latencia", `${v.latencia_ms.toFixed(0)} ms`], ["FPS video", v.fps_video]]) d.append(h("span", null, k + ": ", h("b", { text: String(val) })));

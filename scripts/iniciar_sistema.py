@@ -124,10 +124,15 @@ def main() -> None:
 
     asegurar_env()
     asegurar_base_de_datos(args.con_simulacion)
-    asegurar_video()
+    reales = all((ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists() for x in "abc") and (ROOT / "demo" / "cameras_reales.json").exists()
+    config = "../demo/cameras_reales.json" if reales else "../demo/cameras_demo.json"
+    if reales:
+        print("Usando los videos reales de las 3 cámaras del IEST (datasets/reales).")
+    else:
+        asegurar_video()
+        if not (ROOT / "demo" / "camara2_cctv.mp4").exists():
+            print("Aviso: sin demo/camara2_cctv.mp4 no se activa CAM-02; quedará sin monitoreo.")
     asegurar_modelo()
-    if not (ROOT / "demo" / "camara2_cctv.mp4").exists():
-        print("Aviso: sin demo/camara2_cctv.mp4 no se activa CAM-02 (isla B); esa isla quedará sin monitoreo.")
 
     api = f"http://127.0.0.1:{args.puerto_api}"
     procesos: list[subprocess.Popen] = []
@@ -144,7 +149,7 @@ def main() -> None:
         procesos.append(lanzar([PY, "-m", "uvicorn", "app.main:app", "--host", args.host, "--port", str(args.puerto_api), "--log-level", "warning"], args.oculto, registro, cwd=ROOT / "api", env=ENV))
         if not esperar(f"{api}/health"):
             raise SystemExit("La API no arrancó (¿el puerto está ocupado?)")
-        procesos.append(lanzar([PY, "-m", "parking_vision.demo_server", "--config", "../demo/cameras_demo.json", "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
+        procesos.append(lanzar([PY, "-m", "parking_vision.demo_server", "--config", config, "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
         if args.con_simulacion:
             print("ATENCIÓN: --con-simulacion llena el resto de los cajones con datos inventados.")
             procesos.append(lanzar([PY, str(ROOT / "scripts" / "simulate_cameras.py"), "--api", api, "--interval", "3"], args.oculto, registro, silencio=True, env=ENV))

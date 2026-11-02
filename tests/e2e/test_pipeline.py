@@ -135,13 +135,12 @@ def test_aviso_cuando_la_isla_se_llena(api, escena):
     """Isla C (36 cajones): al ocuparse los últimos, todos reciben el aviso en la app."""
     admin, demo = api.admin, api.demo
     numeros = [f"C-{i:02d}" for i in range(1, 37)]
-    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": []})  # CAM-02 en línea
     # la cámara observa primero los 36 cajones (todos libres) y después se van ocupando: solo así hay cambios reales
-    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
-    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": True} for n in numeros]})
+    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
+    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": [{"numero": n, "ocupado": True} for n in numeros]})
     titulos = [n["titulo"] for n in api.get("/notificaciones", demo)]
     assert "Isla C llena" in titulos
-    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-03", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
+    api.post("/ingest/ocupacion", api.key, {"camara": "CAM-02", "espacios": [{"numero": n, "ocupado": False} for n in numeros]})
     assert set(api.estados(admin)[n] for n in numeros) == {"libre"}
 
 
@@ -156,7 +155,7 @@ def test_modelo_yolo_real_sobre_una_foto(api):
 
     spaces = [Space("B-01", rect(60, 320, 740, 740)), Space("B-02", rect(600, 0, 800, 150))]
     admin, demo = api.admin, api.demo
-    w = arrancar(api, "CAM-02", str(FOTO_BUS), spaces, VehicleDetector(str(YOLO_MODEL)))
+    w = arrancar(api, "CAM-01", str(FOTO_BUS), spaces, VehicleDetector(str(YOLO_MODEL)))
     try:
         wait_until(lambda: api.estados(demo)["B-01"] == "ocupado", timeout=30)
         assert api.estados(demo)["B-02"] == "libre"

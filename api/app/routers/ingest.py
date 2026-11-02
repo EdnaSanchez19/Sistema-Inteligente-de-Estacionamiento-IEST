@@ -59,7 +59,8 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         db.add(Evento(tipo=TipoEvento.error_deteccion, descripcion=f"Confianza baja en {cam.codigo}", camara_id=cam.id))
 
     espacios = {e.numero: e for e in db.scalars(select(Espacio).where(Espacio.camara_id == cam.id))}
-    libres_antes = _libres(db, cam.zona_id)
+    zonas_cam = list(db.scalars(select(Espacio.zona_id).where(Espacio.camara_id == cam.id).distinct()))  # una cámara puede ver varias islas
+    libres_antes = {z: _libres(db, z) for z in zonas_cam}
     desconocidos, cambios = [], 0
     for item in data.espacios:
         esp = espacios.get(item.numero)
@@ -118,7 +119,8 @@ def ocupacion(data: OcupacionIn, db: Session = Depends(get_db)) -> dict:
         esp.estado_desde, esp.inicio_observado = ahora, True  # la cámara vio el cambio: de aquí en adelante la duración es exacta
     if cambios:
         db.flush()
-        _avisar_cambio_de_zona(db, cam.zona_id, libres_antes, _libres(db, cam.zona_id))
+        for z in zonas_cam:
+            _avisar_cambio_de_zona(db, z, libres_antes[z], _libres(db, z))
     db.commit()
     return {"actualizados": cambios, "desconocidos": desconocidos}
 

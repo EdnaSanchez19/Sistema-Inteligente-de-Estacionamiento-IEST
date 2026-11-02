@@ -46,7 +46,7 @@ function Camaras() {
           <Card key={c.id} style={{ gap: 6 }}>
             <View style={s.row}>
               <Text style={s.cam}>
-                {c.camara} · {rotuloZona(c.zona)}
+                {c.camara} · {c.nombre ?? rotuloZona(c.zona)}
               </Text>
               <Badge text={c.estado === 'en_linea' ? 'En línea' : 'Desconectada'} color={c.estado === 'en_linea' ? colors.free : colors.occupied} />
             </View>

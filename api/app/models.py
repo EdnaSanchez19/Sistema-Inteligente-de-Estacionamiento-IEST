@@ -132,6 +132,7 @@ class Camara(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     codigo: Mapped[str] = mapped_column(String(40), unique=True)  # "CAM-01"; coincide con vision/config/cameras.json
+    nombre: Mapped[str | None] = mapped_column(String(80))  # como la llama el IEST: "Isla 1 y 2", "Entrada"...
     zona_id: Mapped[int] = mapped_column(ForeignKey("zonas.id"))
     estado: Mapped[EstadoCamara] = mapped_column(_enum(EstadoCamara), default=EstadoCamara.desconectada)
     ultima_senal: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

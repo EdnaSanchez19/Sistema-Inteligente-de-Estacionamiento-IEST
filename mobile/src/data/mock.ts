@@ -65,10 +65,8 @@ export const eventos: Evento[] = [
   { id: 4, tipo: 'salida', descripcion: 'Salida vehículo colgante IEST-001873', fecha: new Date(Date.now() - 55 * 60_000).toISOString() },
 ];
 
-export const alertasCamara: AlertaCamara[] = 'ABCDEFGH'.split('').map((zona, i) => ({
-  id: i + 1,
-  camara: `CAM-${String(i + 1).padStart(2, '0')}`,
-  zona,
-  estado: i === 2 ? 'desconectada' : 'en_linea',
-  ultimaSenal: new Date(Date.now() - (i === 2 ? 3 * 3600_000 : 0)).toISOString(),
-}));
+export const alertasCamara: AlertaCamara[] = [
+  { id: 1, camara: 'CAM-01', nombre: 'Isla 1 y 2', zona: 'A', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
+  { id: 2, camara: 'CAM-02', nombre: 'Estacionamiento', zona: 'C', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
+  { id: 3, camara: 'CAM-03', nombre: 'Entrada', zona: 'Lateral caseta', estado: 'desconectada', ultimaSenal: new Date(Date.now() - 3 * 3600_000).toISOString() },
+];

@@ -42,9 +42,23 @@ usan los mismos puertos (8000 y 8100). Para probarlo sin instalar nada: `python 
 
 ## Qué cámaras hay
 
-El estacionamiento son **391 cajones**: 8 islas con una cámara por isla (271 cajones) y 6 zonas en el perímetro sin cámara todavía
-(120), según la distribución real (detalle en [`db/README.md`](../db/README.md)). Los videos de demostración dibujan sus propios
-cajones; los que pasan del tamaño real de la isla (B-37 en adelante, C-37 en adelante) la API los ignora. Hoy hay video para cuatro:
+El estacionamiento son **391 cajones**: 8 islas (271 cajones) y 6 zonas en el perímetro (120), según la distribución real (detalle en
+[`db/README.md`](../db/README.md)). **Las únicas cámaras que se usan son 3**, con grabaciones reales del IEST (8 minutos, 6 fps, del
+26/10/2026 a las 06:58). Los videos pesan decenas de MB y llevan personas y placas: están en `datasets/reales/`, que Git ignora, y
+se nombran `real_a.mp4`, `real_b.mp4` y `real_c.mp4`. Si están, `iniciar_sistema.py` las usa (con `demo/cameras_reales.json`); si no,
+arranca con los videos de demostración de más abajo.
+
+| Cámara | Nombre | Video | Cajones vigilados |
+|---|---|---|---|
+| CAM-01 | Isla 1 y 2 | `real_a.mp4`, 2688×1512, ojo de pez | 22 cajones **provisionales** de las islas 1 (A) y 2 (B) de un total de 68; la isla 1 es la fila del fondo (la más lejana) y se numera hacia la cámara |
+| CAM-02 | Estacionamiento | `real_b.mp4`, 1920×1080, vista general | Ninguno todavía (se supone que verá las islas 3 a 7: por confirmar) |
+| CAM-03 | Entrada | `real_c.mp4`, 854×480, la pluma de la caseta | No vigila cajones: es para el flujo de entradas y salidas |
+
+La isla 8 no tiene grabaciones y el perímetro no está en cámara. Los cajones los dibujará el equipo a mano sobre las rayas
+(`parking_vision.tools.define_spaces`); los provisionales salen de los coches estacionados casi todo el video.
+
+### Videos de demostración (si no están los reales)
+Hoy hay video de demostración para cuatro cámaras:
 
 | Cámara | Isla | Video | Cajones vigilados |
 |---|---|---|---|

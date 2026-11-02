@@ -1,5 +1,17 @@
 # Cambios
 
+## Sin versión — cámaras reales del IEST (02/11/2026)
+
+- **Las únicas cámaras son 3, con grabaciones reales**: `CAM-01` "Isla 1 y 2" (2688×1512, ojo de pez), `CAM-02` "Estacionamiento"
+  (vista general) y `CAM-03` "Entrada" (la pluma de la caseta, sin cajones). Los videos están en `datasets/reales/` (ignorado por Git) y
+  `demo/cameras_reales.json` los configura; el panel y la app muestran el nombre de cada cámara. Sin los videos reales se usan los de demostración.
+- **Una cámara puede ver varias islas.** Antes cada cámara era de una sola isla (`CAM-01` a `CAM-08`); ahora la cámara de cada cajón se
+  asigna por cajón, las cámaras sobrantes se eliminan al iniciar y los avisos de isla llena se calculan por cada isla que ve la cámara.
+  La isla 1 es la A (la más lejana a la cámara), la 2 la B, etc.; la isla 8 queda sin cámara por ahora.
+- **Cajones provisionales** en `CAM-01`: 22 de las islas 1 y 2 sacados de los coches estacionados casi todo el video. Cubren una parte
+  pequeña (68 cajones en total): el resto se dibujará a mano sobre las rayas. YOLOv8n a 1920 px falla con algunos coches grandes
+  vistos desde arriba y confunde objetos lejanos; se descargó `yolov8s.pt` para compararlo, sin una ventaja clara sin etiquetas.
+
 ## Sin versión — distribución real del estacionamiento y mapa (29/10/2026)
 
 - **391 cajones, como el estacionamiento real.** 8 islas (A y G de 32, B a F de 36, H de 27) y 6 zonas del perímetro: lateral

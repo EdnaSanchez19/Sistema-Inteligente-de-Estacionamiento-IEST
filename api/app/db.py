@@ -27,6 +27,7 @@ COLUMNAS_NUEVAS = {  # tabla -> {columna: definición}; create_all no modifica t
         "inicio_observado": "BOOLEAN NOT NULL DEFAULT FALSE",
         "objeto": "VARCHAR(40)",
     },
+    "camaras": {"nombre": "VARCHAR(80)"},
 }
 VALORES_NUEVOS = {"espacios": "obstruido", "eventos": "obstruccion"}  # valores de enumeración que una base vieja rechaza (CHECK)
 

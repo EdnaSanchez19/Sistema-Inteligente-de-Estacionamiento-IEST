@@ -30,7 +30,17 @@ _ESPECIAL = {
     "A": TipoEspacio.discapacidad, "B": TipoEspacio.directivo, "C": TipoEspacio.visitante, "D": TipoEspacio.discapacidad,
     "E": TipoEspacio.directivo, "F": TipoEspacio.visitante, "G": TipoEspacio.discapacidad, "H": TipoEspacio.directivo,
 }
-ZONAS = [(isla, f"CAM-{i:02d}", CAJONES_POR_ISLA[isla], _ESPECIAL[isla]) for i, isla in enumerate("ABCDEFGH", start=1)]  # (isla, cámara, cajones, tipo especial)
+# Las únicas cámaras que se usan son 3 (videos reales del IEST), y una ve varias islas. La isla 1 es la A, la 2 la B... la 8 la H
+# (se numeran de la más lejana a la más cercana a la cámara). Quién ve qué: la de "Isla 1 y 2" ve las islas A y B; la general
+# ("Estacionamiento") se supone que ve de la C a la G (por confirmar); la H aún no tiene grabaciones; la de la entrada no vigila
+# cajones, solo el flujo de vehículos.
+CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vigila)
+    ("CAM-01", "Isla 1 y 2", "A", "AB"),
+    ("CAM-02", "Estacionamiento", "C", "CDEFG"),
+    ("CAM-03", "Entrada", "Lateral caseta", ""),
+]
+_CAMARA_DE_ISLA = {isla: cam for cam, _, _, islas in CAMARAS for isla in islas}
+ZONAS = [(isla, _CAMARA_DE_ISLA.get(isla), CAJONES_POR_ISLA[isla], _ESPECIAL[isla]) for isla in "ABCDEFGH"]  # (isla, cámara o None, cajones, tipo especial)
 PERIMETRO = [  # (zona, prefijo del número, cajones, tipo de todos sus cajones)
     ("Lateral caseta", "CAS", 16, TipoEspacio.general),
     ("Esquina motos", "MOT", 8, TipoEspacio.motocicleta),
@@ -73,22 +83,50 @@ def ajustar_cajones(db: Session) -> int:
     return quitados
 
 
+def ajustar_camaras(db: Session) -> None:
+    """Deja solo las cámaras reales: quita las anteriores (CAM-04 a CAM-08 de cuando había una por isla) y reasigna los cajones."""
+    codigos = {c[0] for c in CAMARAS}
+    for cam in db.scalars(select(Camara)).all():
+        if cam.codigo not in codigos:
+            for esp in db.scalars(select(Espacio).where(Espacio.camara_id == cam.id)):
+                esp.camara_id = None
+            for ev in db.scalars(select(Evento).where(Evento.camara_id == cam.id)):
+                ev.camara_id = None
+            db.delete(cam)
+    db.flush()
+    por_codigo = {c.codigo: c for c in db.scalars(select(Camara))}
+    for isla, cam, _, _ in ZONAS:
+        zona = db.scalar(select(Zona).where(Zona.nombre == isla))
+        destino = por_codigo[cam].id if cam else None
+        for esp in db.scalars(select(Espacio).where(Espacio.zona_id == zona.id)):
+            if esp.camara_id != destino:
+                esp.camara_id = destino
+    db.commit()
+
+
 def seed_base(db: Session) -> None:
-    for nombre, cam, cantidad, especial in ZONAS:
-        zona = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Isla {nombre}")
-        db.add(zona)
-        db.flush()
-        camara = db.scalar(select(Camara).where(Camara.codigo == cam)) or Camara(codigo=cam, zona_id=zona.id, estado=EstadoCamara.desconectada)
-        db.add(camara)
-        db.flush()
-        _crear_cajones(db, zona, nombre, cantidad, camara, especial, primeros_especiales=True)
+    zonas: dict[str, Zona] = {}
+    for nombre in CAJONES_POR_ISLA:
+        zonas[nombre] = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Isla {nombre}")
+    for nombre, _, _, _ in PERIMETRO:
+        zonas[nombre] = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Perímetro: {nombre.lower()}")
+    db.add_all(zonas.values())
+    db.flush()
+    camaras: dict[str, Camara] = {}
+    for codigo, nombre_cam, zona_base, _ in CAMARAS:
+        cam = db.scalar(select(Camara).where(Camara.codigo == codigo)) or Camara(codigo=codigo, zona_id=zonas[zona_base].id, estado=EstadoCamara.desconectada)
+        cam.nombre = nombre_cam
+        cam.zona_id = zonas[zona_base].id
+        db.add(cam)
+        camaras[codigo] = cam
+    db.flush()
+    for isla, cam, cantidad, especial in ZONAS:
+        _crear_cajones(db, zonas[isla], isla, cantidad, camaras[cam] if cam else None, especial, primeros_especiales=True)
     for nombre, prefijo, cantidad, tipo in PERIMETRO:
-        zona = db.scalar(select(Zona).where(Zona.nombre == nombre)) or Zona(nombre=nombre, descripcion=f"Perímetro: {nombre.lower()}")
-        db.add(zona)
-        db.flush()
-        _crear_cajones(db, zona, prefijo, cantidad, None, tipo, primeros_especiales=False)
+        _crear_cajones(db, zonas[nombre], prefijo, cantidad, None, tipo, primeros_especiales=False)
     db.flush()
     ajustar_cajones(db)
+    ajustar_camaras(db)
 
     if not db.scalar(select(Usuario).where(Usuario.correo == "admin@iest.edu.mx")):
         password = os.environ.get("SEED_ADMIN_PASSWORD")

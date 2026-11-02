@@ -105,13 +105,14 @@ class EventoOut(BaseModel):
 class CamaraOut(BaseModel):
     id: int
     camara: str
+    nombre: str | None = None
     zona: str
     estado: str
     ultimaSenal: UtcDatetime | None
 
     @classmethod
     def of(cls, c: Camara) -> "CamaraOut":
-        return cls(id=c.id, camara=c.codigo, zona=c.zona.nombre, estado=c.estado.value, ultimaSenal=c.ultima_senal)
+        return cls(id=c.id, camara=c.codigo, nombre=c.nombre, zona=c.zona.nombre, estado=c.estado.value, ultimaSenal=c.ultima_senal)
 
 
 class TokenOut(BaseModel):
