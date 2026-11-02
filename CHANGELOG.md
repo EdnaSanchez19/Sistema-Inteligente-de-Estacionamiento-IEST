@@ -2,12 +2,13 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
-- **CAM-02: filas 6 y 7 con cajones completos** (la isla central y la de la izquierda). Cada isla tiene un camellón de árboles y dos filas de cajones, a
-  cada lado; se dibujaron con perspectiva a lo largo de los bordillos amarillos, vacíos incluidos (`F-01` a `F-20` y `G-01` a `G-31`, la fila
-  izquierda primero y luego la derecha, de lejos a cerca). La isla de la izquierda sale con 15 y 16 por fila, que casi coincide con los 32 de la
-  fila 7; la central, con 10 por fila, no llega a los 36 de las filas 2 a 6 (queda por aclarar). En un fotograma de prueba, la central acierta
-  4 de 4 coches y la de la izquierda 5 de 7 (uno cae en el cajón vecino y uno, tapado por otro coche, no se detecta). Las filas 4 y 5 (las de la
-  derecha, con coches mucho más chicos y un camellón en diagonal) siguen con cajones provisionales de los coches estacionados.
+- **CAM-02: filas 5, 6 y 7 con cajones completos** (las tres islas de la izquierda y el centro de la imagen). Cada isla tiene un camellón de
+  árboles y dos filas de cajones, a cada lado; se dibujaron con perspectiva a lo largo de los bordillos amarillos, vacíos incluidos
+  (`E-01` a `E-31`, `F-01` a `F-20` y `G-01` a `G-31`, la fila izquierda primero y luego la derecha, de lejos a cerca). La fila 5 va en
+  diagonal (`islas_diagonales.py` generaliza la herramienta a filas en cualquier dirección) y sale con 15 y 16 por fila; la 7, con 15 y 16;
+  la 6, con 10 y 10 (no llega a los 36 que le corresponden: queda por aclarar). Fotograma de prueba: la 6 acierta sus 4 coches y la 7, 5
+  de 7. La fila 4 (la de más a la derecha, con coches muy chicos y tapados por árboles) sigue con cajones provisionales de los coches
+  estacionados. La confianza para ocupar un cajón en CAM-02 baja de 0.35 a 0.30: recupera coches oscuros bajo los árboles.
 - **Asignación por punto** (`asignar_por_punto`, por cámara): cada coche va al cajón que contiene el centro de lo que ocupa en el suelo. Con
   cajones de tamaños muy distintos por la perspectiva, el solape absoluto favorecía a los cajones cercanos, que son más grandes.
 - **Panel en celular** (revisión de diseño): la navegación pasa a una barra fija abajo (con "Inicio" y "Admin" como nombres cortos), el
