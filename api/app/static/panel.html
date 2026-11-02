@@ -81,6 +81,7 @@
   .video { position: relative; background: #0b1420; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; }
   .video img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .video .fuera { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 22px; color: #d8c9c3; gap: 8px; font-size: 13.5px; }
+  .video .fuera[hidden] { display: none; }  /* sin esto la capa oculta (display: grid) tapaba el video y se comía los clics */
   .video .fuera code { background: #ffffff14; padding: 6px 10px; border-radius: 8px; font-size: 12px; user-select: all; }
   .pestanas { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .pestanas button { border: 1px solid var(--borde); background: transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; }
@@ -499,7 +500,7 @@ function pintarCamaras() {
     const cv = t.querySelector(".cuerpo-video");
     if (v && !cv.querySelector("img")) {
       const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
-      cv.replaceChildren(h("div", { class: "video" }, img, h("div", { class: "fuera", hidden: true }))); if (S.vista === "camaras") conectarVideo(img, c.codigo, img.nextElementSibling);
+      cv.replaceChildren(h("div", { class: "video", onclick: () => abrirVideo(c.codigo) }, img, h("div", { class: "fuera", hidden: true }))); if (S.vista === "camaras") conectarVideo(img, c.codigo, img.nextElementSibling);
     } else if (!v && !cv.querySelector(".sinvideo")) {
       cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: "Sin video configurado" }), h("span", { text: "Esta cámara todavía no tiene video conectado al modelo." })));
     }

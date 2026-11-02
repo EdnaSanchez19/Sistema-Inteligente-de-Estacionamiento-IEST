@@ -40,7 +40,7 @@ app.include_router(sistema.router)
 @app.get("/panel", include_in_schema=False)
 def panel() -> FileResponse:
     """Panel web de una sola página con la disponibilidad en vivo (para demostraciones)."""
-    return FileResponse(Path(__file__).parent / "static" / "panel.html", media_type="text/html")
+    return FileResponse(Path(__file__).parent / "static" / "panel.html", media_type="text/html", headers={"Cache-Control": "no-cache"})  # que un cambio del panel se vea sin forzar la recarga
 
 
 @app.get("/panel/portada.jpg", include_in_schema=False)
