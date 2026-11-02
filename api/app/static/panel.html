@@ -368,7 +368,9 @@ function conectarVideo(img, cam, fuera) {
   };
   img.dataset.activo = "1"; img.src = `${urlVideo(cam)}?t=${Date.now()}`;
 }
-function desconectarVideo(img) { img.dataset.activo = "0"; img.dataset.cam = ""; img.removeAttribute("src"); }
+const PIXEL = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+/* quitar el atributo src no corta un video MJPEG que ya está abierto: hay que reemplazarlo, o las conexiones se acumulan (Chrome permite 6 por servidor) */
+function desconectarVideo(img) { img.dataset.activo = "0"; img.dataset.cam = ""; img.src = PIXEL; }
 function gestionarVideos() {  // solo la vista visible mantiene sus videos abiertos
   const v = $("video-resumen");
   if (S.vista === "resumen") { const cam = camaraActiva(); if (cam) conectarVideo(v, cam, $("fuera-resumen")); } else desconectarVideo(v);
@@ -510,8 +512,14 @@ function pintarCamaras() {
   }
 }
 function abrirVideo(cam) {
-  const img = h("img", { style: "width:100%;border-radius:12px;display:block;background:#000", alt: "Video ampliado de " + cam });
-  img.src = `${urlVideo(cam)}?t=${Date.now()}`; abrirModal(h("div", null, h("h3", { style: "margin-bottom:12px;font-size:18px", text: cam + " · en vivo" }), img));
+  // mientras se ve en grande, las demás cámaras se pausan: así el video ampliado siempre tiene conexión libre
+  document.querySelectorAll(".camara-tarj img").forEach(desconectarVideo); desconectarVideo($("video-resumen"));
+  const aviso = h("div", { style: "position:absolute;inset:0;display:grid;place-content:center;color:#d8c9c3;font-size:14px", text: "Cargando el video…" });
+  const img = h("img", { style: "width:100%;border-radius:12px;display:block;min-height:240px;position:relative", alt: "Video ampliado de " + cam });
+  img.onload = () => aviso.remove();
+  img.onerror = () => { aviso.textContent = "No se pudo abrir el video. Cierra esta ventana y vuelve a intentarlo."; };
+  img.src = `${urlVideo(cam)}?t=${Date.now()}`;
+  abrirModal(h("div", null, h("h3", { style: "margin-bottom:12px;font-size:18px", text: cam + " · en vivo" }), h("div", { style: "position:relative;background:#000;border-radius:12px;overflow:hidden" }, aviso, img)));
 }
 
 /* ============================== VISTA: islas ============================== */
@@ -691,7 +699,11 @@ function dibujarLinea(canvas, valores) {
 
 /* ============================== modal ============================== */
 function abrirModal(contenido) { $("modal-contenido").replaceChildren(contenido); $("modal").classList.add("abierto"); }
-function cerrarModal() { $("modal").classList.remove("abierto"); $("modal-contenido").replaceChildren(); }
+function cerrarModal() {
+  const img = $("modal-contenido").querySelector("img"); if (img) img.src = PIXEL;  // corta el video ampliado
+  $("modal").classList.remove("abierto"); $("modal-contenido").replaceChildren();
+  if (S.estado) gestionarVideos();  // las demás cámaras vuelven
+}
 $("modal").addEventListener("click", (e) => { if (e.target.id === "modal" || e.target.classList.contains("modal-cerrar")) cerrarModal(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
 
