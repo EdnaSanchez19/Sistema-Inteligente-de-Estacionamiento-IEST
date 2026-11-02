@@ -2,6 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Isla central de CAM-02 (fila 5) con cajones completos**: sus dos filas (a cada lado del camellón de árboles) se dibujaron con perspectiva
+  a lo largo de los bordillos amarillos (`E-01` a `E-10` a la izquierda y `E-11` a `E-20` a la derecha, de lejos a cerca), incluidos los
+  cajones vacíos. En un fotograma de prueba los 4 coches caen en su cajón y los 16 restantes salen libres. Entran 10 por fila, no los 16 a 18
+  que corresponderían a 36 cajones: `E-21` a `E-36` quedan sin monitoreo hasta aclarar la cuenta. Las otras islas de CAM-02 siguen con cajones
+  provisionales de los coches estacionados.
 - **Panel en celular** (revisión de diseño): la navegación pasa a una barra fija abajo (con "Inicio" y "Admin" como nombres cortos), el
   encabezado se reduce de 233 a 57 px (el tema y "Salir" quedan arriba como botones compactos), en el Mapa las filas salen antes que el
   perímetro, los cajones miden 40 px en pantallas táctiles y ningún texto del panel baja de 12 px (los cajones del escritorio crecieron
