@@ -2,6 +2,12 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Lateral de la biblioteca (CAM-02): 20 cajones** (`BIB-01` a `BIB-20`, de izquierda a derecha) a lo largo del bordillo de abajo, perpendiculares
+  al bordillo y con los huecos vacíos incluidos; el ancho de cada cajón sale de los coches (110 px al centro, menos a los lados). Los otros 22
+  (`BIB-21` a `BIB-42`) no se ven en esta cámara y quedan sin monitoreo. El sedán oscuro (`BIB-09`) no lo detecta ningún modelo.
+- **Detector combinado** (`model_extra`): CAM-01 y CAM-02 corren YOLOv8n y YOLOv8s sobre el mismo fotograma y se queda lo que detecta cualquiera. Cada uno
+  falla con coches distintos: v8s ve los SUV vistos desde arriba (0.8 de confianza contra 0.05) y v8n el sedán blanco (0.53 contra 0.24). La señal de
+  detalle (bordes) que sirvió para las motos no sirve en esta hilera: su asfalto agrietado da hasta 22 % de bordes aun vacío.
 - **Motos detectadas por detalle** (`detalle_min` por cajón): YOLOv8n y v8s casi no ven las motos del video (confianza de 0.05 a 0.4). Los cajones con
   `detalle_min` se marcan ocupados si el modelo no vio nada pero hay más de ese % de bordes dentro (el asfalto liso da 0 a 3 %, una moto de 5 % para
   arriba). En 16 fotogramas del video, `MOT-02`, `03`, `04`, `05` y `07` salen ocupados siempre y `MOT-01`, `06` y `08` nunca. Límite: una persona o

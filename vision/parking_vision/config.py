@@ -83,6 +83,7 @@ class Config:
     api_url: str = "http://localhost:8000"
     api_key: str = ""
     model: str = "yolov8n.pt"
+    model_extra: str | None = None  # un segundo modelo cuyas detecciones se suman a las del primero (ver DetectorCombinado)
     device: str | None = None  # None = automático (GPU si hay), "cpu", "0"
     imgsz: int = 960
     vehicle_classes: tuple[int, ...] = (2, 3, 5, 7)  # COCO: auto, moto, bus, camión
@@ -117,6 +118,7 @@ def load_config(path: str | Path) -> Config:
     cfg.api_url = os.environ.get("API_URL", raw.get("api_url", cfg.api_url))
     cfg.api_key = os.environ.get("INGEST_API_KEY", raw.get("api_key", ""))
     cfg.model = os.environ.get("YOLO_MODEL", raw.get("model", cfg.model))
+    cfg.model_extra = raw.get("model_extra")
     for key in ("device", "imgsz", "pendant_model", "pendant_code_regex", "save_low_confidence", "low_confidence_dir"):
         if key in raw:
             setattr(cfg, key, raw[key])

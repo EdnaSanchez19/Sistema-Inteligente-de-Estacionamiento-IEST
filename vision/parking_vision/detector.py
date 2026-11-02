@@ -60,6 +60,22 @@ class VehicleDetector:
         return salida
 
 
+class DetectorCombinado:
+    """Varios modelos sobre el mismo fotograma: se queda con lo que detecta cualquiera (una detección repetida se queda con la más confiable).
+
+    Cada modelo falla con vehículos distintos: en las cámaras del IEST, YOLOv8s ve los SUV vistos desde arriba y YOLOv8n el sedán blanco.
+    """
+
+    def __init__(self, detectores: list["VehicleDetector"]):
+        self.detectores = detectores
+        self.model = detectores[0].model  # lo que el panel muestra del modelo (dispositivo)
+        self.imgsz = detectores[0].imgsz
+
+    def detect(self, frame: np.ndarray, mosaicos: tuple[int, int] | list[int] = (1, 1), traslape: float = 0.2) -> list[Detection]:
+        todas = [(d, False) for det in self.detectores for d in det.detect(frame, mosaicos, traslape)]
+        return _fusionar(todas)
+
+
 def _iou_e_inclusion(a: Detection, b: Detection) -> tuple[float, float]:
     """(IoU, intersección / área de la caja más chica)."""
     ix = max(0.0, min(a.x2, b.x2) - max(a.x1, b.x1))

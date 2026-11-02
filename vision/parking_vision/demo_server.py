@@ -25,7 +25,7 @@ import cv2
 import numpy as np
 
 from .config import CameraConfig, Config, load_config, load_dotenv
-from .detector import VehicleDetector
+from .detector import DetectorCombinado, VehicleDetector
 from .draw import draw_result
 from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, con_estado_confirmado
 from .publisher import ApiPublisher
@@ -297,6 +297,9 @@ def main() -> None:
 
     detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
     modelo = Path(cfg.model).stem.replace("yolov", "YOLOv")  # yolov8n -> YOLOv8n
+    if cfg.model_extra:
+        detector = DetectorCombinado([detector, VehicleDetector(cfg.model_extra, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)])
+        modelo += " + " + Path(cfg.model_extra).stem.replace("yolov", "YOLOv")
     det_lock = threading.Lock()
     disponibles = []
     for c in cfg.cameras:
