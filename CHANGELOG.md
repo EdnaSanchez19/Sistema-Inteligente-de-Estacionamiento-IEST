@@ -2,6 +2,10 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Panel en celular** (revisión de diseño): la navegación pasa a una barra fija abajo (con "Inicio" y "Admin" como nombres cortos), el
+  encabezado se reduce de 233 a 57 px (el tema y "Salir" quedan arriba como botones compactos), en el Mapa las filas salen antes que el
+  perímetro, los cajones miden 40 px en pantallas táctiles y ningún texto del panel baja de 12 px (los cajones del escritorio crecieron
+  de 25 a 30 px).
 - **Panel: estados que no dependen solo del color y contrastes de texto >= 4.5:1** (revisión de diseño). Libre = cajón hueco (relleno claro
   con aro), ocupado = macizo con un coche, obstruido = amarillo con "!", reservado = "R", fuera de servicio = "×"; en las barras y la gráfica,
   libre va rayado. Con deuteranopia simulada, libre y ocupado pasan de 1.04:1 a distinguirse a simple vista. Rellenos más oscuros
