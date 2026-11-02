@@ -42,10 +42,10 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     es_obstaculo = lambda d: d.cls in OBSTACULOS_COCO  # noqa: E731
     vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
-    states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio)
+    states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio, por_punto=cam.asignar_por_punto)
     if ocupados_previos:
         debiles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
-        con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint)}
+        con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint, cam.asignar_por_punto)}
         for i, s in enumerate(states):
             if not s.occupied and ocupados_previos.get(s.id) and con_debiles[s.id].occupied:
                 states[i] = con_debiles[s.id]  # se mantiene ocupado por una detección débil

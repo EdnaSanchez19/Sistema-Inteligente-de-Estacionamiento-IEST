@@ -55,12 +55,17 @@ def compute_occupancy(
     detections: list[Detection],
     occupied_ratio: float = 0.30,
     footprint: float = 0.6,
+    por_punto: bool = False,
 ) -> list[SpaceState]:
     """Marca cada cajón como ocupado/libre.
 
     Cada vehículo se asigna a un solo cajón: aquel con el que su huella se solapa más. Así un
     auto grande o la perspectiva de la cámara no "ocupan" también a los cajones vecinos. El
     cajón queda ocupado si la huella cubre al menos `occupied_ratio` de su área.
+
+    Con `por_punto` el vehículo se asigna al cajón que contiene el punto donde toca el suelo (centro de su recuadro, a 60 % de su altura: el centro de lo que ocupa en el suelo). Sirve
+    cuando los cajones de una cámara miden muy distinto por la perspectiva: el solape absoluto favorece a los cajones grandes (los cercanos)
+    y deja un coche en el cajón vecino. Si ningún cajón contiene el punto, se usa el solape como siempre.
     """
     states = [SpaceState(s.id, False) for s in spaces]
     areas = [max(cv2.contourArea(s.polygon.astype(np.float32)), 1e-6) for s in spaces]
@@ -71,7 +76,14 @@ def compute_occupancy(
         if not inter:
             continue
         best = int(np.argmax(inter))
-        if inter[best] / areas[best] < occupied_ratio:
+        if por_punto:
+            punto = ((det.x1 + det.x2) / 2, det.y1 + 0.6 * (det.y2 - det.y1))
+            dentro = [i for i, sp in enumerate(spaces) if cv2.pointPolygonTest(sp.polygon.astype(np.float32), punto, False) >= 0 and inter[i] > 0]
+            if dentro:
+                best = max(dentro, key=lambda i: inter[i])
+            elif inter[best] / areas[best] < occupied_ratio:
+                continue
+        elif inter[best] / areas[best] < occupied_ratio:
             continue
         # Si dos vehículos caen en el mismo cajón, se queda con el más confiable.
         if not states[best].occupied or det.conf > states[best].confidence:
@@ -87,6 +99,7 @@ def compute_states(
     footprint: float = 0.6,
     obstacle_ratio: float = 0.50,
     obstacle_footprint: float = 0.30,
+    por_punto: bool = False,
 ) -> list[SpaceState]:
     """Marca cada cajón como libre, ocupado u obstruido.
 
@@ -94,7 +107,7 @@ def compute_states(
     deja "obstruido" al cajón donde apoya su base (la parte baja de su recuadro) si ese cajón no está ocupado: un
     objeto asignado a un cajón con auto, o que apenas roza el cajón, no cuenta. Cada objeto se asigna a un solo cajón.
     """
-    states = compute_occupancy(spaces, vehicles, occupied_ratio, footprint)
+    states = compute_occupancy(spaces, vehicles, occupied_ratio, footprint, por_punto)
     for det in obstacles:
         base = det.footprint(obstacle_footprint)
         base_area = max(cv2.contourArea(base), 1e-6)
