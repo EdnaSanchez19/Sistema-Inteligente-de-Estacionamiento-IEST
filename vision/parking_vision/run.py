@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 from .capture import CameraStream
 from .config import OBSTACULOS_COCO, CameraConfig, Config, load_config, load_dotenv
@@ -30,6 +31,26 @@ LOW_CONF_MIN_GAP_S = 30.0
 LOW_CONF_MAX_FILES = 500
 
 
+def densidad_de_bordes(frame, polygon) -> float:
+    """% de píxeles de borde (Canny) dentro del polígono: el asfalto liso da casi 0 y un vehículo encima sube a 5 % o más."""
+    x, y, w, h = cv2.boundingRect(polygon.astype("int32"))
+    x, y = max(x, 0), max(y, 0)
+    gris = cv2.GaussianBlur(cv2.cvtColor(frame[y:y + h, x:x + w], cv2.COLOR_BGR2GRAY), (3, 3), 0)
+    if gris.size == 0:
+        return 0.0
+    bordes = cv2.Canny(gris, 40, 110)
+    mascara = np.zeros(gris.shape, np.uint8)
+    cv2.fillPoly(mascara, [(polygon - [x, y]).astype("int32")], 255)
+    return float((bordes[mascara > 0] > 0).mean() * 100)
+
+
+def _marcar_por_detalle(spaces, states, frame) -> None:
+    """Los cajones con `detalle_min` (motos) se marcan ocupados si el modelo no vio nada pero hay detalle encima."""
+    for i, (sp, st) in enumerate(zip(spaces, states)):
+        if sp.detalle_min is not None and not st.occupied and densidad_de_bordes(frame, sp.polygon) >= sp.detalle_min:
+            states[i] = SpaceState(sp.id, True, 0.5)
+
+
 def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_previos: dict[str, bool] | None = None) -> tuple[list[SpaceState], list[Detection], list[Detection]]:
     """Devuelve (estado de cada cajón, vehículos confiables, todas las detecciones incluso dudosas y obstáculos).
 
@@ -43,6 +64,7 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
     states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio, por_punto=cam.asignar_por_punto)
+    _marcar_por_detalle(cam.spaces, states, frame)
     if ocupados_previos:
         debiles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
         con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint, cam.asignar_por_punto)}

@@ -2,6 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Motos detectadas por detalle** (`detalle_min` por cajón): YOLOv8n y v8s casi no ven las motos del video (confianza de 0.05 a 0.4). Los cajones con
+  `detalle_min` se marcan ocupados si el modelo no vio nada pero hay más de ese % de bordes dentro (el asfalto liso da 0 a 3 %, una moto de 5 % para
+  arriba). En 16 fotogramas del video, `MOT-02`, `03`, `04`, `05` y `07` salen ocupados siempre y `MOT-01`, `06` y `08` nunca. Límite: una persona o
+  un objeto grande dentro del cajón también lo marcaría ocupado. `MOT-08` se movió sobre el asfalto (pisaba la banqueta).
+- **Isla 2 de CAM-01**: un cajón por cada coche visible (17, `B-01` a `B-17`) en lugar de los 16 provisionales. Sin cajones vacíos.
 - **CAM-01: esquina de motos (8 cajones) y fila d de la isla 1.** `MOT-01` a `MOT-08`, a lo largo del bordillo junto a la barda y, el último,
   tras la esquina; las 5 motos del fotograma de prueba caen cada una en su cajón. La fila d (a la izquierda del camellón, `A-17` a `A-32`,
   de lejos a cerca) se dibujó con perspectiva y entran los 7 más cercanos (`A-26` a `A-32`); el resto queda fuera del encuadre. "Esquina

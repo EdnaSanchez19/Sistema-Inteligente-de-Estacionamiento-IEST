@@ -51,6 +51,7 @@ def expand_env(text: str) -> str:
 class Space:
     id: str  # coincide con espacios.numero en la BD, p. ej. "A-03"
     polygon: np.ndarray  # (N, 2) float32, en píxeles del fotograma
+    detalle_min: float | None = None  # % de bordes dentro del cajón a partir del cual hay algo encima (para vehículos que el modelo casi no ve, como las motos)
 
 
 @dataclass
@@ -98,7 +99,7 @@ def _space(raw: dict) -> Space:
     poly = np.asarray(raw["polygon"], dtype=np.float32)
     if poly.ndim != 2 or poly.shape[1] != 2 or len(poly) < 3:
         raise ValueError(f"Polígono inválido en el cajón {raw.get('id')}: se requieren >= 3 puntos [x, y]")
-    return Space(id=str(raw["id"]), polygon=poly)
+    return Space(id=str(raw["id"]), polygon=poly, detalle_min=raw.get("detalle_min"))
 
 
 def load_config(path: str | Path) -> Config:
@@ -136,6 +137,6 @@ def save_spaces(path: str | Path, camera_id: str, source: str, spaces: list[Spac
     if entry is None:
         entry = {"id": camera_id, "source": source}
         raw["cameras"].append(entry)
-    entry["spaces"] = [{"id": s.id, "polygon": [[round(float(x), 1), round(float(y), 1)] for x, y in s.polygon]} for s in spaces]
+    entry["spaces"] = [{"id": s.id, "polygon": [[round(float(x), 1), round(float(y), 1)] for x, y in s.polygon], **({"detalle_min": s.detalle_min} if s.detalle_min is not None else {})} for s in spaces]
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
