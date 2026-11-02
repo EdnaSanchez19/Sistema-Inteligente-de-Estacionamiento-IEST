@@ -26,9 +26,9 @@ Por eso el informe de 4.3 debe decir que el piloto fue **simulado con video** y 
 | `parking_vision.tools.condiciones` | Degrada el video: `noche`, `lluvia`, `niebla`, `sol`, `ruido` |
 | `parking_vision.tools.comparar_condiciones` | Sin etiquetas: cuántos vehículos de la imagen original sigue encontrando el modelo en cada condición |
 | `procesar_video --estabilizar` | Los cajones acompañan el movimiento de la cámara (dron, viento, vibración) |
-| `scripts/simular_rtsp.py` | Publica el video por RTSP como una cámara IP, con caídas programables |
-| `scripts/simulate_cameras.py` | Publica ocupación INVENTADA a la API (pruebas de carga; no es operación real) |
-| `scripts/crear_video_prueba.py` | Montaje sintético con verdad conocida, solo para probar las herramientas |
+| `scripts/simulacion/simular_rtsp.py` | Publica el video por RTSP como una cámara IP, con caídas programables |
+| `scripts/simulacion/simulate_cameras.py` | Publica ocupación INVENTADA a la API (pruebas de carga; no es operación real) |
+| `scripts/simulacion/crear_video_prueba.py` | Montaje sintético con verdad conocida, solo para probar las herramientas |
 
 Todos se ejecutan desde `vision/` con `python -m parking_vision.tools.<nombre>`, salvo los `scripts/`.
 
@@ -91,7 +91,7 @@ video nocturno real para reentrenar.
 (un ejecutable que se guarda en `herramientas_externas/mediamtx/`, ignorado por git):
 
 ```bash
-python scripts/simular_rtsp.py --video datasets/estacionamiento.mp4 --caida-tras 60 --pausa 15
+python scripts/simulacion/simular_rtsp.py --video datasets/estacionamiento.mp4 --caida-tras 60 --pausa 15
 # en config/cameras.json: "source": "rtsp://127.0.0.1:8554/cam1"
 ```
 
@@ -105,7 +105,7 @@ cd vision && python -m parking_vision.run --config config/cameras.json
 
 ## Resultados con el montaje sintético
 
-Video de 30 s armado con la foto de un autobús real (`scripts/crear_video_prueba.py`), 3 cajones, verdad exacta
+Video de 30 s armado con la foto de un autobús real (`scripts/simulacion/crear_video_prueba.py`), 3 cajones, verdad exacta
 cada segundo, YOLOv8n real. **Prueba de las herramientas, no medida de precisión**: es una sola foto sobre
 asfalto liso, mucho más fácil que un estacionamiento real.
 

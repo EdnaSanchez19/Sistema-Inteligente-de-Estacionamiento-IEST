@@ -16,7 +16,7 @@ from parking_vision.capture import CameraStream
 MEDIAMTX = ROOT / "herramientas_externas" / "mediamtx" / "mediamtx.exe"
 pytestmark = pytest.mark.skipif(
     shutil.which("ffmpeg") is None or not (MEDIAMTX.exists() or shutil.which("mediamtx")),
-    reason="requiere ffmpeg y mediamtx (ver scripts/simular_rtsp.py)",
+    reason="requiere ffmpeg y mediamtx (ver scripts/simulacion/simular_rtsp.py)",
 )
 
 
@@ -45,7 +45,7 @@ def video(tmp_path):
 
 def test_captura_rtsp_cae_y_se_reconecta(video):
     puerto = _free_port()
-    cam = subprocess.Popen([sys.executable, str(ROOT / "scripts" / "simular_rtsp.py"), "--video", str(video), "--puerto", str(puerto), "--caida-tras", "8", "--pausa", "4"])
+    cam = subprocess.Popen([sys.executable, str(ROOT / "scripts" / "simulacion" / "simular_rtsp.py"), "--video", str(video), "--puerto", str(puerto), "--caida-tras", "8", "--pausa", "4"])
     stream = CameraStream(f"rtsp://127.0.0.1:{puerto}/cam1", reconnect_s=1.0)
     try:
         time.sleep(3)  # el servidor y la publicación tardan un instante en quedar listos

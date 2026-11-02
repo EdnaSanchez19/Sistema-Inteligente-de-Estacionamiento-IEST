@@ -1,6 +1,6 @@
 """Descubre los cajones de una cámara fija a partir de dónde se estacionan los autos en el video.
 
-    python scripts/descubrir_cajones.py --video datasets/camara2/video.mp4 --isla B --max 40 --camara CAM-02 --salida demo/cajones_cam02.json
+    python scripts/cajones/descubrir_cajones.py --video datasets/camara2/video.mp4 --isla B --max 40 --camara CAM-02 --salida demo/cajones_cam02.json
 
 Procesa un fotograma por segundo con YOLO, agrupa las detecciones que se repiten en el mismo lugar (autos
 estacionados, no los que pasan manejando) y cada grupo estable se vuelve un cajón (B-01, B-02, ...). Es una ayuda
@@ -17,7 +17,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "vision"))
 from parking_vision.detector import VehicleDetector  # noqa: E402
 

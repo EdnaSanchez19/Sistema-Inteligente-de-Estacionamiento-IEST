@@ -1,10 +1,10 @@
-"""Pruebas del simulador de islas (scripts/simulate_cameras.py): ocupación media, estancias y colgantes."""
+"""Pruebas del simulador de islas (scripts/simulacion/simulate_cameras.py): ocupación media, estancias y colgantes."""
 import random
 import statistics
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "simulacion"))
 from simulate_cameras import PERFIL_POR_DEFECTO, SimuladorIslas  # noqa: E402
 
 from app.seed import colgantes_de_muestra  # noqa: E402

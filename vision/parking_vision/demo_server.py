@@ -308,7 +308,7 @@ def main() -> None:
         else:
             log.warning("%s: no existe el video %s; se omite esa cámara", c.id, c.source)
     if not disponibles:
-        raise SystemExit("Ninguna cámara tiene video. Corre scripts/preparar_demo.py")
+        raise SystemExit("Ninguna cámara tiene video. Corre scripts/simulacion/preparar_demo.py")
     camaras = {c.id: CamaraDemo(c, cfg, detector, det_lock, publisher, modelo) for c in disponibles}
     for c in camaras.values():
         c.start()

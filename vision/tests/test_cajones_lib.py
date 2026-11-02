@@ -1,4 +1,4 @@
-"""Herramientas para armar cajones a partir de un video (scripts/cajones_lib.py)."""
+"""Herramientas para armar cajones a partir de un video (scripts/cajones/cajones_lib.py)."""
 import sys
 from pathlib import Path
 
@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "scripts" / "cajones"))
 sys.path.insert(0, str(ROOT / "vision"))
 
 import cajones_lib as L  # noqa: E402

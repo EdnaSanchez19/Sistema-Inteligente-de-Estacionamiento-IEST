@@ -3,7 +3,7 @@
 Archivo revisado: `IIoT_Smart_Parking_Management.csv`, de
 [datasetengineer/smart-parking-management-dataset](https://www.kaggle.com/datasets/datasetengineer/smart-parking-management-dataset)
 (1000 filas, 28 columnas). Los datos **no se incluyen** en el repositorio; solo un perfil agregado
-(`demo/perfil_ocupacion.json`, generado con `scripts/perfil_dataset.py`).
+(`demo/perfil_ocupacion.json`, generado con `scripts/simulacion/perfil_dataset.py`).
 
 ## Qué contiene
 
@@ -31,7 +31,7 @@ Conclusión: sirve para **darle forma a una simulación**, no como dato real ni 
 - **Mezcla de usuarios y vehículos:** 73 % registrados, 24 % visitantes, 3 % personal; 70 % autos, 19 % motocicletas,
   10 % eléctricos.
 
-Se usan solo en el simulador opcional (`scripts/simulate_cameras.py`, `--con-simulacion`) para que los datos inventados
+Se usan solo en el simulador opcional (`scripts/simulacion/simulate_cameras.py`, `--con-simulacion`) para que los datos inventados
 tengan una dinámica verosímil, y para repartir los 150 colgantes de muestra entre tipos.
 
 ## Qué no sirve para este proyecto

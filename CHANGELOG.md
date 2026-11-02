@@ -2,6 +2,10 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Proyecto reordenado.** `scripts/` queda con lo de uso diario y tres subcarpetas (`etiquetado/`, `cajones_reales/`, `cajones/`, `simulacion/`; ver
+  `scripts/README.md`); los polígonos de los cajones reales pasan a `demo/cajones_reales/`; las exportaciones de diseño que estaban sueltas en la
+  raíz (`index.tsx`, `tailwind.*`, `tokens/`) pasan a `docs/diseno/`; el README principal trae el mapa de carpetas. Se retiró lo que no se
+  versionaba y se podía regenerar (`salida/`, videos y datos de la época de demostración en `datasets/`, parches de una sola vez, imágenes de trabajo).
 - **Lateral de la biblioteca reajustada (18 cajones, `BIB-01` a `BIB-18`)**: los bordes de los cajones se anclaron a los coches (los míos salían
   corridos ~40 px); `BIB-19` a `BIB-42` quedan sin monitoreo. Además, `obstaculo_grande` (CAM-02): un "objeto" que cubre al menos 40 % de un cajón se
   toma por un vehículo que el modelo no reconoció (ocupado, no obstruido). Un sedán oscuro visto desde arriba salía como "maleta" (obstruido, amarillo).

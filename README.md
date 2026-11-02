@@ -20,6 +20,23 @@ Cámaras ──RTSP/LAN──▶ vision/ (YOLOv8 + OpenCV) ──▶ api/ (FastA
 | `tests/e2e/`, [`docs/PRUEBAS_INTEGRACION.md`](docs/PRUEBAS_INTEGRACION.md) | Pruebas end-to-end | 3.6 |
 | [`CHANGELOG.md`](CHANGELOG.md) | Alcance y límites de la v1.0 | 3.7 |
 
+## Estructura del proyecto
+
+| Carpeta | Qué hay |
+|---|---|
+| `api/` | API (FastAPI), base de datos y el panel web (`app/static/panel.html`) |
+| `vision/` | Servidor de visión: detección con YOLO, estado de cada cajón y seguimiento de coches |
+| `mobile/` | App móvil (Expo / React Native) |
+| `db/` | Esquema SQL y migraciones |
+| `demo/` | Configuración de las cámaras (`cameras_reales.json` y la de demostración) y los polígonos de los cajones (`cajones_reales/`) |
+| `scripts/` | Arranque y servicio (`iniciar_sistema.py`, `servicio.ps1`) y herramientas por tema; ver `scripts/README.md` |
+| `tests/` | Pruebas de integración (las de cada parte están en su carpeta) |
+| `docs/` | Documentación: ejecución, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |
+| `evidencias/` | Evidencias de pruebas y resultados |
+| `datasets/` | **No se sube a Git.** Videos reales de las cámaras (`reales/`), fotogramas para etiquetar (`etiquetado/`) y ejemplos |
+| `herramientas_externas/` | **No se sube a Git.** `mediamtx`, para la prueba de cámara RTSP simulada |
+| `logs/` | **No se sube a Git.** Registro del servicio |
+
 ## Requisitos
 
 - Python 3.10+ (probado en 3.12)
@@ -89,7 +106,7 @@ Con cámaras reales, sigue [`vision/README.md`](vision/README.md) (dibujar los c
 **Sin cámaras (demostración):** el simulador publica entradas y salidas aleatorias a la API:
 
 ```bash
-python scripts/simulate_cameras.py --api http://localhost:8000   # datos INVENTADOS, solo para pruebas de carga
+python scripts/simulacion/simulate_cameras.py --api http://localhost:8000   # datos INVENTADOS, solo para pruebas de carga
 ```
 
 ### App móvil

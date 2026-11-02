@@ -1,9 +1,9 @@
 """Resume el dataset de Kaggle "Smart Parking Management" en un perfil agregado para la simulación.
 
-    python scripts/perfil_dataset.py --csv datasets/kaggle_smart_parking/IIoT_Smart_Parking_Management.csv
+    python scripts/simulacion/perfil_dataset.py --csv datasets/kaggle_smart_parking/IIoT_Smart_Parking_Management.csv
 
 Escribe demo/perfil_ocupacion.json con proporciones (no copia los datos): ocupación media, distribución de la duración
-de la estancia y mezcla de tipos de usuario y de vehículo. Lo usa scripts/simulate_cameras.py.
+de la estancia y mezcla de tipos de usuario y de vehículo. Lo usa scripts/simulacion/simulate_cameras.py.
 
 OJO: el dataset es sintético (1000 filas generadas, con sensores sin relación con la ocupación y fechas/horas
 incoherentes; ver docs/DATASET_KAGGLE.md). Sirve para darle forma realista a la demostración, no como dato real.
@@ -14,7 +14,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def proporciones(valores) -> dict[str, float]:

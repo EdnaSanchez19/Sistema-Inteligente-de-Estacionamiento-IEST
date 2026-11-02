@@ -1,6 +1,6 @@
 """Regresión del banco de simulación: video con verdad conocida + detector YOLO real + métricas.
 
-Usa el montaje sintético (scripts/crear_video_prueba.py) a partir de una foto de un vehículo. Valida que las
+Usa el montaje sintético (scripts/simulacion/crear_video_prueba.py) a partir de una foto de un vehículo. Valida que las
 herramientas de simulación funcionan; NO mide la precisión real del detector en un estacionamiento.
 """
 import subprocess
@@ -23,7 +23,7 @@ pytestmark = pytest.mark.skipif(not (MODELO.exists() and FOTO.exists()), reason=
 @pytest.fixture(scope="module")
 def banco(tmp_path_factory):
     d = tmp_path_factory.mktemp("sim")
-    subprocess.run([sys.executable, str(ROOT / "scripts" / "crear_video_prueba.py"), "--imagen", str(FOTO), "--salida", str(d)], check=True, capture_output=True)
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "simulacion" / "crear_video_prueba.py"), "--imagen", str(FOTO), "--salida", str(d)], check=True, capture_output=True)
     from parking_vision.detector import VehicleDetector
 
     cam = load_config(d / "cameras.json").cameras[0]

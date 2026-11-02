@@ -84,7 +84,7 @@ Requisitos: `ffmpeg`, `mediamtx` (en `herramientas_externas/mediamtx/`) y `visio
 
 ```bash
 python scripts/run_tests.py                                   # 01
-python scripts/crear_video_prueba.py --imagen <foto> --salida datasets/prueba_sintetica   # 02 (montaje)
+python scripts/simulacion/crear_video_prueba.py --imagen <foto> --salida datasets/prueba_sintetica   # 02 (montaje)
 cd vision
 python -m parking_vision.tools.procesar_video --config ../evidencias/03_video_ia/cameras.json \
     --camera CAM-01 --video ../evidencias/03_video_ia/video_original.mp4 \

@@ -7,7 +7,7 @@ cada coche.
 ## 1. Preparar los fotogramas (una vez)
 
 ```bash
-python scripts/preparar_etiquetado.py
+python scripts/etiquetado/preparar_etiquetado.py
 ```
 
 Saca 100 fotogramas repartidos por los videos reales (40 de la cámara "Fila 1 y 2", 50 de "Estacionamiento" y 10 de "Entrada") y los
@@ -16,7 +16,7 @@ pre-marca con el modelo actual. Quedan en `datasets/etiquetado/` (Git los ignora
 ## 2. Corregir las cajas
 
 ```bash
-python scripts/etiquetar_coches.py
+python scripts/etiquetado/etiquetar_coches.py
 ```
 
 Abre `http://127.0.0.1:8200`. Solo escucha en este equipo y cada cambio se guarda solo. Las cajas rojas son coches y las azules motos.

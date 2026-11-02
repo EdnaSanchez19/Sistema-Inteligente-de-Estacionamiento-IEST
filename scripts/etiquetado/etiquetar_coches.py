@@ -1,6 +1,6 @@
 """Herramienta local para corregir las cajas de los coches en los fotogramas de datasets/etiquetado (preparados con preparar_etiquetado.py).
 
-    python scripts/etiquetar_coches.py            # abre http://127.0.0.1:8200 en el navegador
+    python scripts/etiquetado/etiquetar_coches.py            # abre http://127.0.0.1:8200 en el navegador
 
 Todo se queda en este equipo: el servidor solo escucha en 127.0.0.1 y las imágenes no salen de datasets/etiquetado. Cada cambio se guarda
 solo, en formato YOLO (labels/*.txt), y las imágenes marcadas como revisadas se anotan en revisadas.json.
@@ -13,7 +13,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 PAGINA = Path(__file__).with_name("etiquetador.html")
 NOMBRE = re.compile(r"^[A-Za-z0-9_\-]+$")
 _cerrojo = threading.Lock()
@@ -111,7 +111,7 @@ def main() -> None:
     ap.add_argument("--sin-navegador", action="store_true")
     args = ap.parse_args()
     if not (args.datos / "images").is_dir():
-        raise SystemExit(f"No hay fotogramas en {args.datos}. Primero: python scripts/preparar_etiquetado.py")
+        raise SystemExit(f"No hay fotogramas en {args.datos}. Primero: python scripts/etiquetado/preparar_etiquetado.py")
     servidor = ThreadingHTTPServer(("127.0.0.1", args.puerto), crear_manejador(args.datos))
     url = f"http://127.0.0.1:{args.puerto}"
     print(f"Etiquetador en {url} (Ctrl+C para cerrar). Los cambios se guardan solos en {args.datos / 'labels'}")

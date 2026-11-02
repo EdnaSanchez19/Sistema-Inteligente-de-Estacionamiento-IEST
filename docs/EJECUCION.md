@@ -75,7 +75,7 @@ sin monitoreo. Los cajones de cada una (`demo/cajones_cam0N.json`) sí están en
 ### Agregar otra cámara
 
 ```bash
-python scripts/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-05 --isla E \
+python scripts/cajones/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-05 --isla E \
     --region-marcas 380,180,1000,240 --excluir 990,620,1280,720 --imagen revisar.jpg
 ```
 
@@ -139,7 +139,7 @@ fuente es un archivo de video y no una cámara RTSP.
 - El video emitido se dibuja y comprime solo mientras alguien lo mira (panel abierto en Resumen o Cámaras); con nadie viendo, toda
   la capacidad queda para el modelo.
 - No hay lectura de colgantes: los vehículos aparecen como "sin colgante identificado" hasta que exista un modelo entrenado.
-- Los cajones de CAM-01 y CAM-02 se dibujaron a partir de los videos (ver `scripts/cajones_cam02.py`); la precisión real
+- Los cajones de CAM-01 y CAM-02 se dibujaron a partir de los videos (ver `scripts/cajones/cajones_cam02.py`); la precisión real
   del sistema solo se podrá medir con etiquetas propias (`docs/SIMULACION.md`).
 - El video emitido en el puerto 8100 no tiene autenticación: úsalo solo en tu red local.
 
@@ -155,5 +155,5 @@ lleno; no lo mezcles con una operación real.
 - **El video dice "Sin señal":** el servidor de visión no está corriendo o tarda en cargar el modelo (10 a 30 s). Si abriste
   el panel desde otro equipo, agrega `?vision=http://IP_DEL_SERVIDOR:8100` a la dirección.
 - **Puerto ocupado:** usa `--puerto-api` o `--puerto-video`.
-- **Otro video o cajones:** `scripts/descubrir_cajones.py` propone cajones a partir de dónde se estacionan los autos, y
+- **Otro video o cajones:** `scripts/cajones/descubrir_cajones.py` propone cajones a partir de dónde se estacionan los autos, y
   `parking_vision.tools.define_spaces` permite dibujarlos a mano sobre las líneas del estacionamiento.

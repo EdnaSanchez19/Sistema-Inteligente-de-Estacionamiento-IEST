@@ -1,7 +1,7 @@
 """Saca fotogramas de los videos reales y los pre-marca con el modelo actual, para que una persona corrija las cajas.
 
-    python scripts/preparar_etiquetado.py                  # ~100 fotogramas (40 de real_a, 50 de real_b, 10 de real_c)
-    python scripts/preparar_etiquetado.py --a 30 --b 40 --c 5 --conf 0.25
+    python scripts/etiquetado/preparar_etiquetado.py                  # ~100 fotogramas (40 de real_a, 50 de real_b, 10 de real_c)
+    python scripts/etiquetado/preparar_etiquetado.py --a 30 --b 40 --c 5 --conf 0.25
 
 Deja en datasets/etiquetado/ (ignorado por Git: son imágenes de las cámaras del IEST, con personas y placas):
     images/*.jpg   los fotogramas, a la resolución original
@@ -9,7 +9,7 @@ Deja en datasets/etiquetado/ (ignorado por Git: son imágenes de las cámaras de
     clases.txt     0 = coche (autos, camionetas, SUV, camiones, autobuses), 1 = moto
 
 Las cajas iniciales son las de los modelos YOLOv8n y YOLOv8s combinados (detección por mosaicos, confianza >= --conf): falta corregirlas (borrar las falsas, dibujar
-las que faltan) con `python scripts/etiquetar_coches.py`.
+las que faltan) con `python scripts/etiquetado/etiquetar_coches.py`.
 """
 import argparse
 import sys
@@ -17,7 +17,7 @@ from pathlib import Path
 
 import cv2
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "vision"))
 from parking_vision.detector import DetectorCombinado, VehicleDetector  # noqa: E402
 
@@ -66,7 +66,7 @@ def main() -> None:
             cajas_total += len(lineas)
         cap.release()
         print(f"{nombre}: {n} fotogramas, {cajas_total} cajas iniciales ({cajas_total / max(n, 1):.0f} por fotograma)")
-    print(f"Listo en {args.salida}. Siguiente paso: python scripts/etiquetar_coches.py")
+    print(f"Listo en {args.salida}. Siguiente paso: python scripts/etiquetado/etiquetar_coches.py")
 
 
 if __name__ == "__main__":

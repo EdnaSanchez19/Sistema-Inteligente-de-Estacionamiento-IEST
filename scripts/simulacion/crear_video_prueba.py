@@ -1,6 +1,6 @@
 """Genera un video de PRUEBA TÉCNICA con verdad conocida, para ejercitar las herramientas de simulación.
 
-    python scripts/crear_video_prueba.py --imagen datasets/ejemplos/bus.jpg --salida datasets/prueba_sintetica
+    python scripts/simulacion/crear_video_prueba.py --imagen datasets/ejemplos/bus.jpg --salida datasets/prueba_sintetica
 
 Toma la foto de un vehículo real (por ejemplo bus.jpg) y la desplaza sobre un fondo de asfalto: entra a un
 cajón, permanece y sale; otro está ocupado al inicio y se va. Escribe:

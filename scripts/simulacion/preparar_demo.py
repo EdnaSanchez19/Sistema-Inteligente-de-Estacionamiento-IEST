@@ -1,6 +1,6 @@
 """Prepara los videos y la configuración de la demostración del panel (carpeta demo/).
 
-    python scripts/preparar_demo.py --video evidencias/03_video_ia/video_original.mp4
+    python scripts/simulacion/preparar_demo.py --video evidencias/03_video_ia/video_original.mp4
 
 Con el video generado con IA (toma aérea que avanza) hace que parezca una cámara fija: alinea cada fotograma
 con el primero (misma técnica del estabilizador), recorta los bordes negros que quedan y reproduce el tramo
@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 import sys
 
 sys.path.insert(0, str(ROOT / "vision"))
@@ -99,7 +99,7 @@ def escribir_configuracion(salida: Path) -> list[dict]:
     camaras = [
         {"id": "CAM-01", "source": "../demo/camara1_estatica.mp4", "interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "spaces": spaces},
     ]
-    # Las demás cámaras salen de demo/cajones_cam*.json (scripts/cajones_cam02.py y scripts/agregar_camara.py). Sus videos son
+    # Las demás cámaras salen de demo/cajones_cam*.json (scripts/cajones/cajones_cam02.py y scripts/cajones/agregar_camara.py). Sus videos son
     # de terceros y NO se incluyen en el repositorio: se copian a demo/ (ver docs/EJECUCION.md).
     por_defecto = {"interval_s": 0.5, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 3, "confirm_free": 6}
     for archivo in sorted((ROOT / "demo").glob("cajones_cam*.json")):

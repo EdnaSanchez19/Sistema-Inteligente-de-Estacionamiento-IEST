@@ -1,6 +1,6 @@
 """Agrega una cámara (un video de cámara fija) al sistema: descubre sus cajones y los deja listos para el servidor de visión.
 
-    python scripts/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-03 --isla C \
+    python scripts/cajones/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-03 --isla C \
         --region-marcas 380,180,1000,240 --excluir 990,620,1280,720 --imagen revisar.jpg
 
 Qué hace:
@@ -24,8 +24,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "cajones"))
 import cajones_lib as L  # noqa: E402
 
 PARAMETROS = {"interval_s": 1.0, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 3, "confirm_free": 6}
@@ -115,7 +115,7 @@ def main() -> None:
         print(f"Imagen para revisar: {args.imagen}")
 
     if not args.sin_regenerar:
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "preparar_demo.py"), "--video", str(ROOT / "evidencias" / "03_video_ia" / "video_original.mp4")], check=True)
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "simulacion" / "preparar_demo.py"), "--video", str(ROOT / "evidencias" / "03_video_ia" / "video_original.mp4")], check=True)
 
 
 if __name__ == "__main__":

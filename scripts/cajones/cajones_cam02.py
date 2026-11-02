@@ -1,13 +1,13 @@
 """Arma los 40 cajones de la isla B (cámara CAM-02) para la demostración: ocupados y vacíos.
 
-    python scripts/cajones_cam02.py --candidatos datasets/camara2/cajones_candidatos.json --imagen datasets/camara2/cajones_cam02.jpg
+    python scripts/cajones/cajones_cam02.py --candidatos datasets/camara2/cajones_candidatos.json --imagen datasets/camara2/cajones_cam02.jpg
 
 Mezcla dos fuentes, porque lo que importa es poder distinguir cajones vacíos de ocupados:
-  - 23 cajones del estacionamiento cercano, donde se ven autos (los descubre scripts/descubrir_cajones.py a partir
+  - 23 cajones del estacionamiento cercano, donde se ven autos (los descubre scripts/cajones/descubrir_cajones.py a partir
     del video; se priorizan los que cambian de estado y los más grandes).
   - 17 cajones del estacionamiento de atrás, que están marcados y vacíos. Se dibujaron entre las rayas blancas del
     pavimento (posiciones medidas sobre el primer fotograma del video de 1280x720).
-Escribe demo/cajones_cam02.json, que usa scripts/preparar_demo.py. El video NO se incluye en el repositorio.
+Escribe demo/cajones_cam02.json, que usa scripts/simulacion/preparar_demo.py. El video NO se incluye en el repositorio.
 """
 import argparse
 import json
@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 # Estacionamiento de atrás, fila cercana: extremos (abajo, arriba) de cada raya blanca, de izquierda a derecha
 FILA_2 = [((23, 366), (43, 350)), ((68, 370), (90, 349)), ((121, 369), (134, 348)), ((174, 368), (181, 348)), ((226, 367), (227, 347)),

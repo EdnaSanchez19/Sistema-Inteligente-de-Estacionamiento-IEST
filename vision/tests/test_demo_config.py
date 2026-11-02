@@ -8,12 +8,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "vision"))
-sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "scripts" / "cajones"))
 
 from parking_vision.config import load_config  # noqa: E402
 
 CONFIG = ROOT / "demo" / "cameras_demo.json"
-pytestmark = pytest.mark.skipif(not CONFIG.exists(), reason="falta demo/cameras_demo.json (corre scripts/preparar_demo.py)")
+pytestmark = pytest.mark.skipif(not CONFIG.exists(), reason="falta demo/cameras_demo.json (corre scripts/simulacion/preparar_demo.py)")
 
 
 def test_la_demo_define_las_camaras_esperadas():

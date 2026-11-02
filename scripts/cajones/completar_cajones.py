@@ -1,7 +1,7 @@
 """Agrega a una cámara los cajones que le faltan: todo coche estacionado que quede fuera de los cajones ya definidos.
 
-    python scripts/completar_cajones.py --camara CAM-02 --imagen revisar.jpg
-    python scripts/completar_cajones.py --camara CAM-03 --excluir 0,0,200,150 --min-presencia 0.3
+    python scripts/cajones/completar_cajones.py --camara CAM-02 --imagen revisar.jpg
+    python scripts/cajones/completar_cajones.py --camara CAM-03 --excluir 0,0,200,150 --min-presencia 0.3
 
 Un coche cuenta como estacionado si YOLO lo ve en el mismo lugar durante al menos `--min-presencia` del video (los que solo
 pasan manejando se descartan). Los cajones nuevos se numeran a continuación de los existentes (B-41, B-42...), así que
@@ -18,8 +18,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "cajones"))
 sys.path.insert(0, str(ROOT / "vision"))
 import cajones_lib as L  # noqa: E402
 
@@ -112,7 +112,7 @@ def main() -> None:
         print(f"Imagen para revisar (magenta = nuevos): {args.imagen}")
 
     if not args.sin_regenerar:
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "preparar_demo.py"), "--video", str(ROOT / "evidencias" / "03_video_ia" / "video_original.mp4")], check=True)
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "simulacion" / "preparar_demo.py"), "--video", str(ROOT / "evidencias" / "03_video_ia" / "video_original.mp4")], check=True)
 
 
 if __name__ == "__main__":

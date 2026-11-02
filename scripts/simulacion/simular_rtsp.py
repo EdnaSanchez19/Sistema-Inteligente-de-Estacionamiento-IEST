@@ -1,9 +1,9 @@
 """Simula una cámara IP: publica un video en bucle por RTSP con ffmpeg + mediamtx (servidor RTSP).
 
-    python scripts/simular_rtsp.py --video datasets/prueba_sintetica/video.mp4
+    python scripts/simulacion/simular_rtsp.py --video datasets/prueba_sintetica/video.mp4
     # el servidor de visión se conecta a rtsp://127.0.0.1:8554/cam1
 
-    python scripts/simular_rtsp.py --video v.mp4 --caida-tras 20 --pausa 10   # se "cae" 10 s cada 20 s
+    python scripts/simulacion/simular_rtsp.py --video v.mp4 --caida-tras 20 --pausa 10   # se "cae" 10 s cada 20 s
 
 Requisitos (no se incluyen en el repo):
   - ffmpeg en el PATH (o --ffmpeg).
@@ -20,7 +20,7 @@ import subprocess
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 MEDIAMTX_LOCAL = ROOT / "herramientas_externas" / "mediamtx" / "mediamtx.exe"
 
 

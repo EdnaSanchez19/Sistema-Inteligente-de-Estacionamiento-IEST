@@ -90,7 +90,7 @@ def asegurar_video() -> None:
     if not origen.exists():
         raise SystemExit(f"Falta el video de origen: {origen}")
     print("Preparando el video de la cámara CAM-01...")
-    subprocess.run([PY, str(ROOT / "scripts" / "preparar_demo.py"), "--video", str(origen)], check=True, env=ENV)
+    subprocess.run([PY, str(ROOT / "scripts" / "simulacion" / "preparar_demo.py"), "--video", str(origen)], check=True, env=ENV)
 
 
 def asegurar_modelo() -> None:
@@ -153,7 +153,7 @@ def main() -> None:
         procesos.append(lanzar([PY, "-m", "parking_vision.demo_server", "--config", config, "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
         if args.con_simulacion:
             print("ATENCIÓN: --con-simulacion llena el resto de los cajones con datos inventados.")
-            procesos.append(lanzar([PY, str(ROOT / "scripts" / "simulate_cameras.py"), "--api", api, "--interval", "3"], args.oculto, registro, silencio=True, env=ENV))
+            procesos.append(lanzar([PY, str(ROOT / "scripts" / "simulacion" / "simulate_cameras.py"), "--api", api, "--interval", "3"], args.oculto, registro, silencio=True, env=ENV))
         esperar(f"http://127.0.0.1:{args.puerto_video}/estado", 120)
         url = f"{api.replace('127.0.0.1', 'localhost')}/panel"
         print(f"\nSistema listo: {url}\nUsuario y clave: credenciales.txt\nCtrl+C para detener todo.\n")

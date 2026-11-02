@@ -1,10 +1,10 @@
 """Simula las cámaras publicando ocupación a la API, para demostrar el sistema sin cámaras reales.
 
-    python scripts/simulate_cameras.py --api http://localhost:8000
-    python scripts/simulate_cameras.py --api http://localhost:8000 --zonas B,C --hora-simulada 20
+    python scripts/simulacion/simulate_cameras.py --api http://localhost:8000
+    python scripts/simulacion/simulate_cameras.py --api http://localhost:8000 --zonas B,C --hora-simulada 20
 
 Cada auto llega, se queda un tiempo y se va. La duración de la estancia y la ocupación media salen del perfil del
-dataset de Kaggle (demo/perfil_ocupacion.json, ver scripts/perfil_dataset.py): estancias de unas 3 horas, con la
+dataset de Kaggle (demo/perfil_ocupacion.json, ver scripts/simulacion/perfil_dataset.py): estancias de unas 3 horas, con la
 forma de la distribución original, y una ocupación cercana al 55 %. Como una demostración no puede esperar horas,
 `--hora-simulada` dice cuántos segundos reales dura una hora simulada (30 por defecto).
 
@@ -22,7 +22,7 @@ from pathlib import Path
 
 import requests
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "api"))
 from app.seed import ZONAS, colgantes_de_muestra  # noqa: E402  (misma distribución de islas y cámaras que la BD inicial)
 
