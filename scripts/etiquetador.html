@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etiquetar coches</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; display: grid; grid-template-columns: 260px 1fr; background: #14181d; color: #e8eaed; font: 14px system-ui, "Segoe UI", sans-serif; }
+  #lista { overflow-y: auto; border-right: 1px solid #2b323a; background: #1a1f25; }
+  #lista h2 { margin: 0; padding: 12px 14px 6px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #9aa4af; }
+  #avance { padding: 0 14px 10px; color: #9aa4af; font-size: 12.5px; }
+  .it { display: flex; justify-content: space-between; padding: 6px 14px; cursor: pointer; border-left: 3px solid transparent; font-size: 13px; }
+  .it:hover { background: #222932; } .it.act { background: #2a3340; border-left-color: #f86923; }
+  .it .ok { color: #3ecf75; } .it small { color: #8b95a1; margin-left: 8px; }
+  #principal { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+  #barra { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border-bottom: 1px solid #2b323a; background: #1a1f25; }
+  #barra b { margin-right: 6px; }
+  button { background: #2a3340; color: #e8eaed; border: 1px solid #3a4553; border-radius: 6px; padding: 6px 11px; cursor: pointer; font: inherit; }
+  button:hover { border-color: #f86923; } button.on { background: #f86923; border-color: #f86923; color: #fff; }
+  #estado { margin-left: auto; color: #9aa4af; font-size: 12.5px; }
+  #zona { position: relative; overflow: hidden; background: #000; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+  #ayuda { padding: 6px 12px; border-top: 1px solid #2b323a; background: #1a1f25; color: #9aa4af; font-size: 12.5px; }
+  kbd { background: #2a3340; border: 1px solid #3a4553; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+<aside id="lista"><h2>Fotogramas</h2><div id="avance"></div><div id="items"></div></aside>
+<main id="principal">
+  <div id="barra">
+    <b id="nombre">…</b>
+    <span id="conteo"></span>
+    <button id="b-coche" class="on" title="Tecla 1">Coche</button>
+    <button id="b-moto" title="Tecla 2">Moto</button>
+    <button id="b-ant" title="Flecha izquierda">◀ Anterior</button>
+    <button id="b-sig" title="Flecha derecha">Siguiente ▶</button>
+    <button id="b-copiar" title="Tecla C">Copiar cajas de la anterior</button>
+    <button id="b-ver" title="Tecla H">Ocultar cajas</button>
+    <button id="b-rev" title="Enter">✓ Revisado y siguiente</button>
+    <span id="estado"></span>
+  </div>
+  <div id="zona"><canvas id="lienzo"></canvas></div>
+  <div id="ayuda"><b>Dibujar:</b> arrastra con el clic izquierdo · <b>Borrar:</b> clic derecho sobre la caja (o seleccionarla y <kbd>Supr</kbd>) · <b>Seleccionar:</b> clic · <b>Zoom:</b> rueda · <b>Mover la imagen:</b> arrastra con <kbd>Mayús</kbd> o con el botón del medio · <b>Deshacer:</b> <kbd>Ctrl</kbd>+<kbd>Z</kbd> · <b>Ajustar:</b> <kbd>F</kbd></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const lienzo = $("lienzo"), ctx = lienzo.getContext("2d");
+const COLOR = ["#ff4d4d", "#4da3ff"];
+let imgs = [], idx = -1, img = null, cajas = [], sel = -1, vista = { s: 1, ox: 0, oy: 0 }, clase = 0, ver = true, historial = [], revisadaActual = false, temporizador = null;
+let arrastre = null; // { tipo: "dibujar"|"mover", x0, y0, x, y }
+
+async function pedir(url, opciones) { const r = await fetch(url, opciones); if (!r.ok) throw new Error(url + " " + r.status); return r.json(); }
+
+function nombreActual() { return idx >= 0 ? imgs[idx].nombre : null; }
+function camaraDe(n) { return n.split("_").slice(0, 2).join("_"); }
+
+function pintarLista() {
+  const cont = $("items"); cont.replaceChildren();
+  imgs.forEach((f, i) => {
+    const d = document.createElement("div"); d.className = "it" + (i === idx ? " act" : ""); d.onclick = () => abrir(i);
+    const a = document.createElement("span"); a.textContent = f.nombre; const b = document.createElement("span");
+    b.innerHTML = (f.revisada ? '<span class="ok">✓</span>' : "") + "<small>" + f.cajas + "</small>";
+    d.append(a, b); cont.append(d);
+  });
+  $("avance").textContent = imgs.filter((f) => f.revisada).length + " de " + imgs.length + " revisados";
+  const act = cont.querySelector(".act"); if (act) act.scrollIntoView({ block: "nearest" });
+}
+
+function ajustar() {
+  const r = $("zona").getBoundingClientRect(); lienzo.width = r.width * devicePixelRatio; lienzo.height = r.height * devicePixelRatio;
+  if (!img) return;
+  const s = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+  vista = { s, ox: (r.width - img.naturalWidth * s) / 2, oy: (r.height - img.naturalHeight * s) / 2 };
+  dibujar();
+}
+
+function dibujar() {
+  const dpr = devicePixelRatio, w = lienzo.width, h = lienzo.height;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, w, h);
+  if (!img) return;
+  ctx.setTransform(dpr * vista.s, 0, 0, dpr * vista.s, dpr * vista.ox, dpr * vista.oy);
+  ctx.drawImage(img, 0, 0);
+  if (ver) {
+    cajas.forEach((b, i) => {
+      ctx.lineWidth = (i === sel ? 3.5 : 1.8) / vista.s; ctx.strokeStyle = i === sel ? "#ffe14d" : COLOR[b.c];
+      ctx.strokeRect(b.x1, b.y1, b.x2 - b.x1, b.y2 - b.y1);
+    });
+  }
+  if (arrastre && arrastre.tipo === "dibujar") {
+    ctx.lineWidth = 2 / vista.s; ctx.strokeStyle = "#3ecf75"; ctx.setLineDash([6 / vista.s, 4 / vista.s]);
+    ctx.strokeRect(arrastre.x0, arrastre.y0, arrastre.x - arrastre.x0, arrastre.y - arrastre.y0); ctx.setLineDash([]);
+  }
+  const n = [0, 0]; cajas.forEach((b) => n[b.c]++);
+  $("conteo").textContent = n[0] + " coches" + (n[1] ? ", " + n[1] + " motos" : "");
+}
+
+function aImagen(ev) { const r = lienzo.getBoundingClientRect(); return [(ev.clientX - r.left - vista.ox) / vista.s, (ev.clientY - r.top - vista.oy) / vista.s]; }
+function cajaEn(x, y) {
+  let mejor = -1, area = Infinity;
+  cajas.forEach((b, i) => { if (x >= b.x1 && x <= b.x2 && y >= b.y1 && y <= b.y2) { const a = (b.x2 - b.x1) * (b.y2 - b.y1); if (a < area) { area = a; mejor = i; } } });
+  return mejor;
+}
+
+function foto() { historial.push(JSON.stringify(cajas)); if (historial.length > 60) historial.shift(); }
+function cambio() { programarGuardado(); dibujar(); }
+function deshacer() { if (!historial.length) return; cajas = JSON.parse(historial.pop()); sel = -1; cambio(); }
+
+function programarGuardado() { $("estado").textContent = "cambios sin guardar…"; clearTimeout(temporizador); temporizador = setTimeout(() => guardar(revisadaActual), 500); }
+async function guardar(revisada) {
+  if (idx < 0 || !img) return; clearTimeout(temporizador); temporizador = null;
+  const W = img.naturalWidth, H = img.naturalHeight, n = nombreActual();
+  const cuerpo = { revisada, cajas: cajas.map((b) => ({ c: b.c, x: (b.x1 + b.x2) / 2 / W, y: (b.y1 + b.y2) / 2 / H, w: (b.x2 - b.x1) / W, h: (b.y2 - b.y1) / H })) };
+  try {
+    await pedir("/api/etiquetas/" + n, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
+    const f = imgs.find((x) => x.nombre === n); f.cajas = cajas.length; f.revisada = revisada; revisadaActual = revisada;
+    $("estado").textContent = "guardado ✓"; pintarLista();
+  } catch (e) { $("estado").textContent = "ERROR al guardar: " + e.message; }
+}
+
+async function abrir(i) {
+  if (i < 0 || i >= imgs.length) return;
+  if (temporizador) await guardar(revisadaActual);
+  idx = i; const f = imgs[i]; $("nombre").textContent = f.nombre; sel = -1; historial = []; revisadaActual = f.revisada;
+  const nuevo = new Image(); nuevo.src = "/img/" + f.nombre + ".jpg"; await nuevo.decode(); img = nuevo;
+  const r = await pedir("/api/etiquetas/" + f.nombre), W = img.naturalWidth, H = img.naturalHeight;
+  cajas = r.map((b) => ({ c: b.c, x1: (b.x - b.w / 2) * W, y1: (b.y - b.h / 2) * H, x2: (b.x + b.w / 2) * W, y2: (b.y + b.h / 2) * H }));
+  $("estado").textContent = f.revisada ? "revisado ✓" : ""; pintarLista(); ajustar();
+}
+
+function siguiente(sinRevisar) { let j = idx + 1; if (sinRevisar) while (j < imgs.length && imgs[j].revisada) j++; abrir(Math.min(j, imgs.length - 1)); }
+async function revisadoYSiguiente() { await guardar(true); siguiente(true); }
+
+async function copiarDeLaAnterior() {
+  if (idx < 1) return;
+  const n = nombreActual(), previa = imgs.slice(0, idx).reverse().find((f) => camaraDe(f.nombre) === camaraDe(n));
+  if (!previa) return;
+  const r = await pedir("/api/etiquetas/" + previa.nombre), W = img.naturalWidth, H = img.naturalHeight;
+  foto(); cajas = r.map((b) => ({ c: b.c, x1: (b.x - b.w / 2) * W, y1: (b.y - b.h / 2) * H, x2: (b.x + b.w / 2) * W, y2: (b.y + b.h / 2) * H })); sel = -1; cambio();
+  $("estado").textContent = "copiadas las cajas de " + previa.nombre;
+}
+
+function ponerClase(c) { clase = c; $("b-coche").classList.toggle("on", c === 0); $("b-moto").classList.toggle("on", c === 1); if (sel >= 0) { foto(); cajas[sel].c = c; cambio(); } }
+
+lienzo.addEventListener("mousedown", (ev) => {
+  if (!img) return; const [x, y] = aImagen(ev);
+  if (ev.button === 1 || (ev.button === 0 && ev.shiftKey)) { arrastre = { tipo: "mover", cx: ev.clientX, cy: ev.clientY, ox: vista.ox, oy: vista.oy }; ev.preventDefault(); return; }
+  if (ev.button === 0) arrastre = { tipo: "dibujar", x0: x, y0: y, x, y, cx: ev.clientX, cy: ev.clientY };
+});
+window.addEventListener("mousemove", (ev) => {
+  if (!arrastre) return;
+  if (arrastre.tipo === "mover") { vista.ox = arrastre.ox + ev.clientX - arrastre.cx; vista.oy = arrastre.oy + ev.clientY - arrastre.cy; }
+  else { const [x, y] = aImagen(ev); arrastre.x = x; arrastre.y = y; }
+  dibujar();
+});
+window.addEventListener("mouseup", (ev) => {
+  if (!arrastre) return; const a = arrastre; arrastre = null;
+  if (a.tipo === "dibujar") {
+    const movido = Math.hypot(ev.clientX - a.cx, ev.clientY - a.cy) > 5;
+    if (!movido) { sel = cajaEn(a.x0, a.y0); dibujar(); return; }
+    const x1 = Math.max(0, Math.min(a.x0, a.x)), y1 = Math.max(0, Math.min(a.y0, a.y)), x2 = Math.min(img.naturalWidth, Math.max(a.x0, a.x)), y2 = Math.min(img.naturalHeight, Math.max(a.y0, a.y));
+    if (x2 - x1 >= 4 && y2 - y1 >= 4) { foto(); cajas.push({ c: clase, x1, y1, x2, y2 }); sel = cajas.length - 1; cambio(); }
+  }
+  dibujar();
+});
+lienzo.addEventListener("contextmenu", (ev) => {
+  ev.preventDefault(); if (!img) return; const [x, y] = aImagen(ev), i = cajaEn(x, y);
+  if (i >= 0) { foto(); cajas.splice(i, 1); sel = -1; cambio(); }
+});
+lienzo.addEventListener("wheel", (ev) => {
+  ev.preventDefault(); if (!img) return; const r = lienzo.getBoundingClientRect(), px = ev.clientX - r.left, py = ev.clientY - r.top;
+  const f = ev.deltaY < 0 ? 1.18 : 1 / 1.18, s = Math.min(Math.max(vista.s * f, 0.05), 12);
+  vista.ox = px - (px - vista.ox) * (s / vista.s); vista.oy = py - (py - vista.oy) * (s / vista.s); vista.s = s; dibujar();
+}, { passive: false });
+window.addEventListener("resize", ajustar);
+window.addEventListener("keydown", (ev) => {
+  if (ev.ctrlKey && ev.key.toLowerCase() === "z") { ev.preventDefault(); deshacer(); return; }
+  if (ev.key === "Delete" || ev.key === "Backspace") { if (sel >= 0) { foto(); cajas.splice(sel, 1); sel = -1; cambio(); } }
+  else if (ev.key === "ArrowRight" || ev.key.toLowerCase() === "d") siguiente(false);
+  else if (ev.key === "ArrowLeft" || ev.key.toLowerCase() === "a") abrir(idx - 1);
+  else if (ev.key === "Enter") revisadoYSiguiente();
+  else if (ev.key === "1") ponerClase(0);
+  else if (ev.key === "2") ponerClase(1);
+  else if (ev.key.toLowerCase() === "c" && !ev.ctrlKey) copiarDeLaAnterior();
+  else if (ev.key.toLowerCase() === "h") { ver = !ver; $("b-ver").textContent = ver ? "Ocultar cajas" : "Mostrar cajas"; dibujar(); }
+  else if (ev.key.toLowerCase() === "f") ajustar();
+  else if (ev.key === "Escape") { sel = -1; dibujar(); }
+});
+$("b-coche").onclick = () => ponerClase(0); $("b-moto").onclick = () => ponerClase(1);
+$("b-ant").onclick = () => abrir(idx - 1); $("b-sig").onclick = () => siguiente(false);
+$("b-copiar").onclick = copiarDeLaAnterior; $("b-rev").onclick = revisadoYSiguiente;
+$("b-ver").onclick = () => { ver = !ver; $("b-ver").textContent = ver ? "Ocultar cajas" : "Mostrar cajas"; dibujar(); };
+
+(async () => {
+  imgs = await pedir("/api/imagenes");
+  const primera = imgs.findIndex((f) => !f.revisada);
+  await abrir(primera >= 0 ? primera : 0);
+})();
+</script>
+</body>
+</html>

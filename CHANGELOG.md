@@ -2,6 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Etiquetado de coches** para ajustar el modelo (`docs/ETIQUETADO.md`): `scripts/preparar_etiquetado.py` saca 100 fotogramas de los videos
+  reales y los pre-marca; `scripts/etiquetar_coches.py` abre una herramienta local en el navegador para corregir las cajas (dibujar,
+  borrar, zoom, copiar de la anterior, deshacer). Todo queda en `datasets/etiquetado/`, fuera de Git.
+- **CAM-02 con 51 cajones provisionales** en las filas 3 a 7, tomados de los coches que están quietos casi todo el video (la numeración
+  de las filas, de derecha a izquierda, está por confirmar). Solo existen donde hay coche: los cajones vacíos aún no están dibujados.
 - **Seguimiento de coches.** Cada vehículo detectado recibe un número que conserva entre fotogramas (`vision/parking_vision/seguimiento.py`)
   y se sabe si está en movimiento o quieto, desde cuándo y en qué cajón está (o si está fuera de todo cajón, también donde no hay
   cajones dibujados). El servidor de visión lo publica (`POST /ingest/vehiculos`), la API lo guarda solo en memoria
