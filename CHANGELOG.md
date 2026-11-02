@@ -2,6 +2,8 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **"Fila" en lugar de "Isla"** en el panel, la app y los avisos: la isla A se muestra como "Fila 1", la B como "Fila 2", etc. (los
+  cajones siguen llamándose `A-09`, `B-01`...), y la cámara `CAM-01` se llama "Fila 1 y 2". Internamente las zonas siguen siendo `A` a `H`.
 - **Las únicas cámaras son 3, con grabaciones reales**: `CAM-01` "Isla 1 y 2" (2688×1512, ojo de pez), `CAM-02` "Estacionamiento"
   (vista general) y `CAM-03` "Entrada" (la pluma de la caseta, sin cajones). Los videos están en `datasets/reales/` (ignorado por Git) y
   `demo/cameras_reales.json` los configura; el panel y la app muestran el nombre de cada cámara. Sin los videos reales se usan los de demostración.

@@ -308,7 +308,7 @@ const ICONOS = {
   admin: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M17 11a3 3 0 100-6M18.5 14.3c1.9.7 3 2.4 3 5.7"/></svg>',
   sistema: '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg>',
 };
-const VISTAS = [["resumen", "Resumen"], ["mapa", "Mapa"], ["camaras", "Cámaras"], ["islas", "Islas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
+const VISTAS = [["resumen", "Resumen"], ["mapa", "Mapa"], ["camaras", "Cámaras"], ["islas", "Filas"], ["eventos", "Eventos"], ["admin", "Administración"], ["sistema", "Sistema"]];
 
 /* tema claro / oscuro: por omisión el del sistema; el botón fija uno y lo recuerda en este navegador */
 function temaActual() {
@@ -349,7 +349,7 @@ function ir(vista) {
   S.vista = vista; history.replaceState(null, "", "#" + vista);
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("sel", b.dataset.vista === vista));
   document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + vista));
-  const nombres = { resumen: ["Resumen", "Estado actual del estacionamiento"], mapa: ["Mapa", "Plano del estacionamiento con el estado de cada cajón en vivo"], camaras: ["Cámaras", "Video en vivo con las detecciones del modelo"], islas: ["Islas", "Cajones libres, ocupados y sin monitoreo"], eventos: ["Eventos", "Entradas, salidas y alertas registradas"], admin: ["Administración", "Usuarios, vehículos y colgantes"], sistema: ["Sistema", "Componentes y modelo de visión"] }[vista];
+  const nombres = { resumen: ["Resumen", "Estado actual del estacionamiento"], mapa: ["Mapa", "Plano del estacionamiento con el estado de cada cajón en vivo"], camaras: ["Cámaras", "Video en vivo con las detecciones del modelo"], islas: ["Filas", "Cajones libres, ocupados y sin monitoreo, por fila"], eventos: ["Eventos", "Entradas, salidas y alertas registradas"], admin: ["Administración", "Usuarios, vehículos y colgantes"], sistema: ["Sistema", "Componentes y modelo de visión"] }[vista];
   $("titulo").textContent = nombres[0]; $("subtitulo").textContent = nombres[1];
   if (vista === "eventos" && S.eventos) S.eventos.forEach((e) => S.vistos.add(e.id));
   gestionarVideos(); if (vista === "admin") cargarAdmin(); pintar();
@@ -392,7 +392,7 @@ function vistaResumen() {
       h("div", { class: "rejilla", style: "align-content:start" },
         h("div", { class: "tarjeta" }, h("h3", null, "Ocupación en el tiempo", h("span", { class: "nota", id: "nota-serie" })), h("canvas", { class: "grafica", id: "grafica" })),
         h("div", { class: "tarjeta" }, h("h3", null, "Más tiempo estacionados", h("span", { class: "nota", text: "sin moverse" })), h("div", { id: "estancias" })),
-        h("div", { class: "tarjeta" }, h("h3", null, "Cobertura por isla", h("span", { class: "nota", text: "cajones que una cámara observa" })), h("div", { id: "cobertura-islas", style: "display:grid;gap:9px" })))),
+        h("div", { class: "tarjeta" }, h("h3", null, "Cobertura por fila", h("span", { class: "nota", text: "cajones que una cámara observa" })), h("div", { id: "cobertura-islas", style: "display:grid;gap:9px" })))),
     h("div", { class: "rejilla dos-iguales" },
       h("div", { class: "tarjeta" }, h("h3", null, "Últimos eventos", h("a", { href: "#eventos", style: "text-transform:none;letter-spacing:0;font-weight:500;color:var(--naranja)", text: "ver todos", onclick: (e) => { e.preventDefault(); ir("eventos"); } })), h("div", { id: "ultimos-eventos" })),
       h("div", { class: "tarjeta" }, h("h3", null, "Avisos"), h("div", { id: "avisos" }))));
@@ -438,7 +438,7 @@ function pintarResumen() {
   else if (!ev.length) cont.append(h("div", { class: "vacio", text: "Aún no hay eventos: se registran cuando un vehículo entra o sale de un cajón monitoreado." }));
   else cont.append(h("ul", { class: "lista", style: "max-height:300px" }, ev.slice(0, 7).map(filaEvento)));
   const av = $("avisos"); av.replaceChildren();
-  av.append(S.avisos.length ? h("ul", { class: "lista", style: "max-height:300px" }, S.avisos.slice(0, 6).map((a) => h("li", null, h("span", null, h("b", { text: a.titulo + " " }), a.mensaje), h("time", { text: hace(a.fecha) })))) : h("div", { class: "vacio", text: "No hay avisos. Se generan cuando una isla con cobertura completa se llena." }));
+  av.append(S.avisos.length ? h("ul", { class: "lista", style: "max-height:300px" }, S.avisos.slice(0, 6).map((a) => h("li", null, h("span", null, h("b", { text: a.titulo + " " }), a.mensaje), h("time", { text: hace(a.fecha) })))) : h("div", { class: "vacio", text: "No hay avisos. Se generan cuando una fila con cobertura completa se llena." }));
   $("nota-serie").textContent = S.serie.length > 1 ? `últimos ${Math.max(1, Math.round((new Date(S.serie[S.serie.length - 1].t) - new Date(S.serie[0].t)) / 60000))} min` : "";
   dibujarSerie($("grafica"), S.serie);
 }
@@ -446,8 +446,8 @@ function filaEvento(e) {
   const ins = h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` });
   return h("li", { class: S.vistos.size && e.id > 0 && !S.vistos.has(e.id) ? "nuevo" : "" }, h("span", null, ins, " " + e.descripcion), h("time", { text: hora(e.fecha) }));
 }
-/* una isla es "Isla A"; las zonas del perímetro se llaman por su nombre ("Lateral caseta") */
-function rotulo(nombre) { return nombre.length === 1 ? "Isla " + nombre : nombre; }
+/* la isla A es la "Fila 1", la B la "Fila 2"...; las zonas del perímetro se llaman por su nombre ("Lateral caseta") */
+function rotulo(nombre) { return nombre.length === 1 ? "Fila " + (nombre.charCodeAt(0) - 64) : nombre; }
 function agruparIslas() {
   const m = new Map();
   for (const e of S.espacios) {

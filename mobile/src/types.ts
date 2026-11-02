@@ -67,7 +67,7 @@ export interface Evento {
 export interface AlertaCamara {
   id: number;
   camara: string;
-  nombre?: string | null; // como la llama el IEST: "Isla 1 y 2", "Entrada"...
+  nombre?: string | null; // como la llama el IEST: "Fila 1 y 2", "Entrada"...
   zona: string;
   estado: 'en_linea' | 'desconectada';
   ultimaSenal: string | null; // ISO

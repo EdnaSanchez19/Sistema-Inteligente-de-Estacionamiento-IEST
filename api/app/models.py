@@ -123,8 +123,8 @@ class Zona(Base):
 
     @property
     def rotulo(self) -> str:
-        """Cómo se nombra para las personas: "Isla A", pero "Lateral caseta" a secas."""
-        return f"Isla {self.nombre}" if len(self.nombre) == 1 else self.nombre
+        """Cómo se nombra para las personas: la isla A es la "Fila 1", la B la "Fila 2"..., pero "Lateral caseta" a secas."""
+        return f"Fila {ord(self.nombre) - 64}" if len(self.nombre) == 1 else self.nombre
 
 
 class Camara(Base):

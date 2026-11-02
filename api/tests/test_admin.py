@@ -91,9 +91,9 @@ def test_aviso_automatico_isla_casi_llena_y_llena(client):
     ocupar(isla_c[32:33])  # quedan 3 -> casi llena
     ocupar(isla_c[33:34])  # quedan 2 -> no repite el aviso
     avisos = [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
-    assert avisos.count("Isla C casi llena") == 1
+    assert avisos.count("Fila 3 casi llena") == 1
     ocupar(isla_c[34:])  # 0 libres -> llena
-    assert "Isla C llena" in [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
+    assert "Fila 3 llena" in [n["titulo"] for n in client.get("/notificaciones", headers=h).json()]
 
 
 def test_fechas_salen_con_zona_horaria_utc(client):

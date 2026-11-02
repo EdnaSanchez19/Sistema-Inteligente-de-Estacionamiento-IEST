@@ -66,7 +66,7 @@ export const eventos: Evento[] = [
 ];
 
 export const alertasCamara: AlertaCamara[] = [
-  { id: 1, camara: 'CAM-01', nombre: 'Isla 1 y 2', zona: 'A', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
+  { id: 1, camara: 'CAM-01', nombre: 'Fila 1 y 2', zona: 'A', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
   { id: 2, camara: 'CAM-02', nombre: 'Estacionamiento', zona: 'C', estado: 'en_linea', ultimaSenal: new Date().toISOString() },
   { id: 3, camara: 'CAM-03', nombre: 'Entrada', zona: 'Lateral caseta', estado: 'desconectada', ultimaSenal: new Date(Date.now() - 3 * 3600_000).toISOString() },
 ];

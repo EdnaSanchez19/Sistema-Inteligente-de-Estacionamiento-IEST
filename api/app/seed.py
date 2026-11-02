@@ -35,7 +35,7 @@ _ESPECIAL = {
 # ("Estacionamiento") se supone que ve de la C a la G (por confirmar); la H aún no tiene grabaciones; la de la entrada no vigila
 # cajones, solo el flujo de vehículos.
 CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vigila)
-    ("CAM-01", "Isla 1 y 2", "A", "AB"),
+    ("CAM-01", "Fila 1 y 2", "A", "AB"),
     ("CAM-02", "Estacionamiento", "C", "CDEFG"),
     ("CAM-03", "Entrada", "Lateral caseta", ""),
 ]
