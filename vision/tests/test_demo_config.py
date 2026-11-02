@@ -63,3 +63,14 @@ def test_el_generador_de_cajones_lejanos_da_16_cuadrilateros():
 
     quads = cajones_lejanos()
     assert len(quads) == 16 and all(len(q) == 4 for q in quads)
+
+
+def test_config_real_conserva_motos_y_biblioteca():
+    """demo/cameras_reales.json: la esquina de motos (8 cajones con detalle_min) en CAM-01 y los 20 cajones visibles de la biblioteca en CAM-02."""
+    ruta = Path(__file__).resolve().parents[2] / "demo" / "cameras_reales.json"
+    if not ruta.exists():
+        return
+    cams = {c.id: c for c in load_config(ruta).cameras}
+    motos = [s for s in cams["CAM-01"].spaces if s.id.startswith("MOT-")]
+    assert sorted(s.id for s in motos) == [f"MOT-{i:02d}" for i in range(1, 9)] and all(s.detalle_min for s in motos)
+    assert len([s for s in cams["CAM-02"].spaces if s.id.startswith("BIB-")]) == 20
