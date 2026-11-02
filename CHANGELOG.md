@@ -2,6 +2,10 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Cajones de los extremos** de las islas 5 y 6 de CAM-02 (`E-33`, `E-34`, `F-33`, `F-34`): son dos cajones en paralelo al bordillo de
+  remate del extremo cercano, uno junto al otro (en la isla 5 son el coche azul claro y la camioneta naranja; en la 6, la franja de
+  asfalto libre). Los dos del extremo lejano (`35` y `36`) no se ven marcados en la imagen y quedan sin dibujar. La fila derecha de la
+  isla 5 se acortó hasta el remate: antes invadía el cajón del extremo.
 - **CAM-02: filas 5, 6 y 7 con cajones completos** (las tres islas de la izquierda y el centro de la imagen). Cada isla tiene un camellón de
   árboles y dos filas de cajones, a cada lado; se dibujaron con perspectiva a lo largo de los bordillos amarillos, vacíos incluidos
   (`E-01` a `E-31`, `F-01` a `F-20` y `G-01` a `G-31`, la fila izquierda primero y luego la derecha, de lejos a cerca). La fila 5 va en
