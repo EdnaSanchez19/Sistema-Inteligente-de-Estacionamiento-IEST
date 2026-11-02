@@ -2,6 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Se retira el modo demostración.** Fuera: los videos de demostración y su configuración (`cameras_demo.json`, `cajones_cam0N.json`), las
+  herramientas para dibujar cajones sobre ellos (`scripts/cajones/`, `preparar_demo.py`) y sus pruebas. `iniciar_sistema.py` ya no tiene
+  alternativa: sin los videos reales de `datasets/reales/` avisa cuáles faltan. La carpeta `demo/` pasa a `camaras/` (`camaras.json` y los
+  polígonos en `camaras/cajones/`), `perfil_ocupacion.json` a `scripts/simulacion/`, y `parking_vision.demo_server` se llama ahora
+  `parking_vision.servidor`. El simulador de datos inventados (`--con-simulacion`) se conserva.
 - **Proyecto reordenado.** `scripts/` queda con lo de uso diario y tres subcarpetas (`etiquetado/`, `cajones_reales/`, `cajones/`, `simulacion/`; ver
   `scripts/README.md`); los polígonos de los cajones reales pasan a `demo/cajones_reales/`; las exportaciones de diseño que estaban sueltas en la
   raíz (`index.tsx`, `tailwind.*`, `tokens/`) pasan a `docs/diseno/`; el README principal trae el mapa de carpetas. Se retiró lo que no se

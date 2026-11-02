@@ -4,12 +4,12 @@
     python scripts/simulacion/simulate_cameras.py --api http://localhost:8000 --zonas B,C --hora-simulada 20
 
 Cada auto llega, se queda un tiempo y se va. La duración de la estancia y la ocupación media salen del perfil del
-dataset de Kaggle (demo/perfil_ocupacion.json, ver scripts/simulacion/perfil_dataset.py): estancias de unas 3 horas, con la
+dataset de Kaggle (scripts/simulacion/perfil_ocupacion.json, ver scripts/simulacion/perfil_dataset.py): estancias de unas 3 horas, con la
 forma de la distribución original, y una ocupación cercana al 55 %. Como una demostración no puede esperar horas,
 `--hora-simulada` dice cuántos segundos reales dura una hora simulada (30 por defecto).
 
 El 85 % de las llegadas llevan un colgante de los usuarios de muestra (los crea `python -m app.seed --muestra 150`),
-con la mezcla de tipos del perfil. Los cajones que ya vigila un servidor de visión real (cameras_demo.json) se
+con la mezcla de tipos del perfil. Los cajones que ya vigila un servidor de visión real (camaras/camaras.json) se
 omiten para no pisar lo que detecta el modelo. Usa INGEST_API_KEY del entorno o del .env. Ctrl+C para detener.
 """
 import argparse
@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "api"))
 from app.seed import ZONAS, colgantes_de_muestra  # noqa: E402  (misma distribución de islas y cámaras que la BD inicial)
 
-PERFIL_POR_DEFECTO = {  # valores del dataset de Kaggle, por si no existe demo/perfil_ocupacion.json
+PERFIL_POR_DEFECTO = {  # valores del dataset de Kaggle, por si no existe scripts/simulacion/perfil_ocupacion.json
     "ocupacion_media": 0.55,
     "duracion_horas": {"0": 0.053, "1": 0.15, "2": 0.238, "3": 0.247, "4": 0.144, "5": 0.102, "6": 0.048, "7": 0.015, "8": 0.001, "10": 0.002},
 }
@@ -115,8 +115,8 @@ def main() -> None:
     ap.add_argument("--api", default="http://localhost:8000")
     ap.add_argument("--interval", type=float, default=3.0, help="segundos entre actualizaciones")
     ap.add_argument("--hora-simulada", type=float, default=30.0, help="segundos reales que dura una hora simulada")
-    ap.add_argument("--perfil", type=Path, default=ROOT / "demo" / "perfil_ocupacion.json")
-    ap.add_argument("--vigilados", type=Path, default=ROOT / "demo" / "cameras_demo.json", help="cajones de esta configuración (si su video existe) no se simulan")
+    ap.add_argument("--perfil", type=Path, default=ROOT / "scripts" / "simulacion" / "perfil_ocupacion.json")
+    ap.add_argument("--vigilados", type=Path, default=ROOT / "demo" / "camaras/camaras.json", help="cajones de esta configuración (si su video existe) no se simulan")
     ap.add_argument("--muestra", type=int, default=150, help="cuántos colgantes de muestra hay en la BD (python -m app.seed --muestra N)")
     ap.add_argument("--zonas", default="", help="solo simula estas islas, p. ej. B,C (por defecto todas)")
     ap.add_argument("--seed", type=int, default=None)

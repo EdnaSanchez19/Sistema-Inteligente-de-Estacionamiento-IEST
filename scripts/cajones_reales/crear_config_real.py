@@ -1,17 +1,17 @@
-"""Genera demo/cameras_reales.json: las 3 cámaras reales del IEST (videos en datasets/reales) a partir de los cajones de demo/cajones_reales/."""
+"""Genera camaras/camaras.json: las 3 cámaras reales del IEST (videos en datasets/reales) a partir de los cajones de camaras/cajones/."""
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-prop = json.loads((ROOT / "demo" / "cajones_reales" / "propuesta_cam_a.json").read_text(encoding="utf-8"))
+prop = json.loads((ROOT / "camaras" / "cajones" / "propuesta_cam_a.json").read_text(encoding="utf-8"))
 # isla 1 (A): fila c dibujada a lo largo de su banqueta (los demás cajones, sin monitoreo); isla 2 (B): provisionales de los coches estacionados
-isla1 = json.loads((ROOT / "demo" / "cajones_reales" / "isla1_c_cajones.json").read_text(encoding="utf-8"))
-motos = json.loads((ROOT / "demo" / "cajones_reales" / "motos_cajones.json").read_text(encoding="utf-8"))  # esquina de motos (8 cajones, motos_cam01.py)
-isla1_d = json.loads((ROOT / "demo" / "cajones_reales" / "isla1_d_cajones.json").read_text(encoding="utf-8"))  # fila d de la isla 1 (fila_d_cam01.py)
-cajones_a = [{"id": c["id"], "polygon": c["polygon"]} for c in isla1 + isla1_d] + [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "demo" / "cajones_reales" / "por_coche_isla2.json").read_text(encoding="utf-8"))] + [{**m, "detalle_min": 4.5} for m in motos]
+isla1 = json.loads((ROOT / "camaras" / "cajones" / "isla1_c_cajones.json").read_text(encoding="utf-8"))
+motos = json.loads((ROOT / "camaras" / "cajones" / "motos_cajones.json").read_text(encoding="utf-8"))  # esquina de motos (8 cajones, motos_cam01.py)
+isla1_d = json.loads((ROOT / "camaras" / "cajones" / "isla1_d_cajones.json").read_text(encoding="utf-8"))  # fila d de la isla 1 (fila_d_cam01.py)
+cajones_a = [{"id": c["id"], "polygon": c["polygon"]} for c in isla1 + isla1_d] + [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "camaras" / "cajones" / "por_coche_isla2.json").read_text(encoding="utf-8"))] + [{**m, "detalle_min": 4.5} for m in motos]
 
 # filas 3 a 7 de la cámara general: cajones provisionales de los coches estacionados (filas por confirmar)
-prop_b = json.loads((ROOT / "demo" / "cajones_reales" / "propuesta_cam_b.json").read_text(encoding="utf-8"))
+prop_b = json.loads((ROOT / "camaras" / "cajones" / "propuesta_cam_b.json").read_text(encoding="utf-8"))
 # CAM-02 ve las filas de la 4 a la 7 (de derecha a izquierda): la 7 es la isla de la izquierda y la 6 la central, dibujadas a lo largo de su camellón
 # (islas_cam02.py); la 4 y la 5 (las de la derecha, con los coches más chicos) siguen con cajones provisionales de los coches estacionados.
 cajones_b = []
@@ -19,8 +19,8 @@ import cv2
 import numpy as np
 
 # fila 5 (letra E): la isla de la derecha de la central, dibujada a lo largo de su camellón en diagonal (islas_diagonales.py)
-isla_e = json.loads((ROOT / "demo" / "cajones_reales" / "isla_E_cajones.json").read_text(encoding="utf-8"))
-extremos = json.loads((ROOT / "demo" / "cajones_reales" / "extremos_cam02.json").read_text(encoding="utf-8"))  # cajones de los extremos (islas 5 y 6)
+isla_e = json.loads((ROOT / "camaras" / "cajones" / "isla_E_cajones.json").read_text(encoding="utf-8"))
+extremos = json.loads((ROOT / "camaras" / "cajones" / "extremos_cam02.json").read_text(encoding="utf-8"))  # cajones de los extremos (islas 5 y 6)
 polis_e = [np.array(c["polygon"], np.float32) for c in isla_e + extremos["E"]]
 # fila 4 (letra D, la de más a la derecha): provisional, de los coches estacionados casi todo el video; se omiten los que ya cubre la fila 5
 crudos = [c for letra in "CD" for c in prop_b.get(letra, [])]
@@ -36,10 +36,10 @@ for n, (_, _, poly) in enumerate(sorted(provisional_d), start=1):
 cajones_b += [{"id": c["id"], "polygon": c["polygon"]} for c in isla_e + extremos["E"] + extremos["F"]]
 # filas 6 (F, la isla central) y 7 (G, la de la izquierda): dos filas por isla dibujadas a lo largo de su camellón (islas_cam02.py)
 for letra in "FG":
-    cajones_b += [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "demo" / "cajones_reales" / f"isla_{letra}_cajones.json").read_text(encoding="utf-8"))]
+    cajones_b += [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "camaras" / "cajones" / f"isla_{letra}_cajones.json").read_text(encoding="utf-8"))]
 
 # lateral de la biblioteca: la hilera junto al bordillo de abajo de la cámara general, con vacíos incluidos (biblioteca_cam02.py)
-cajones_b += json.loads((ROOT / "demo" / "cajones_reales" / "biblioteca_cajones.json").read_text(encoding="utf-8"))
+cajones_b += json.loads((ROOT / "camaras" / "cajones" / "biblioteca_cajones.json").read_text(encoding="utf-8"))
 
 comun = {"interval_s": 1.0, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5}
 cfg = {
@@ -52,5 +52,5 @@ cfg = {
         {"id": "CAM-03", "source": "../datasets/reales/real_c.mp4", **comun, "spaces": []},          # "Entrada": flujo, no vigila cajones
     ],
 }
-(ROOT / "demo" / "cameras_reales.json").write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+(ROOT / "camaras" / "camaras.json").write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
 print("cajones CAM-01:", len(cajones_a), "| CAM-02:", len(cajones_b))

@@ -1,7 +1,7 @@
-"""Servidor de visión en modo demostración.
+"""Servidor de visión: trata cada video (o cámara) como una cámara fija, detecta con YOLO y publica a la API.
 
     cd vision
-    python -m parking_vision.demo_server --config ../demo/cameras_demo.json
+    python -m parking_vision.servidor --config ../camaras/camaras.json
 
 Procesa videos en bucle como si fueran cámaras: detecta vehículos con YOLO, calcula la ocupación de cada cajón,
 la publica en la API (igual que el servidor real) y emite el video anotado por HTTP (MJPEG) para el panel web:
@@ -9,7 +9,7 @@ la publica en la API (igual que el servidor real) y emite el video anotado por H
   http://127.0.0.1:8100/stream/CAM-01     video en vivo con detecciones y cajones
   http://127.0.0.1:8100/estado            estadísticas del modelo (JSON)
 
-El video emitido no lleva autenticación: úsalo solo en tu red local y para demostraciones.
+El video emitido no lleva autenticación: úsalo solo en tu red local.
 """
 from __future__ import annotations
 
@@ -282,7 +282,7 @@ def crear_manejador(camaras: dict[str, CamaraDemo]):
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--config", default="../demo/cameras_demo.json")
+    ap.add_argument("--config", default="../camaras/camaras.json")
     ap.add_argument("--host", default="127.0.0.1", help="usa 0.0.0.0 para verlo desde otros equipos de la red")
     ap.add_argument("--puerto", type=int, default=8100)
     ap.add_argument("--sin-api", action="store_true", help="no publica a la API (solo emite el video)")
@@ -308,14 +308,14 @@ def main() -> None:
         else:
             log.warning("%s: no existe el video %s; se omite esa cámara", c.id, c.source)
     if not disponibles:
-        raise SystemExit("Ninguna cámara tiene video. Corre scripts/simulacion/preparar_demo.py")
+        raise SystemExit("Ninguna cámara tiene video. Revisa las rutas de los videos en la configuración (camaras/camaras.json)")
     camaras = {c.id: CamaraDemo(c, cfg, detector, det_lock, publisher, modelo) for c in disponibles}
     for c in camaras.values():
         c.start()
 
     servidor = ThreadingHTTPServer((args.host, args.puerto), crear_manejador(camaras))
     servidor.daemon_threads = True
-    log.info("Demostración lista: %s cámara(s). Video en http://%s:%d/stream/<CAM>  (Ctrl+C para salir)", len(camaras), args.host, args.puerto)
+    log.info("Servidor de visión listo: %s cámara(s). Video en http://%s:%d/stream/<CAM>  (Ctrl+C para salir)", len(camaras), args.host, args.puerto)
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

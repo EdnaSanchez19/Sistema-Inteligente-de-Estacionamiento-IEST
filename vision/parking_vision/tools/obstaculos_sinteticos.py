@@ -1,7 +1,7 @@
 """Prueba controlada del estado "obstruido": inserta objetos en cajones vacíos de un video y mide si el sistema los marca.
 
-    python -m parking_vision.tools.obstaculos_sinteticos --config ../demo/cameras_demo.json --camera CAM-02 \
-        --video ../demo/camara2_cctv.mp4 --cada 0.5 \
+    python -m parking_vision.tools.obstaculos_sinteticos --config ../camaras/camaras.json --camera CAM-01 \
+        --video ../datasets/reales/real_a.mp4 --cada 0.5 \
         --insertar B-27:75:125:persona --insertar B-38:106:140:caja --salida ../salida/con_objetos.mp4
 
 Los videos disponibles no tienen obstrucciones reales (casi nunca hay algo dentro de un cajón vacío), así que se crean:

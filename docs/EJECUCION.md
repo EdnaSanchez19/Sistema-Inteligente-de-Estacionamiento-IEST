@@ -1,4 +1,4 @@
-# Ejecución del sistema con videos como cámaras
+# Ejecución del sistema
 
 El sistema funciona de punta a punta con lo que hay hoy: **videos tratados como cámaras fijas**. El modelo YOLO detecta
 los vehículos, decide qué cajones están libres u ocupados, lo publica en la API y lo guarda en la base de datos; el
@@ -14,7 +14,7 @@ python scripts/iniciar_sistema.py
 
 Abre `http://localhost:8000/panel` y deja todo corriendo hasta que presiones Ctrl+C. La primera vez prepara lo que
 falta: `.env` con claves aleatorias, la base de datos con el usuario administrador (su clave queda en
-`credenciales.txt`, que no se sube a git), el video de CAM-01 y el modelo `yolov8n.pt` (~6 MB, de Ultralytics). Con una
+`credenciales.txt`, que no se sube a git) y los modelos `yolov8n.pt` (~6 MB, de Ultralytics); `yolov8s.pt` se descarga aparte (ver `vision/README.md`). Con una
 GPU NVIDIA cada detección tarda unos 70 a 120 ms; en CPU será más lenta.
 
 Desde el panel (sección **Administración**) se registran usuarios, vehículos y colgantes. Con esos usuarios se entra a
@@ -42,46 +42,20 @@ usan los mismos puertos (8000 y 8100). Para probarlo sin instalar nada: `python 
 
 ## Qué cámaras hay
 
-El estacionamiento son **391 cajones**: 8 islas (271 cajones) y 6 zonas en el perímetro (120), según la distribución real (detalle en
-[`db/README.md`](../db/README.md)). **Las únicas cámaras que se usan son 3**, con grabaciones reales del IEST (8 minutos, 6 fps, del
-26/10/2026 a las 06:58). Los videos pesan decenas de MB y llevan personas y placas: están en `datasets/reales/`, que Git ignora, y
-se nombran `real_a.mp4`, `real_b.mp4` y `real_c.mp4`. Si están, `iniciar_sistema.py` las usa (con `demo/cameras_reales.json`); si no,
-arranca con los videos de demostración de más abajo.
+El estacionamiento son **391 cajones**: 8 filas (271 cajones; la fila 1 es la isla A, la 2 la B... la 8 la H) y 6 zonas en el perímetro (120),
+según la distribución real (detalle en [`db/README.md`](../db/README.md)). **Las únicas cámaras que se usan son 3**, con grabaciones reales del
+IEST (8 minutos, 6 fps, del 26/10/2026 a las 06:58). Los videos pesan decenas de MB y llevan personas y placas: están en `datasets/reales/`,
+que Git ignora, y se llaman `real_a.mp4`, `real_b.mp4` y `real_c.mp4`. Sin ellos `iniciar_sistema.py` no arranca y avisa cuáles faltan. La
+configuración (videos, parámetros y cajones de cada cámara) está en `camaras/camaras.json`.
 
 | Cámara | Nombre | Video | Cajones vigilados |
 |---|---|---|---|
-| CAM-01 | Isla 1 y 2 | `real_a.mp4`, 2688×1512, ojo de pez | Isla 1, fila c: 8 de sus 16 cajones (`A-09` a `A-16`), dibujados a lo largo de la banqueta con perspectiva; los otros 8 (`A-01` a `A-08`, los más lejanos, fuera del encuadre) quedan sin monitoreo. Los cajones de la isla 1 se numeran desde el más lejano. Isla 2: 16 cajones **provisionales** (`B-01` a `B-16`) tomados de los coches estacionados |
-| CAM-02 | Estacionamiento | `real_b.mp4`, 1920×1080, vista general | Ninguno todavía (se supone que verá las islas 3 a 7: por confirmar) |
+| CAM-01 | Fila 1 y 2 | `real_a.mp4`, 2688×1512, ojo de pez | 40: fila 1 (`A-09` a `A-16` y `A-26` a `A-32`, dibujados con perspectiva; el resto queda fuera del encuadre), fila 2 (`B-01` a `B-17`, un cajón por coche, sin vacíos) y la esquina de motos (`MOT-01` a `MOT-08`) |
+| CAM-02 | Estacionamiento | `real_b.mp4`, 1920×1080, vista general | 133: filas 5, 6 y 7 completas (`E`, `F`, `G`, con vacíos), fila 4 provisional (`D`, de los coches estacionados) y 18 de la lateral de la biblioteca (`BIB-01` a `BIB-18`) |
 | CAM-03 | Entrada | `real_c.mp4`, 854×480, la pluma de la caseta | No vigila cajones: es para el flujo de entradas y salidas |
 
-La isla 8 no tiene grabaciones y el perímetro no está en cámara. Los cajones los dibujará el equipo a mano sobre las rayas
-(`parking_vision.tools.define_spaces`); los provisionales salen de los coches estacionados casi todo el video.
-
-### Videos de demostración (si no están los reales)
-Hoy hay video de demostración para cuatro cámaras:
-
-| Cámara | Isla | Video | Cajones vigilados |
-|---|---|---|---|
-| CAM-01 | A | Toma aérea **generada con IA**, estabilizada para que parezca fija | 12 de 40 (9 con auto y 3 sobre asfalto vacío) |
-| CAM-02 | B | Cámara de seguridad fija (estacionamiento al aire libre, 152 s) | 52 (los coches estacionados y 16 cajones vacíos pintados en las filas lejanas) |
-| CAM-03 | C | Otra vista de esa cámara de seguridad (52 s) | 57 (los coches estacionados y 16 cajones vacíos pintados en las filas lejanas) |
-| CAM-04 | D | Estacionamiento techado, cámara fija (22 s), con un jeep que cruza el pasillo | 8 de 40 (todos ocupados: es lo único que se ve) |
-| CAM-05 a CAM-08 | E a H | — | Ninguno |
-
-**Todos los videos son de demostración** para mostrar la eficacia del modelo YOLO; no son las grabaciones de las cámaras del IEST. Los videos de CAM-02, CAM-03 y CAM-04 son de terceros y **no se incluyen en el repositorio**: cópialos a `demo/` con los
-nombres `camara2_cctv.mp4`, `camara3_cctv.mp4` y `camara4_garaje.mp4`. Sin su video, esa cámara no se activa y su isla queda
-sin monitoreo. Los cajones de cada una (`demo/cajones_cam0N.json`) sí están en el repo.
-
-### Agregar otra cámara
-
-```bash
-python scripts/cajones/agregar_camara.py --video "C:/ruta/video.mp4" --camara CAM-05 --isla E \
-    --region-marcas 380,180,1000,240 --excluir 990,620,1280,720 --imagen revisar.jpg
-```
-
-Copia el video a `demo/`, descubre los cajones con autos (YOLO sobre todo el video), arma los cajones vacíos marcados entre
-las rayas blancas de la zona indicada y regenera la configuración. **Revisa la imagen** que genera: los cajones se proponen
-automáticamente. Requiere una cámara **fija** (con una toma que se mueve los cajones no sirven).
+La fila 8 no tiene grabaciones y el resto del perímetro (caseta, gimnasio, entrada lateral, callejón) no está en cámara. Los cajones se
+dibujan sobre cada video con las herramientas de `scripts/cajones_reales/`; sus polígonos están en `camaras/cajones/`.
 
 ### "Sin monitoreo" no es "libre"
 
@@ -116,7 +90,7 @@ cámara no vio la llegada, se muestra como "al menos".
 
 ## Cómo se conecta el modelo con el sistema
 
-1. `demo_server` lee cada video a su velocidad real, como lo haría una cámara fija.
+1. `servidor` (`parking_vision.servidor`) lee cada video a su velocidad real, como lo haría una cámara fija.
 2. Cada 0.5 s YOLOv8 detecta los vehículos y `occupancy.py` decide qué cajones están ocupados, con antirrebote temporal
    y **histéresis** (un cajón ya ocupado se conserva con una detección más débil, para que un auto parcialmente tapado no
    haga parpadear el estado).
@@ -134,13 +108,12 @@ fuente es un archivo de video y no una cámara RTSP.
 
 ## Límites que hay que tener presentes
 
-- Los videos no son las cámaras del IEST. CAM-01 es generado con IA; CAM-02 a CAM-04 son cámaras reales, pero de otros
-  lugares. Los videos son cortos y se repiten en bucle, así que los eventos de un ciclo se repiten en el siguiente.
+- Las cámaras son grabaciones de 8 minutos que se repiten en bucle, no una transmisión en vivo: los eventos de un ciclo se repiten en el siguiente.
 - El video emitido se dibuja y comprime solo mientras alguien lo mira (panel abierto en Resumen o Cámaras); con nadie viendo, toda
   la capacidad queda para el modelo.
 - No hay lectura de colgantes: los vehículos aparecen como "sin colgante identificado" hasta que exista un modelo entrenado.
-- Los cajones de CAM-01 y CAM-02 se dibujaron a partir de los videos (ver `scripts/cajones/cajones_cam02.py`); la precisión real
-  del sistema solo se podrá medir con etiquetas propias (`docs/SIMULACION.md`).
+- Los cajones se dibujaron a partir de los videos (ver `scripts/cajones_reales/`) y varios son provisionales; la precisión real del sistema
+  solo se podrá medir con etiquetas propias (`docs/ETIQUETADO.md`).
 - El video emitido en el puerto 8100 no tiene autenticación: úsalo solo en tu red local.
 
 ## Simulación opcional (no es operación real)

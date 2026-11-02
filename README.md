@@ -28,7 +28,7 @@ Cámaras ──RTSP/LAN──▶ vision/ (YOLOv8 + OpenCV) ──▶ api/ (FastA
 | `vision/` | Servidor de visión: detección con YOLO, estado de cada cajón y seguimiento de coches |
 | `mobile/` | App móvil (Expo / React Native) |
 | `db/` | Esquema SQL y migraciones |
-| `demo/` | Configuración de las cámaras (`cameras_reales.json` y la de demostración) y los polígonos de los cajones (`cajones_reales/`) |
+| `camaras/` | Configuración de las 3 cámaras reales (`camaras.json`) y los polígonos de sus cajones (`cajones/`) |
 | `scripts/` | Arranque y servicio (`iniciar_sistema.py`, `servicio.ps1`) y herramientas por tema; ver `scripts/README.md` |
 | `tests/` | Pruebas de integración (las de cada parte están en su carpeta) |
 | `docs/` | Documentación: ejecución, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |

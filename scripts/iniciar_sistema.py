@@ -8,8 +8,8 @@
 Qué arranca (y se detiene todo junto con Ctrl+C):
   1. La API (FastAPI) con una base SQLite local.
   2. El servidor de visión: procesa cada video como si fuera una cámara fija, detecta vehículos con YOLO, decide qué
-     cajones están libres u ocupados, lo publica en la API y emite el video anotado. CAM-01 (isla A) usa un video
-     generado con IA; CAM-02 (isla B) usa una cámara de seguridad real si copias su video a demo/camara2_cctv.mp4.
+     cajones están libres u ocupados, lo publica en la API y emite el video anotado. Usa las 3 cámaras reales del IEST: sus
+     videos están en datasets/reales/ (real_a.mp4, real_b.mp4, real_c.mp4) y la configuración en camaras/camaras.json.
 
 Solo hay datos reales de lo que una cámara observa: los cajones que ninguna cámara cubre aparecen como "sin
 monitoreo", no como libres. `--con-simulacion` es solo para pruebas de carga o para ver el panel lleno: arranca un
@@ -83,16 +83,6 @@ def asegurar_base_de_datos(con_simulacion: bool, config: str) -> None:
     print("Base de datos creada. Clave del administrador en credenciales.txt")
 
 
-def asegurar_video() -> None:
-    if (ROOT / "demo" / "camara1_estatica.mp4").exists():
-        return
-    origen = ROOT / "evidencias" / "03_video_ia" / "video_original.mp4"
-    if not origen.exists():
-        raise SystemExit(f"Falta el video de origen: {origen}")
-    print("Preparando el video de la cámara CAM-01...")
-    subprocess.run([PY, str(ROOT / "scripts" / "simulacion" / "preparar_demo.py"), "--video", str(origen)], check=True, env=ENV)
-
-
 def asegurar_modelo() -> None:
     modelo = ROOT / "vision" / "models" / "yolov8n.pt"
     if modelo.exists():
@@ -124,15 +114,11 @@ def main() -> None:
     args = ap.parse_args()
 
     asegurar_env()
-    reales = all((ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists() for x in "abc") and (ROOT / "demo" / "cameras_reales.json").exists()
-    config = "../demo/cameras_reales.json" if reales else "../demo/cameras_demo.json"
+    faltan = [f"real_{x}.mp4" for x in "abc" if not (ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists()]
+    if faltan:
+        raise SystemExit("Faltan los videos de las cámaras en datasets/reales/: " + ", ".join(faltan) + " (ver docs/EJECUCION.md)")
+    config = "../camaras/camaras.json"
     asegurar_base_de_datos(args.con_simulacion, config)
-    if reales:
-        print("Usando los videos reales de las 3 cámaras del IEST (datasets/reales).")
-    else:
-        asegurar_video()
-        if not (ROOT / "demo" / "camara2_cctv.mp4").exists():
-            print("Aviso: sin demo/camara2_cctv.mp4 no se activa CAM-02; quedará sin monitoreo.")
     asegurar_modelo()
 
     api = f"http://127.0.0.1:{args.puerto_api}"
@@ -150,7 +136,7 @@ def main() -> None:
         procesos.append(lanzar([PY, "-m", "uvicorn", "app.main:app", "--host", args.host, "--port", str(args.puerto_api), "--log-level", "warning"], args.oculto, registro, cwd=ROOT / "api", env=ENV))
         if not esperar(f"{api}/health"):
             raise SystemExit("La API no arrancó (¿el puerto está ocupado?)")
-        procesos.append(lanzar([PY, "-m", "parking_vision.demo_server", "--config", config, "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
+        procesos.append(lanzar([PY, "-m", "parking_vision.servidor", "--config", config, "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
         if args.con_simulacion:
             print("ATENCIÓN: --con-simulacion llena el resto de los cajones con datos inventados.")
             procesos.append(lanzar([PY, str(ROOT / "scripts" / "simulacion" / "simulate_cameras.py"), "--api", api, "--interval", "3"], args.oculto, registro, silencio=True, env=ENV))

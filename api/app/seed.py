@@ -2,8 +2,8 @@
 
     python -m app.seed            # zonas, cámaras, espacios (391, como el estacionamiento real) y usuario admin
     python -m app.seed --demo     # además usuarios/vehículos de ejemplo
-    python -m app.seed --demo --muestra 150   # además 150 usuarios, vehículos y colgantes inventados (demostración)
-    python -m app.seed --vigilados ../demo/cameras_reales.json   # deja sin monitoreo los cajones que esa configuración no define
+    python -m app.seed --demo --muestra 150   # además 150 usuarios, vehículos y colgantes inventados (muestra)
+    python -m app.seed --vigilados ../camaras/camaras.json   # deja sin monitoreo los cajones que esa configuración no define
 
 Ejecutar desde la carpeta api/. La contraseña del admin sale de SEED_ADMIN_PASSWORD;
 si no existe se genera una aleatoria y se imprime una sola vez.
@@ -35,7 +35,7 @@ _ESPECIAL = {
 # (se numeran de la más lejana a la más cercana a la cámara). Quién ve qué: la de "Isla 1 y 2" ve las islas A y B; la general
 # ("Estacionamiento") ve de la C a la G (filas 3 a 7) y el perímetro; la H (fila 8) no la ve ninguna; la de la entrada no vigila cajones, solo el flujo de
 # vehículos. Que una cámara "vea" un cajón no significa que ya esté dibujado: sin su polígono en la configuración de la cámara
-# (demo/cameras_reales.json) el cajón sigue "sin monitoreo".
+# (camaras/camaras.json) el cajón sigue "sin monitoreo".
 CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vigila)
     ("CAM-01", "Fila 1 y 2", "A", "AB"),
     ("CAM-02", "Estacionamiento", "C", "CDEFG"),
@@ -115,7 +115,7 @@ def ajustar_camaras(db: Session) -> None:
 
 def reiniciar_no_vigilados(db: Session, config: str) -> int:
     """Deja "sin monitoreo" los cajones que la configuración de las cámaras no define (p. ej. los que vigilaban los videos de
-    demostración antes). No toca los reservados ni los fuera de servicio, que los fija un administrador. Devuelve cuántos reinició."""
+    los videos de antes). No toca los reservados ni los fuera de servicio, que los fija un administrador. Devuelve cuántos reinició."""
     import json
 
     cfg = json.loads(open(config, encoding="utf-8").read())
@@ -176,7 +176,7 @@ def seed_demo(db: Session) -> None:
     db.commit()
 
 
-# --- Datos de muestra para la demostración: personas, vehículos y colgantes INVENTADOS ---------------------------
+# --- Datos de muestra para la simulación: personas, vehículos y colgantes INVENTADOS ---------------------------
 # La mezcla de tipos sale del perfil del dataset de Kaggle (73 % usuarios registrados, 24 % visitantes, 3 % personal);
 # los registrados se reparten entre estudiantes y docentes y el personal entre administrativos y directivos.
 _VEHICULOS = [("Nissan", "Versa"), ("Volkswagen", "Jetta"), ("Chevrolet", "Aveo"), ("Toyota", "Corolla"), ("Mazda", "3"), ("Honda", "Civic"), ("Kia", "Rio"), ("Ford", "Fiesta")]

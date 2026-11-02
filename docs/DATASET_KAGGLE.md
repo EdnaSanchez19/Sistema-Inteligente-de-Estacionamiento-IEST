@@ -3,7 +3,7 @@
 Archivo revisado: `IIoT_Smart_Parking_Management.csv`, de
 [datasetengineer/smart-parking-management-dataset](https://www.kaggle.com/datasets/datasetengineer/smart-parking-management-dataset)
 (1000 filas, 28 columnas). Los datos **no se incluyen** en el repositorio; solo un perfil agregado
-(`demo/perfil_ocupacion.json`, generado con `scripts/simulacion/perfil_dataset.py`).
+(`scripts/simulacion/perfil_ocupacion.json`, generado con `scripts/simulacion/perfil_dataset.py`).
 
 ## Qué contiene
 

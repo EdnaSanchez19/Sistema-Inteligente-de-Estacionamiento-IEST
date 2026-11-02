@@ -71,16 +71,14 @@ python -m parking_vision.run
 
 ## Cajones de una cámara fija
 
-`python scripts/cajones/completar_cajones.py --camara CAM-02 --imagen revisar.jpg` agrega a una cámara los coches estacionados que
-quedaron fuera de sus cajones (los numera a continuación; los anteriores no cambian) y, con `--region-marcas x1,y1,x2,y2`,
-también los cajones vacíos pintados de una zona. Los cajones que existen en el sistema son los del estacionamiento real
-(`api/app/seed.py`: 391); si un video de demostración dibuja más cajones que los reales de su isla, la API ignora los sobrantes.
-Los cajones muy lejanos (rayas de pocos píxeles) no se vigilan: un auto ahí mide pocos píxeles y el modelo no lo distingue.
+Los cajones que existen en el sistema son los del estacionamiento real (`api/app/seed.py`: 391); si una cámara define un cajón que no
+existe en la base de datos, la API lo ignora. Los cajones muy lejanos (rayas de pocos píxeles) no se vigilan: un auto ahí mide pocos
+píxeles y el modelo no lo distingue.
 
-`python scripts/cajones/descubrir_cajones.py --video v.mp4` propone cajones a partir de dónde se estacionan los autos (solo donde
-hubo un auto); `scripts/cajones/cajones_cam02.py` es el ejemplo de cómo se combinaron con los cajones vacíos marcados en el pavimento
-para la cámara CAM-02. En producción los cajones se dibujan sobre las líneas con `parking_vision.tools.define_spaces`.
-`parking_vision.demo_server` procesa videos como cámaras y emite el video anotado (ver `docs/EJECUCION.md`).
+Para las 3 cámaras reales, los polígonos están en `camaras/cajones/` y `scripts/cajones_reales/crear_config_real.py` los junta en
+`camaras/camaras.json` (ver `scripts/README.md`). Para dibujar cajones nuevos sobre las líneas de un video se usa
+`python -m parking_vision.tools.define_spaces`. `parking_vision.servidor` procesa los videos como cámaras y emite el video anotado
+(ver `docs/EJECUCION.md`).
 
 ## Colgantes (clasificación + OCR)
 

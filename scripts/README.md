@@ -13,6 +13,5 @@ Lo que se usa a diario está en esta carpeta; lo demás, agrupado por tema.
 | Carpeta | Contenido |
 |---|---|
 | `etiquetado/` | Etiquetar coches para ajustar el modelo: `preparar_etiquetado.py` y `etiquetar_coches.py` (ver `docs/ETIQUETADO.md`) |
-| `cajones_reales/` | Cámaras reales del IEST: `crear_config_real.py` arma `demo/cameras_reales.json` a partir de los polígonos de `demo/cajones_reales/`; `islas_cam02.py`, `islas_diagonales.py` y `cajon_por_coche.py` son las herramientas con las que se dibujaron |
-| `cajones/` | Dibujar cajones de los videos de demostración (`descubrir_cajones.py`, `completar_cajones.py`, `agregar_camara.py`, `cajones_lib.py`) |
-| `simulacion/` | Datos inventados y videos de prueba: `simulate_cameras.py`, `simular_rtsp.py`, `crear_video_prueba.py`, `preparar_demo.py`, `perfil_dataset.py` (ver `docs/SIMULACION.md`) |
+| `cajones_reales/` | Cámaras reales del IEST: `crear_config_real.py` arma `camaras/camaras.json` a partir de los polígonos de `camaras/cajones/`; `islas_cam02.py`, `islas_diagonales.py` y `cajon_por_coche.py` son las herramientas con las que se dibujaron |
+| `simulacion/` | Datos inventados y videos de prueba: `simulate_cameras.py`, `simular_rtsp.py`, `crear_video_prueba.py`, `perfil_dataset.py` (ver `docs/SIMULACION.md`) |

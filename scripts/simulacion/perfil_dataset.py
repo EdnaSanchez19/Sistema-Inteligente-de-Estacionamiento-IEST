@@ -2,11 +2,11 @@
 
     python scripts/simulacion/perfil_dataset.py --csv datasets/kaggle_smart_parking/IIoT_Smart_Parking_Management.csv
 
-Escribe demo/perfil_ocupacion.json con proporciones (no copia los datos): ocupación media, distribución de la duración
+Escribe scripts/simulacion/perfil_ocupacion.json con proporciones (no copia los datos): ocupación media, distribución de la duración
 de la estancia y mezcla de tipos de usuario y de vehículo. Lo usa scripts/simulacion/simulate_cameras.py.
 
 OJO: el dataset es sintético (1000 filas generadas, con sensores sin relación con la ocupación y fechas/horas
-incoherentes; ver docs/DATASET_KAGGLE.md). Sirve para darle forma realista a la demostración, no como dato real.
+incoherentes; ver docs/DATASET_KAGGLE.md). Sirve para darle forma realista a la simulación, no como dato real.
 """
 import argparse
 import csv
@@ -26,7 +26,7 @@ def proporciones(valores) -> dict[str, float]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--csv", required=True, type=Path)
-    ap.add_argument("--salida", type=Path, default=ROOT / "demo" / "perfil_ocupacion.json")
+    ap.add_argument("--salida", type=Path, default=ROOT / "scripts" / "simulacion" / "perfil_ocupacion.json")
     args = ap.parse_args()
 
     with args.csv.open(encoding="utf-8", newline="") as f:

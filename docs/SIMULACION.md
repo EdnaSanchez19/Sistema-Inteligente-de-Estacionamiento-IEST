@@ -173,7 +173,7 @@ cada uno; una clase sin casos aparece como "n/d", no como 0 %.
 **Los videos disponibles no tienen obstrucciones reales**: se detectaron los objetos que no son vehículos en los cuatro
 videos y casi nunca hay algo dentro de un cajón vacío (solo personas, y 2 detecciones sueltas en CAM-03). Por eso se creó
 `obstaculos_sinteticos`, una prueba **controlada con montaje** (el objeto se pega sobre el video, la verdad es conocida).
-Resultado sobre CAM-02, cajones B-27 y B-38 (videos de demostración, no las cámaras del IEST):
+Resultado sobre CAM-02, cajones B-27 y B-38 (video de una cámara de seguridad de otro lugar, usado en una etapa anterior; ya no forma parte del proyecto):
 
 | Objeto insertado | ¿Se marcó obstruido? | Detalle |
 |---|---|---|

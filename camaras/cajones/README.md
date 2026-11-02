@@ -1,7 +1,7 @@
 # Cajones de las cámaras reales
 
 Polígonos de los cajones dibujados sobre los videos reales (en píxeles del video). `scripts/cajones_reales/crear_config_real.py` los junta
-en `demo/cameras_reales.json`, que es lo que lee el servidor de visión.
+en `camaras/camaras.json`, que es lo que lee el servidor de visión.
 
 | Archivo | Qué es |
 |---|---|

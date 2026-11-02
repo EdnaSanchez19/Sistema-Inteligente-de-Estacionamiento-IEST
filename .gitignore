@@ -38,9 +38,6 @@ herramientas_externas/
 credenciales_demo.txt
 *.db
 
-# Demostración: el video estabilizado se genera con scripts/simulacion/preparar_demo.py
-demo/*.mp4
-demo/*.jpg
 credenciales.txt
 logs/
 *.pid

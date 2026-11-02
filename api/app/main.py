@@ -39,7 +39,7 @@ app.include_router(sistema.router)
 
 @app.get("/panel", include_in_schema=False)
 def panel() -> FileResponse:
-    """Panel web de una sola página con la disponibilidad en vivo (para demostraciones)."""
+    """Panel web de una sola página con la disponibilidad en vivo (para ver el estado en vivo)."""
     return FileResponse(Path(__file__).parent / "static" / "panel.html", media_type="text/html", headers={"Cache-Control": "no-cache"})  # que un cambio del panel se vea sin forzar la recarga
 
 
