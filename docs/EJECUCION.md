@@ -50,7 +50,7 @@ arranca con los videos de demostración de más abajo.
 
 | Cámara | Nombre | Video | Cajones vigilados |
 |---|---|---|---|
-| CAM-01 | Isla 1 y 2 | `real_a.mp4`, 2688×1512, ojo de pez | 22 cajones **provisionales** de las islas 1 (A) y 2 (B) de un total de 68; la isla 1 es la fila del fondo (la más lejana) y se numera hacia la cámara |
+| CAM-01 | Isla 1 y 2 | `real_a.mp4`, 2688×1512, ojo de pez | Isla 1, fila c: 8 de sus 16 cajones (`A-09` a `A-16`), dibujados a lo largo de la banqueta con perspectiva; los otros 8 (`A-01` a `A-08`, los más lejanos, fuera del encuadre) quedan sin monitoreo. Los cajones de la isla 1 se numeran desde el más lejano. Isla 2: 16 cajones **provisionales** (`B-01` a `B-16`) tomados de los coches estacionados |
 | CAM-02 | Estacionamiento | `real_b.mp4`, 1920×1080, vista general | Ninguno todavía (se supone que verá las islas 3 a 7: por confirmar) |
 | CAM-03 | Entrada | `real_c.mp4`, 854×480, la pluma de la caseta | No vigila cajones: es para el flujo de entradas y salidas |
 

@@ -8,8 +8,9 @@
 - **Una cámara puede ver varias islas.** Antes cada cámara era de una sola isla (`CAM-01` a `CAM-08`); ahora la cámara de cada cajón se
   asigna por cajón, las cámaras sobrantes se eliminan al iniciar y los avisos de isla llena se calculan por cada isla que ve la cámara.
   La isla 1 es la A (la más lejana a la cámara), la 2 la B, etc.; la isla 8 queda sin cámara por ahora.
-- **Cajones provisionales** en `CAM-01`: 22 de las islas 1 y 2 sacados de los coches estacionados casi todo el video. Cubren una parte
-  pequeña (68 cajones en total): el resto se dibujará a mano sobre las rayas. YOLOv8n a 1920 px falla con algunos coches grandes
+- **Isla 1, fila c** (16 cajones, numerados desde el más lejano): se dibujaron a lo largo de la banqueta con perspectiva y entran 8 en el
+  encuadre (`A-09` a `A-16`); los 8 más lejanos quedan sin monitoreo. En un fotograma de prueba los 3 coches de la fila caen en su cajón
+  (con `occupied_ratio` 0.22 en `CAM-01`, porque los cajones son franjas largas). Isla 2: 16 cajones provisionales de los coches estacionados. YOLOv8n a 1920 px falla con algunos coches grandes
   vistos desde arriba y confunde objetos lejanos; se descargó `yolov8s.pt` para compararlo, sin una ventaja clara sin etiquetas.
 
 ## Sin versión — distribución real del estacionamiento y mapa (29/10/2026)
