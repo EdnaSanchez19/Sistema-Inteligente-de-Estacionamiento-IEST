@@ -2,6 +2,11 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Panel: estados que no dependen solo del color y contrastes de texto >= 4.5:1** (revisión de diseño). Libre = cajón hueco (relleno claro
+  con aro), ocupado = macizo con un coche, obstruido = amarillo con "!", reservado = "R", fuera de servicio = "×"; en las barras y la gráfica,
+  libre va rayado. Con deuteranopia simulada, libre y ocupado pasan de 1.04:1 a distinguirse a simple vista. Rellenos más oscuros
+  (`#1E7D46`, `#C23030`, `#3B68C2`, `#6B7480`), texto marino sobre el naranja de la marca y naranja oscuro (`#B84508`) para texto
+  naranja sobre blanco; el modo oscuro usa acentos más claros.
 - **Etiquetado de coches** para ajustar el modelo (`docs/ETIQUETADO.md`): `scripts/preparar_etiquetado.py` saca 100 fotogramas de los videos
   reales y los pre-marca; `scripts/etiquetar_coches.py` abre una herramienta local en el navegador para corregir las cajas (dibujar,
   borrar, zoom, copiar de la anterior, deshacer). Todo queda en `datasets/etiquetado/`, fuera de Git.

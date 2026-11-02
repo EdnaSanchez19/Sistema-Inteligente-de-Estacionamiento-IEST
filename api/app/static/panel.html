@@ -12,14 +12,21 @@
   :root {
     --marino: #132539; --naranja: #f86923; --naranja-fuerte: #ff5900; --naranja-suave: #fff1e8; --fondo: #f7f7f7; --tarjeta: #ffffff; --texto: #222222; --suave: #666666; --borde: #e4e4e4; --hover: #f1f1f1;
     --titular: "Zilla Slab", Georgia, serif; --marca-fuente: Montserrat, "Segoe UI", system-ui, sans-serif;
-    --libre: #2e9e5b; --ocupado: #d64545; --obstruido: #f2c200; --reservado: #4f7fd9; --fuera: #8a93a0; --sin: #b9aea8; --ok: #2e9e5b; --mal: #d64545;
+    /* relleno de los cajones (texto blanco encima, contraste >= 4.5:1) */
+    --libre: #1e7d46; --ocupado: #c23030; --obstruido: #f2c200; --reservado: #3b68c2; --fuera: #6b7480; --sin: #b9aea8;
+    /* acentos: texto, líneas y puntos sobre el fondo de la página (en el modo oscuro son más claros) */
+    --libre-a: #1e7d46; --ocupado-a: #c23030; --obstruido-a: #8a6a00; --reservado-a: #3b68c2; --fuera-a: #6b7480;
+    --libre-tinte: #e3f1e9; --libre-texto: #0f4d2a; --naranja-texto: #b84508; --ok: #1e7d46; --mal: #c23030;
+    --icono-coche: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M5 11l1.6-4.5A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.5L19 11a2 2 0 0 1 2 2v5h-2v-2H5v2H3v-5a2 2 0 0 1 2-2zm1.5 2.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zm11 0a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM7.6 7l-1 3h10.8l-1-3z'/%3E%3C/svg%3E");
     --sombra: 0 1px 2px rgba(19,37,57,.06), 0 6px 18px rgba(19,37,57,.05);
   }
   /* oscuro: lo pide el sistema operativo, salvo que el botón del panel haya fijado un tema */
   @media (prefers-color-scheme: dark) {
-    :root:not([data-tema="claro"]) { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45); }
+    :root:not([data-tema="claro"]) { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45);
+      --libre-a: #4cc27f; --ocupado-a: #ff7b7b; --obstruido-a: #f2c200; --reservado-a: #7ba3f2; --fuera-a: #a3acb8; --libre-tinte: #173d33; --libre-texto: #9be6bb; --naranja-texto: #ff8a50; --ok: #4cc27f; --mal: #ff7b7b; }
   }
-  :root[data-tema="oscuro"] { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45); }
+  :root[data-tema="oscuro"] { --fondo: #0e1a29; --tarjeta: #132539; --texto: #f2f4f7; --suave: #a9b6c6; --borde: #263c55; --hover: #1b3350; --sin: #4d6177; --naranja-suave: #3a2a22; --sombra: 0 1px 2px rgba(0,0,0,.45);
+      --libre-a: #4cc27f; --ocupado-a: #ff7b7b; --obstruido-a: #f2c200; --reservado-a: #7ba3f2; --fuera-a: #a3acb8; --libre-tinte: #173d33; --libre-texto: #9be6bb; --naranja-texto: #ff8a50; --ok: #4cc27f; --mal: #ff7b7b; }
   :root[data-tema="claro"] { color-scheme: light; } :root[data-tema="oscuro"] { color-scheme: dark; }
   * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
   html, body { height: 100%; }
@@ -33,17 +40,17 @@
   #app.login { display: block; }
   aside { background: var(--tarjeta); color: var(--texto); border-right: 1px solid var(--borde); display: flex; flex-direction: column; padding: 22px 12px 18px; position: sticky; top: 0; height: 100vh; }
   .marca { display: flex; align-items: center; gap: 11px; padding: 0 8px 18px; }
-  .logo { width: 38px; height: 38px; border-radius: 6px; background: var(--naranja); color: #fff; display: grid; place-items: center; font-family: var(--marca-fuente); font-weight: 800; font-size: 21px; flex: none; }
+  .logo { width: 38px; height: 38px; border-radius: 6px; background: var(--naranja); color: var(--marino); display: grid; place-items: center; font-family: var(--marca-fuente); font-weight: 800; font-size: 21px; flex: none; }
   .marca b { display: block; font-family: var(--marca-fuente); font-size: 15px; font-weight: 800; letter-spacing: .02em; line-height: 1.15; text-transform: uppercase; } .marca small { color: var(--suave); font-size: 11.5px; }
   nav { display: grid; gap: 3px; }
   nav button { display: flex; align-items: center; gap: 11px; background: transparent; border: 0; color: var(--texto); padding: 11px 12px; border-radius: 5px; cursor: pointer; text-align: left; font-family: var(--marca-fuente); font-size: 12.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
   nav button:hover { background: var(--hover); }
-  nav button.sel { background: var(--naranja-suave); color: var(--naranja-fuerte); font-weight: 700; box-shadow: inset 3px 0 0 var(--naranja); }
+  nav button.sel { background: var(--naranja-suave); color: var(--naranja-texto); font-weight: 700; box-shadow: inset 3px 0 0 var(--naranja); }
   nav svg { width: 19px; height: 19px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   nav .cuenta { margin-left: auto; font-size: 11px; background: var(--hover); color: var(--suave); padding: 1px 8px; border-radius: 99px; }
   .lado-pie { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid var(--borde); font-size: 12.5px; display: grid; gap: 8px; }
   .lado-pie button { background: transparent; border: 1px solid var(--borde); color: var(--texto); padding: 8px; border-radius: 5px; cursor: pointer; font-family: var(--marca-fuente); font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-  .lado-pie button:hover { border-color: var(--naranja); color: var(--naranja-fuerte); }
+  .lado-pie button:hover { border-color: var(--naranja); color: var(--naranja-texto); }
   .conexion { display: flex; align-items: center; gap: 7px; color: var(--suave); }
 
   main { padding: 20px 26px 60px; min-width: 0; }
@@ -86,24 +93,30 @@
   .pestanas { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .pestanas button { border: 1px solid var(--borde); background: transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; }
   .pestanas button:hover { background: var(--hover); }
-  .pestanas button.sel { background: var(--naranja); border-color: var(--naranja); color: #fff; }
+  .pestanas button.sel { background: var(--naranja); border-color: var(--naranja); color: var(--marino); }
   .datos { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 13px; color: var(--suave); }
   .datos b { color: var(--texto); }
 
   /* ---------- islas ---------- */
   .leyenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--suave); align-items: center; }
-  .leyenda span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+  .leyenda span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; background: var(--c) var(--i, none) center / 9px no-repeat; box-shadow: inset 0 0 0 2px var(--b, transparent); vertical-align: -2px; }
   .leyenda .sin::before { background: repeating-linear-gradient(45deg, var(--sin) 0 2px, transparent 2px 4px); border: 1px solid var(--sin); }
   .islas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
   .isla-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .isla-cab h4 { font-size: 17px; } .isla-cab span { font-size: 12.5px; color: var(--suave); }
   .cobertura { display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 99px; background: var(--hover); color: var(--suave); margin-top: 6px; }
-  .cobertura.total { background: #2e9e5b22; color: var(--libre); } .cobertura.nula { background: transparent; border: 1px dashed var(--sin); }
+  .cobertura.total { background: color-mix(in srgb, var(--libre-a) 14%, transparent); color: var(--libre-a); } .cobertura.nula { background: transparent; border: 1px dashed var(--sin); }
+  .barra i.o { background: var(--ocupado-a); } .barra i.b { background: var(--obstruido); } .barra i.l { background: repeating-linear-gradient(135deg, var(--libre-a) 0 3px, transparent 3px 6px); }
   .cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(33px, 1fr)); gap: 5px; margin-top: 12px; }
   .cajon { height: 33px; border-radius: 7px; color: #fff; font-weight: 700; font-size: 11.5px; display: grid; place-items: center; position: relative; cursor: pointer; border: 0; padding: 0; transition: transform .15s, background .4s; }
   .cajon:hover { transform: scale(1.12); z-index: 2; }
   .cajon small { position: absolute; top: 0; right: 3px; font-size: 8px; }
-  .libre { background: var(--libre); } .ocupado { background: var(--ocupado); } .obstruido { background: var(--obstruido); color: #3b2f00; } .reservado { background: var(--reservado); } .fuera_de_servicio { background: var(--fuera); }
+  /* el estado no depende solo del color: libre = hueco (relleno claro y aro), ocupado = macizo con un coche, obstruido = amarillo con !, reservado = R, fuera de servicio = x */
+  .libre { background: var(--libre-tinte); color: var(--libre-texto); box-shadow: inset 0 0 0 2px var(--libre-a); }
+  .ocupado { background: var(--ocupado); } .obstruido { background: var(--obstruido); color: #3b2f00; } .reservado { background: var(--reservado); } .fuera_de_servicio { background: var(--fuera); }
+  .cajon.ocupado::after { content: ""; position: absolute; right: 2px; bottom: 2px; width: 9px; height: 9px; background: var(--icono-coche) center / contain no-repeat; }
+  .cajon.obstruido::after, .cajon.reservado::after, .cajon.fuera_de_servicio::after { position: absolute; right: 3px; bottom: 1px; font-size: 9px; line-height: 10px; font-weight: 900; }
+  .cajon.obstruido::after { content: "!"; color: #3b2f00; } .cajon.reservado::after { content: "R"; color: #fff; } .cajon.fuera_de_servicio::after { content: "×"; color: #fff; }
   .cajon.sin { background: repeating-linear-gradient(45deg, var(--sin) 0 2px, transparent 2px 5px); color: var(--suave); border: 1px solid var(--sin); font-weight: 500; }
   .cajon.cambio { animation: destello 2.4s ease-out; }
   @keyframes destello { 0% { box-shadow: 0 0 0 0 var(--naranja); transform: scale(1.2); } 60% { box-shadow: 0 0 0 9px #f8692300; } 100% { transform: scale(1); } }
@@ -125,7 +138,7 @@
   }
   .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .filtros button { border: 1px solid var(--borde); background: var(--tarjeta); padding: 6px 13px; border-radius: 999px; cursor: pointer; font-size: 13px; }
-  .filtros button.sel { background: var(--naranja); border-color: var(--naranja); color: #fff; }
+  .filtros button.sel { background: var(--naranja); border-color: var(--naranja); color: var(--marino); }
   .filtros input[type=search], .campo input, .campo select { border: 1px solid var(--borde); background: var(--tarjeta); color: var(--texto); padding: 8px 11px; border-radius: 10px; font: inherit; min-width: 0; }
 
   /* ---------- listas y tablas ---------- */
@@ -163,7 +176,7 @@
   form.campos { display: grid; gap: 10px; }
   .campo { display: grid; gap: 4px; font-size: 12.5px; color: var(--suave); }
   .campo input, .campo select { color: var(--texto); font-size: 14px; }
-  .boton { background: var(--naranja); color: #fff; border: 0; padding: 11px 18px; border-radius: 5px; font-family: var(--marca-fuente); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .boton { background: var(--naranja); color: var(--marino); border: 0; padding: 11px 18px; border-radius: 5px; font-family: var(--marca-fuente); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .boton:hover:not(:disabled) { background: var(--naranja-fuerte); }
   .boton:disabled { opacity: .5; cursor: default; }
 
@@ -192,7 +205,7 @@
   .portada p { font-size: 15.5px; line-height: 1.5; max-width: 480px; opacity: .92; }
   .acceso { position: relative; display: grid; place-items: center; padding: 40px 28px; }
   .acceso .tema { position: absolute; top: 20px; right: 22px; background: transparent; border: 1px solid var(--borde); color: var(--suave); padding: 7px 12px; border-radius: 5px; cursor: pointer; font-family: var(--marca-fuente); font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-  .acceso .tema:hover { border-color: var(--naranja); color: var(--naranja-fuerte); }
+  .acceso .tema:hover { border-color: var(--naranja); color: var(--naranja-texto); }
   .acceso .pie { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; color: var(--suave); font-size: 12px; }
   .login { width: min(390px, 100%); display: grid; gap: 12px; text-align: center; padding: 32px 30px; border-top: 4px solid var(--naranja); }
   @media (max-width: 860px) {
@@ -244,7 +257,7 @@ const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
 const ESTADO = { libre: "Libre", ocupado: "Ocupado", obstruido: "Obstruido", reservado: "Reservado", fuera_de_servicio: "Fuera de servicio" };
 const TIPO_ESPACIO = { general: "General", discapacidad: "Accesibilidad", directivo: "Directivo", visitante: "Visitante", motocicleta: "Motocicleta" };
 const MARCA_TIPO = { discapacidad: "♿", directivo: "★", visitante: "V", motocicleta: "M" };
-const COLOR_EVENTO = { entrada: "#2e9e5b", salida: "#132539", cambio_ocupacion: "#c99700", error_deteccion: "#d64545", camara_desconectada: "#d64545", camara_restablecida: "#2e9e5b", obstruccion: "#c99700", obstruccion_retirada: "#2e9e5b" };
+const COLOR_EVENTO = { entrada: "#1e7d46", salida: "#132539", cambio_ocupacion: "#8a6a00", error_deteccion: "#c23030", camara_desconectada: "#c23030", camara_restablecida: "#1e7d46", obstruccion: "#8a6a00", obstruccion_retirada: "#2e9e5b" };
 const NOMBRE_EVENTO = { entrada: "entrada", salida: "salida", cambio_ocupacion: "cambio manual", error_deteccion: "confianza baja", camara_desconectada: "cámara caída", camara_restablecida: "cámara restablecida", obstruccion: "obstrucción", obstruccion_retirada: "obstrucción retirada" };
 
 let token = sessionStorage.getItem("token");
@@ -388,7 +401,7 @@ function vistaResumen() {
   return h("section", { class: "vista", id: "vista-resumen" },
     h("div", { class: "kpis", id: "kpis" }),
     h("div", { class: "rejilla dos" },
-      h("div", { class: "tarjeta" }, h("h3", null, "Cámara en vivo · detección con YOLO", h("span", { class: "leyenda nota" }, h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:#e6e6e6", text: "Vehículo" }))),
+      h("div", { class: "tarjeta" }, h("h3", null, "Cámara en vivo · detección con YOLO", h("span", { class: "leyenda nota" }, h("span", { style: "--c:var(--ocupado);--i:var(--icono-coche)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--libre-tinte);--b:var(--libre-a)", text: "Libre" }), h("span", { style: "--c:#e6e6e6", text: "Vehículo" }))),
         h("div", { class: "pestanas", id: "pestanas-resumen" }),
         h("div", { class: "video" }, h("img", { id: "video-resumen", alt: "Video de la cámara con las detecciones del modelo" }), h("div", { class: "fuera", id: "fuera-resumen", hidden: true })),
         h("div", { class: "datos", id: "datos-video" })),
@@ -398,7 +411,7 @@ function vistaResumen() {
         h("div", { class: "tarjeta" }, h("h3", null, "Seguimiento de coches", h("span", { class: "nota", text: "en vivo, por cámara" })), h("div", { id: "seguimiento" })),
         h("div", { class: "tarjeta" }, h("h3", null, "Cobertura por fila", h("span", { class: "nota", text: "cajones que una cámara observa" })), h("div", { id: "cobertura-islas", style: "display:grid;gap:9px" })))),
     h("div", { class: "rejilla dos-iguales" },
-      h("div", { class: "tarjeta" }, h("h3", null, "Últimos eventos", h("a", { href: "#eventos", style: "text-transform:none;letter-spacing:0;font-weight:500;color:var(--naranja)", text: "ver todos", onclick: (e) => { e.preventDefault(); ir("eventos"); } })), h("div", { id: "ultimos-eventos" })),
+      h("div", { class: "tarjeta" }, h("h3", null, "Últimos eventos", h("a", { href: "#eventos", style: "text-transform:none;letter-spacing:0;font-weight:500;color:var(--naranja-texto)", text: "ver todos", onclick: (e) => { e.preventDefault(); ir("eventos"); } })), h("div", { id: "ultimos-eventos" })),
       h("div", { class: "tarjeta" }, h("h3", null, "Avisos"), h("div", { id: "avisos" }))));
 }
 function kpi(rot, val, sub, color, extra) {
@@ -411,9 +424,9 @@ function pintarResumen() {
   const barraCob = h("div", { class: "barra" }, h("i", { style: `width:${pct(monit, total)}%;background:var(--naranja)` }));
   $("kpis").replaceChildren(
     kpi("Cajones monitoreados", [String(monit), h("small", { text: ` de ${total}` })], `Cobertura ${pct(monit, total)} %`, null, barraCob),
-    kpi("Libres", String(e.libre), monit ? `${pct(e.libre, util)} % de los monitoreados` : "sin datos aún", "var(--libre)"),
-    kpi("Ocupados", String(e.ocupado), monit ? `${pct(e.ocupado, util)} % de los monitoreados` : "sin datos aún", "var(--ocupado)"),
-    kpi("Obstruidos", String(e.obstruido), e.obstruido ? "un objeto ocupa el cajón sin ser un vehículo" : "ningún objeto en cajones vacíos", "var(--obstruido)"),
+    kpi("Libres", String(e.libre), monit ? `${pct(e.libre, util)} % de los monitoreados` : "sin datos aún", "var(--libre-a)"),
+    kpi("Ocupados", String(e.ocupado), monit ? `${pct(e.ocupado, util)} % de los monitoreados` : "sin datos aún", "var(--ocupado-a)"),
+    kpi("Obstruidos", String(e.obstruido), e.obstruido ? "un objeto ocupa el cajón sin ser un vehículo" : "ningún objeto en cajones vacíos", "var(--obstruido-a)"),
     kpi("Vehículos detectados", String(vehiculos), v.length ? `en ${v.length} cámara${v.length > 1 ? "s" : ""}` : "sin servidor de visión", null),
     kpi("Cámaras en línea", [String(S.estado.camaras.en_linea), h("small", { text: ` de ${S.estado.camaras.total}` })], `${S.estado.eventos_ultimo_minuto} eventos en el último minuto`, null));
 
@@ -436,7 +449,7 @@ function pintarResumen() {
   const islas = agruparIslas();
   $("cobertura-islas").replaceChildren(...islas.map((i) => h("div", { style: "cursor:pointer", onclick: () => { S.isla = i.nombre; ir("islas"); } },
     h("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, h("b", { text: rotulo(i.nombre) }), h("span", { style: "color:var(--suave)", text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") + ` · ${i.monit}/${i.total}` : `sin monitorear · 0/${i.total}` })),
-    h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })))));
+    h("div", { class: "barra" }, h("i", { class: "o", style: `width:${pct(i.ocupados, i.total)}%` }), h("i", { class: "b", style: `width:${pct(i.obstruidos, i.total)}%` }), h("i", { class: "l", style: `width:${pct(i.libres, i.total)}%` })))));
 
   const ev = S.eventos, cont = $("ultimos-eventos"); cont.replaceChildren();
   if (ev === null) cont.append(h("div", { class: "vacio", text: "Los eventos son visibles solo para administradores." }));
@@ -484,7 +497,9 @@ function dibujarSerie(canvas, pts) {
   g.strokeStyle = borde; g.lineWidth = 1; g.fillStyle = suave; g.font = "11px system-ui"; g.textAlign = "right";
   for (let i = 0; i <= 3; i++) { const v = Math.round((max * i) / 3), y = Y(v); g.beginPath(); g.moveTo(izq, y); g.lineTo(w - 6, y); g.stroke(); g.fillText(v, izq - 6, y + 4); }
   const serie = (clave, color) => { g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(X(p), Y(p[clave])) : g.moveTo(X(p), Y(p[clave])))); g.strokeStyle = color; g.lineWidth = 2.2; g.stroke(); g.lineTo(X(pts[pts.length - 1]), Y(0)); g.lineTo(X(pts[0]), Y(0)); g.closePath(); g.fillStyle = color + "26"; g.fill(); };
-  serie("libres", "#2e9e5b"); serie("ocupados", "#d64545"); if (pts.some((p) => p.obstruidos)) serie("obstruidos", "#f2c200");
+  const col = (v) => estilo.getPropertyValue(v).trim();
+  g.setLineDash([7, 4]); serie("libres", col("--libre-a")); g.setLineDash([]);  // libres a rayas y ocupados continua: se distinguen sin color
+  serie("ocupados", col("--ocupado-a")); if (pts.some((p) => p.obstruidos)) serie("obstruidos", "#f2c200");
   g.fillStyle = suave; g.textAlign = "left"; g.fillText(hora(pts[0].t), izq, hh - 4); g.textAlign = "right"; g.fillText(hora(pts[pts.length - 1].t), w - 6, hh - 4);
 }
 
@@ -498,7 +513,7 @@ function pintarCamaras() {
     let t = cont.querySelector(`[data-tarjeta="${c.codigo}"]`);
     const v = vision.get(c.codigo);
     if (!t) { t = h("div", { class: "tarjeta camara-tarj", "data-tarjeta": c.codigo }, h("div", { class: "camara-cab" }), h("div", { class: "cuerpo-video" }), h("div", { class: "datos" })); cont.append(t); }
-    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.nombre ? ` · ${c.nombre}` : c.isla ? ` · ${rotulo(c.isla)}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "#2e9e5b" : "#d64545"}` }));
+    t.querySelector(".camara-cab").replaceChildren(h("b", null, c.codigo, c.nombre ? ` · ${c.nombre}` : c.isla ? ` · ${rotulo(c.isla)}` : ""), h("span", { class: "insignia", text: c.estado === "en_linea" ? "en línea" : "desconectada", style: `background:${c.estado === "en_linea" ? "var(--libre)" : "var(--ocupado)"}` }));
     const cv = t.querySelector(".cuerpo-video");
     if (v && !cv.querySelector("img")) {
       const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
@@ -527,7 +542,7 @@ function vistaIslas() {
   return h("section", { class: "vista", id: "vista-islas" },
     h("div", { class: "tarjeta", style: "display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between" },
       h("div", { class: "filtros", id: "filtro-islas" }),
-      h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
+      h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre-tinte);--b:var(--libre-a)", text: "Libre" }), h("span", { style: "--c:var(--ocupado);--i:var(--icono-coche)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
     h("div", { class: "islas", id: "islas" }));
 }
 function pintarIslas() {
@@ -540,7 +555,7 @@ function pintarIslas() {
     const clase = i.monit === 0 ? "nula" : i.monit === i.total ? "total" : "";
     const t = h("div", { class: "tarjeta" }, h("div", { class: "isla-cab" }, h("h4", { text: rotulo(i.nombre) }), h("span", { text: i.monit ? `${i.libres} libres · ${i.ocupados} ocupados` + (i.obstruidos ? ` · ${i.obstruidos} obstruidos` : "") : "sin monitorear" })),
       h("span", { class: "cobertura " + clase, text: `Cobertura ${i.monit}/${i.total} · ${pct(i.monit, i.total)} %` }),
-      h("div", { class: "barra" }, h("i", { style: `width:${pct(i.ocupados, i.total)}%;background:var(--ocupado)` }), h("i", { style: `width:${pct(i.obstruidos, i.total)}%;background:var(--obstruido)` }), h("i", { style: `width:${pct(i.libres, i.total)}%;background:var(--libre)` })));
+      h("div", { class: "barra" }, h("i", { class: "o", style: `width:${pct(i.ocupados, i.total)}%` }), h("i", { class: "b", style: `width:${pct(i.obstruidos, i.total)}%` }), h("i", { class: "l", style: `width:${pct(i.libres, i.total)}%` })));
     t.append(h("div", { class: "cajones" }, i.lista.map(botonCajon))); cont.append(t);
   }
 }
@@ -557,7 +572,7 @@ function vistaMapa() {
   return h("section", { class: "vista", id: "vista-mapa" },
     h("div", { class: "tarjeta" },
       h("div", { class: "titulo" }, h("span", { text: "Plano del estacionamiento" }),
-        h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre)", text: "Libre" }), h("span", { style: "--c:var(--ocupado)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
+        h("div", { class: "leyenda" }, h("span", { style: "--c:var(--libre-tinte);--b:var(--libre-a)", text: "Libre" }), h("span", { style: "--c:var(--ocupado);--i:var(--icono-coche)", text: "Ocupado" }), h("span", { style: "--c:var(--obstruido)", text: "Obstruido" }), h("span", { style: "--c:var(--reservado)", text: "Reservado" }), h("span", { style: "--c:var(--fuera)", text: "Fuera de servicio" }), h("span", { class: "sin", text: "Sin monitoreo" }))),
       h("div", { class: "plano", id: "plano" }),
       h("p", { class: "nota-plano", id: "nota-plano" })));
 }
@@ -616,7 +631,7 @@ function pintarEventos() {
   for (const e of lista) {
     const cajon = (e.descripcion.match(/\b[A-H]-\d{2}\b/) || [""])[0];
     tb.append(h("tr", null, h("td", { class: "mono", text: fechaHora(e.fecha) }), h("td", null, h("span", { class: "insignia", text: NOMBRE_EVENTO[e.tipo] || e.tipo, style: `background:${COLOR_EVENTO[e.tipo] || "#888"}` })),
-      h("td", null, cajon ? h("a", { href: "#", style: "color:var(--naranja);font-weight:600", text: cajon, onclick: (ev) => { ev.preventDefault(); abrirCajon(cajon); } }) : "—"), h("td", { text: e.descripcion })));
+      h("td", null, cajon ? h("a", { href: "#", style: "color:var(--naranja-texto);font-weight:600", text: cajon, onclick: (ev) => { ev.preventDefault(); abrirCajon(cajon); } }) : "—"), h("td", { text: e.descripcion })));
   }
 }
 
@@ -685,7 +700,7 @@ function pintarSistema() {
     const dl = h("dl", { class: "detalle" });
     for (const [k, val] of [["Modelo", x.modelo], ["Dispositivo", x.dispositivo.startsWith("cuda") ? `GPU (${x.dispositivo})` : x.dispositivo], ["Tamaño de entrada", x.imgsz + " px"], ["Confianza mínima", Math.round(x.umbral_confianza * 100) + " %"], ["Latencia por detección", x.latencia_ms.toFixed(0) + " ms"], ["Detecciones por segundo", x.fps_deteccion.toFixed(1)], ["Video", `${x.resolucion} · ${x.fps_video} fps`], ["Cajones vigilados", x.espacios], ["Último reporte", `hace ${x.hace_s.toFixed(0)} s`]]) dl.append(h("dt", { text: k }), h("dd", { text: String(val) }));
     const cv = h("canvas", { class: "grafica", style: "height:90px" });
-    cont.append(h("div", { class: "tarjeta" }, h("h3", null, x.camara, h("span", { class: "insignia", style: `background:${x.hace_s <= 15 ? "#2e9e5b" : "#d64545"}`, text: x.hace_s <= 15 ? "reportando" : "sin reporte" })), dl, h("div", { class: "datos", style: "margin:0 0 6px", text: "Latencia reciente" }), cv));
+    cont.append(h("div", { class: "tarjeta" }, h("h3", null, x.camara, h("span", { class: "insignia", style: `background:${x.hace_s <= 15 ? "var(--libre)" : "var(--ocupado)"}`, text: x.hace_s <= 15 ? "reportando" : "sin reporte" })), dl, h("div", { class: "datos", style: "margin:0 0 6px", text: "Latencia reciente" }), cv));
     const lat = S.latCam[x.camara] || []; requestAnimationFrame(() => dibujarLinea(cv, lat));
   }
 }
