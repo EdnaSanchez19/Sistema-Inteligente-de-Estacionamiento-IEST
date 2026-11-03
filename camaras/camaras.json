@@ -12,6 +12,7 @@
       "footprint": 0.6,
       "confirm_occupied": 2,
       "confirm_free": 5,
+      "confirm_obstruido": 2,
       "mosaicos": [
         3,
         2
@@ -1171,6 +1172,7 @@
       "footprint": 0.6,
       "confirm_occupied": 2,
       "confirm_free": 5,
+      "confirm_obstruido": 2,
       "asignar_por_punto": true,
       "obstaculo_grande": 0.4,
       "mosaicos": [
@@ -3983,6 +3985,7 @@
       "footprint": 0.6,
       "confirm_occupied": 2,
       "confirm_free": 5,
+      "confirm_obstruido": 2,
       "spaces": []
     }
   ]

@@ -2,6 +2,9 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Obstruido se confirma con 2 observaciones (antes 6)** en las 3 cámaras. Con dos modelos y mosaicos cada ciclo tarda ~3 s, así que 6 observaciones eran ~18 s:
+  una persona de pie en un cajón unos segundos nunca se marcaba. Repetido el video a ritmo real, salen 3 obstrucciones en CAM-01 (`A-09`, `A-10`, `BIB-24`), las 3
+  personas de pie en el cajón; en CAM-02 la persona de `BIB-07` está solo ~4 s y sigue sin confirmarse. El soporte amarillo de `BIB-07` no se detecta (YOLO no tiene esa clase).
 - **Biblioteca, tramo junto a las motos (CAM-01): 10 cajones** (`BIB-19` a `BIB-28`, desde la esquina de motos hacia la garita; siguen la hilera `BIB-01` a `BIB-18` de CAM-02),
   en diagonal al bordillo como están estacionados los coches. Antes los había dibujado como "Lateral caseta" y en paralelo al bordillo, mal. `BIB-29` en adelante
   quedan fuera del encuadre. La lateral de la caseta vuelve a estar sin monitorear.

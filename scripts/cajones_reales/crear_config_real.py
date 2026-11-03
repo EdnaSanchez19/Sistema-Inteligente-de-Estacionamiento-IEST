@@ -41,7 +41,7 @@ for letra in "FG":
 # lateral de la biblioteca: la hilera junto al bordillo de abajo de la cámara general, con vacíos incluidos (biblioteca_cam02.py)
 cajones_b += json.loads((ROOT / "camaras" / "cajones" / "biblioteca_cajones.json").read_text(encoding="utf-8"))
 
-comun = {"interval_s": 1.0, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5}
+comun = {"interval_s": 1.0, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "confirm_obstruido": 2}
 cfg = {
     "model": "models/yolov8n.pt",
     "model_extra": "models/yolov8s.pt",
