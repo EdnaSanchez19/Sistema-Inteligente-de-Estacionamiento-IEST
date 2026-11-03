@@ -52,5 +52,13 @@ cfg = {
         {"id": "CAM-03", "source": "../datasets/reales/real_c.mp4", **comun, "spaces": []},          # "Entrada": flujo, no vigila cajones
     ],
 }
+# cajones bloqueados por un objeto fijo que YOLO no reconoce: salen obstruidos mientras no haya un vehículo
+BLOQUEADOS = {"BIB-07": "soporte",  # soporte amarillo en medio del cajón
+              "BIB-23": "cono", "BIB-24": "cono", "BIB-25": "cono"}  # fila de conos en la boca de estos cajones
+for cam_ in cfg["cameras"]:
+    for sp in cam_["spaces"]:
+        if sp["id"] in BLOQUEADOS:
+            sp["bloqueado"] = BLOQUEADOS[sp["id"]]
+
 (ROOT / "camaras" / "camaras.json").write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
 print("cajones CAM-01:", len(cajones_a), "| CAM-02:", len(cajones_b))

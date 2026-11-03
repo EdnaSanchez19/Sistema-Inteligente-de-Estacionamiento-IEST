@@ -52,6 +52,7 @@ class Space:
     id: str  # coincide con espacios.numero en la BD, p. ej. "A-03"
     polygon: np.ndarray  # (N, 2) float32, en píxeles del fotograma
     detalle_min: float | None = None  # % de bordes dentro del cajón a partir del cual hay algo encima (para vehículos que el modelo casi no ve, como las motos)
+    bloqueado: str | None = None  # objeto fijo que bloquea el cajón y YOLO no conoce ("cono", "soporte"): el cajón vacío sale obstruido siempre
 
 
 @dataclass
@@ -101,7 +102,7 @@ def _space(raw: dict) -> Space:
     poly = np.asarray(raw["polygon"], dtype=np.float32)
     if poly.ndim != 2 or poly.shape[1] != 2 or len(poly) < 3:
         raise ValueError(f"Polígono inválido en el cajón {raw.get('id')}: se requieren >= 3 puntos [x, y]")
-    return Space(id=str(raw["id"]), polygon=poly, detalle_min=raw.get("detalle_min"))
+    return Space(id=str(raw["id"]), polygon=poly, detalle_min=raw.get("detalle_min"), bloqueado=raw.get("bloqueado"))
 
 
 def load_config(path: str | Path) -> Config:

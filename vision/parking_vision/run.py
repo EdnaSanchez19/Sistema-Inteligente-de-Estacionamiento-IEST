@@ -44,6 +44,13 @@ def densidad_de_bordes(frame, polygon) -> float:
     return float((bordes[mascara > 0] > 0).mean() * 100)
 
 
+def _marcar_bloqueados(spaces, states) -> None:
+    """Un cajón con `bloqueado` (un cono o un soporte fijo que YOLO no reconoce) sale obstruido mientras no tenga un vehículo: el vehículo manda."""
+    for i, (sp, st) in enumerate(zip(spaces, states)):
+        if sp.bloqueado and not st.occupied:
+            states[i] = SpaceState(sp.id, False, 0.9, obstructed=True, obstacle=sp.bloqueado)
+
+
 def _marcar_por_detalle(spaces, states, frame) -> None:
     """Los cajones con `detalle_min` (motos) se marcan ocupados si el modelo no vio nada pero hay detalle encima."""
     for i, (sp, st) in enumerate(zip(spaces, states)):
@@ -65,6 +72,7 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
     states = compute_states(cam.spaces, vehicles, obstacles, cam.occupied_ratio, cam.footprint, cam.obstaculo_ratio, por_punto=cam.asignar_por_punto, obstaculo_grande=cam.obstaculo_grande)
     _marcar_por_detalle(cam.spaces, states, frame)
+    _marcar_bloqueados(cam.spaces, states)
     if ocupados_previos:
         debiles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= (cam.conf_baja if cam.conf_baja is not None else cam.conf * 0.6)]
         con_debiles = {s.id: s for s in compute_occupancy(cam.spaces, debiles, cam.occupied_ratio, cam.footprint, cam.asignar_por_punto)}

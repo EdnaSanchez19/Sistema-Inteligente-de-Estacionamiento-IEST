@@ -221,3 +221,21 @@ def test_un_objeto_que_cubre_medio_cajon_es_un_vehiculo_no_una_obstruccion():
     assert compute_states(cajones, [], [maleta_grande], obstaculo_grande=0.4)[0].estado == "ocupado"
     assert compute_states(cajones, [], [maleta_grande])[0].estado == "obstruido"  # sin la regla se comporta como siempre
     assert compute_states(cajones, [], [maleta_chica], obstaculo_grande=0.4)[0].estado == "obstruido"  # una maleta de verdad sigue siendo obstrucción
+
+
+def test_un_cajon_bloqueado_sale_obstruido_aunque_yolo_no_vea_nada_y_el_vehiculo_manda():
+    from parking_vision.run import process_frame
+
+    class Nada:
+        def detect(self, frame, mosaicos=None):
+            return []
+
+    class Coche:
+        def detect(self, frame, mosaicos=None):
+            return [Detection(5, 20, 95, 190, 0.9, AUTO)]
+
+    cam = CameraConfig(id="C", source="x", spaces=[Space("A-01", rect(0, 0, 100, 200), bloqueado="cono"), Space("A-02", rect(200, 0, 300, 200))])
+    frame = np.zeros((220, 320, 3), np.uint8)
+    est = {s.id: (s.estado, s.obstacle) for s in process_frame(cam, Nada(), frame)[0]}
+    assert est == {"A-01": ("obstruido", "cono"), "A-02": ("libre", None)}
+    assert process_frame(cam, Coche(), frame)[0][0].estado == "ocupado"  # un coche estacionado ahí manda sobre el cono

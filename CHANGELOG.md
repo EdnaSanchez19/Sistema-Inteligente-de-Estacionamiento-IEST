@@ -2,6 +2,10 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Cajones bloqueados por objetos fijos** (`bloqueado` por cajón en `camaras/camaras.json`): YOLO no conoce los conos ni el soporte amarillo, así que
+  `BIB-07` (soporte amarillo) y `BIB-23`, `BIB-24`, `BIB-25` (fila de conos en su boca) salen **obstruidos siempre** mientras no tengan un vehículo (un coche manda;
+  `BIB-25` hoy tiene uno). Se aplica a ojo desde el video: si se quita un cono o el soporte, hay que quitar la marca en `scripts/cajones_reales/crear_config_real.py`
+  y regenerar. El cono junto al SUV (`BIB-22`) no cuenta porque el cajón está ocupado.
 - **Obstruido se confirma con 2 observaciones (antes 6)** en las 3 cámaras. Con dos modelos y mosaicos cada ciclo tarda ~3 s, así que 6 observaciones eran ~18 s:
   una persona de pie en un cajón unos segundos nunca se marcaba. Repetido el video a ritmo real, salen 3 obstrucciones en CAM-01 (`A-09`, `A-10`, `BIB-24`), las 3
   personas de pie en el cajón; en CAM-02 la persona de `BIB-07` está solo ~4 s y sigue sin confirmarse. El soporte amarillo de `BIB-07` no se detecta (YOLO no tiene esa clase).
