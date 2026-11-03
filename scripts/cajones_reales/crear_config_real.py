@@ -8,7 +8,7 @@ prop = json.loads((ROOT / "camaras" / "cajones" / "propuesta_cam_a.json").read_t
 isla1 = json.loads((ROOT / "camaras" / "cajones" / "isla1_c_cajones.json").read_text(encoding="utf-8"))
 motos = json.loads((ROOT / "camaras" / "cajones" / "motos_cajones.json").read_text(encoding="utf-8"))  # esquina de motos (8 cajones, motos_cam01.py)
 isla1_d = json.loads((ROOT / "camaras" / "cajones" / "isla1_d_cajones.json").read_text(encoding="utf-8"))  # fila d de la isla 1 (fila_d_cam01.py)
-cajones_a = [{"id": c["id"], "polygon": c["polygon"]} for c in isla1 + isla1_d] + [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "camaras" / "cajones" / "por_coche_isla2.json").read_text(encoding="utf-8"))] + [{**m, "detalle_min": 4.5} for m in motos] + json.loads((ROOT / "camaras" / "cajones" / "lateral_caseta.json").read_text(encoding="utf-8"))  # lateral de la caseta (lateral_caseta.py)
+cajones_a = [{"id": c["id"], "polygon": c["polygon"]} for c in isla1 + isla1_d] + [{"id": c["id"], "polygon": c["polygon"]} for c in json.loads((ROOT / "camaras" / "cajones" / "por_coche_isla2.json").read_text(encoding="utf-8"))] + [{**m, "detalle_min": 4.5} for m in motos] + json.loads((ROOT / "camaras" / "cajones" / "biblioteca_esquina.json").read_text(encoding="utf-8"))  # tramo de la biblioteca junto a las motos, BIB-19 en adelante (biblioteca_esquina.py)
 
 # filas 3 a 7 de la cámara general: cajones provisionales de los coches estacionados (filas por confirmar)
 prop_b = json.loads((ROOT / "camaras" / "cajones" / "propuesta_cam_b.json").read_text(encoding="utf-8"))

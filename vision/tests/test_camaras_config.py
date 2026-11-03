@@ -38,4 +38,4 @@ def test_conserva_motos_y_biblioteca(camaras):
     motos = [s for s in camaras["CAM-01"].spaces if s.id.startswith("MOT-")]
     assert sorted(s.id for s in motos) == [f"MOT-{i:02d}" for i in range(1, 9)] and all(s.detalle_min for s in motos)
     assert len([s for s in camaras["CAM-02"].spaces if s.id.startswith("BIB-")]) == 18
-    assert len([s for s in camaras["CAM-01"].spaces if s.id.startswith("CAS-")]) == 9  # lateral de la caseta
+    assert len([s for s in camaras["CAM-01"].spaces if s.id.startswith("BIB-")]) == 10  # tramo de la biblioteca junto a las motos (BIB-19 en adelante)
