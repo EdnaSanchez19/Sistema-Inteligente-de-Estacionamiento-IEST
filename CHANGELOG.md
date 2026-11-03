@@ -2,6 +2,9 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Lateral de la caseta (CAM-01): 9 de sus 16 cajones** (`CAS-01` a `CAS-09`, desde la esquina de motos hacia la garita), en paralelo al bordillo y con
+  tamaño de coche; los otros 7 quedan fuera del encuadre. En 12 fotogramas: el SUV blanco, el sedán y el SUV plateado salen ocupados siempre y el
+  coche gris (medio tapado) la mitad de las veces. "Lateral caseta" pasa a verse en la cámara "Fila 1 y 2".
 - **Fila 2 (CAM-01): 21 cajones** (`B-01` a `B-21`): se agregaron 4 pickups blancas del fondo de la isla que la auditoría de cobertura encontró fuera de
   todo cajón. Auditoría: 45 coches estables en CAM-01 y 70 en CAM-02; quedan fuera de cajón los de la zona de la caseta, el SUV plateado del
   extremo de la fila 1, dos coches del fondo de la fila 7 y los coches muy chicos del fondo derecho de CAM-02.

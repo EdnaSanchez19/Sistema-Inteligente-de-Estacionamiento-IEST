@@ -5,6 +5,7 @@ en `camaras/camaras.json`, que es lo que lee el servidor de visión.
 
 | Archivo | Qué es |
 |---|---|
+| `lateral_caseta.json` | Lateral de la caseta (`CAS-01` a `CAS-09`) |
 | `isla1_c_cajones.json`, `isla1_d_cajones.json` | Fila 1 (isla A), filas c y d (`A-09` a `A-16` y `A-26` a `A-32`) |
 | `motos_cajones.json` | Esquina de motos (`MOT-01` a `MOT-08`) |
 | `por_coche_isla2.json` | Fila 2 (isla B): un cajón por cada coche visible |

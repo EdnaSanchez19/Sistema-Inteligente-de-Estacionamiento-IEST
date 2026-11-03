@@ -42,7 +42,7 @@ CAMARAS = [  # (código, nombre, zona a la que pertenece, islas cuyos cajones vi
     ("CAM-03", "Entrada", "Lateral caseta", ""),
 ]
 CAMARA_DEL_PERIMETRO = "CAM-02"   # el perímetro lo ve la cámara general...
-CAMARA_DE_ZONA = {"Esquina motos": "CAM-01"}  # ...salvo la esquina de motos, que se ve en la cámara "Fila 1 y 2"
+CAMARA_DE_ZONA = {"Esquina motos": "CAM-01", "Lateral caseta": "CAM-01"}  # ...salvo la esquina de motos y la lateral de la caseta, que se ven en la cámara "Fila 1 y 2"
 
 
 def camara_del_perimetro(zona: str) -> str:
