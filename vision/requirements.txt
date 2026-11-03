@@ -2,6 +2,7 @@ numpy>=1.26
 opencv-python>=4.9
 ultralytics>=8.3          # YOLOv8 / YOLO11
 requests>=2.31
+scipy>=1.11            # emparejamiento del seguimiento de coches
 
 # OCR del ID del colgante (opcional, se usa solo si está instalado)
 # easyocr>=1.7

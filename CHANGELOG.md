@@ -2,6 +2,12 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Docker completo** (`scripts/docker.ps1`, `docs/DOCKER.md`): PostgreSQL + API con el panel + servidor de visión con GPU, con un solo comando. Prepara las claves,
+  enciende Docker Desktop, construye y levanta. Los videos, los modelos y la configuración de las cámaras se montan desde el disco (no van en las imágenes).
+  La API crea las tablas, los 391 cajones y el administrador al arrancar. Los puertos solo se abren en este equipo.
+- **Arranque más claro**: `scripts/abrir_panel.bat` (con acceso directo en el Escritorio) abre el panel y, si el sistema está apagado, lo enciende y espera;
+  `iniciar_sistema.py` registra cuánto tarda cada paso (`logs/sistema.log`) y el panel dice "Esperando al servidor de visión" mientras carga, en lugar de "sin video".
+  Tras iniciar sesión en Windows el arranque llegó a tardar ~10 minutos; no se encontró la causa, el registro de tiempos servirá para localizarla.
 - **Cajones bloqueados por objetos fijos** (`bloqueado` por cajón en `camaras/camaras.json`): YOLO no conoce los conos ni el soporte amarillo, así que
   `BIB-07` (soporte amarillo) y `BIB-23`, `BIB-24`, `BIB-25` (fila de conos en su boca) salen **obstruidos siempre** mientras no tengan un vehículo (un coche manda;
   `BIB-25` hoy tiene uno). Se aplica a ojo desde el video: si se quita un cono o el soporte, hay que quitar la marca en `scripts/cajones_reales/crear_config_real.py`

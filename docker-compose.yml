@@ -1,3 +1,7 @@
+# Sistema completo: PostgreSQL + API con el panel + servidor de visión (GPU).
+#   scripts\docker.ps1            lo prepara y lo levanta con un solo comando (ver docs/DOCKER.md)
+#   docker compose up -d --build  a mano (necesita .env con POSTGRES_PASSWORD, JWT_SECRET, INGEST_API_KEY y SEED_ADMIN_PASSWORD)
+# No lo uses a la vez que el servicio de Windows (scripts\servicio.ps1): comparten los puertos 8000 y 8100.
 services:
   db:
     image: postgres:16-alpine
@@ -7,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,11 +26,43 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?define SEED_ADMIN_PASSWORD en .env (lo hace scripts/docker.ps1)}
+    volumes:
+      - ./camaras:/srv/camaras:ro
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  vision:
+    build: ./vision
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+      INGEST_API_KEY: ${INGEST_API_KEY}
+    volumes:
+      - ./camaras:/srv/camaras:ro
+      - ./datasets/reales:/srv/datasets/reales:ro
+      - ./vision/models:/srv/vision/models:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8100:8100"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 volumes:
   pgdata:

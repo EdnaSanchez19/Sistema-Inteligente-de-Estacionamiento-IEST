@@ -6,6 +6,8 @@ Lo que se usa a diario está en esta carpeta; lo demás, agrupado por tema.
 |---|---|
 | `iniciar_sistema.py` | Arranca API, visión y panel (`python scripts/iniciar_sistema.py`) |
 | `servicio.ps1` / `servicio.bat` | Deja el sistema corriendo en segundo plano en Windows (`instalar`, `estado`, `detener`, `reiniciar`, `quitar`) |
+| `abrir_panel.bat` | Doble clic: abre el panel y, si el sistema está apagado, lo enciende y espera a que cargue (hay un acceso directo en el Escritorio) |
+| `docker.ps1` | Levanta todo en Docker (PostgreSQL + API + visión con GPU): `docker.ps1`, `detener`, `estado`, `logs`, `borrar` (ver `docs/DOCKER.md`) |
 | `run_tests.py` | Corre todas las pruebas |
 | `check_env.py` | Revisa que el entorno esté completo |
 | `export_schema.py` | Regenera `db/schema.sql` desde los modelos |

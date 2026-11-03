@@ -42,3 +42,4 @@ credenciales.txt
 logs/
 *.pid
 api/dev.db.copia*
+credenciales.docker.txt

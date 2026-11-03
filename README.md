@@ -31,11 +31,13 @@ Cámaras ──RTSP/LAN──▶ vision/ (YOLOv8 + OpenCV) ──▶ api/ (FastA
 | `camaras/` | Configuración de las 3 cámaras reales (`camaras.json`) y los polígonos de sus cajones (`cajones/`) |
 | `scripts/` | Arranque y servicio (`iniciar_sistema.py`, `servicio.ps1`) y herramientas por tema; ver `scripts/README.md` |
 | `tests/` | Pruebas de integración (las de cada parte están en su carpeta) |
-| `docs/` | Documentación: ejecución, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |
+| `docs/` | Documentación: ejecución, Docker, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |
 | `evidencias/` | Evidencias de pruebas y resultados |
 | `datasets/` | **No se sube a Git.** Videos reales de las cámaras (`reales/`), fotogramas para etiquetar (`etiquetado/`) y ejemplos |
 | `herramientas_externas/` | **No se sube a Git.** `mediamtx`, para la prueba de cámara RTSP simulada |
 | `logs/` | **No se sube a Git.** Registro del servicio |
+
+**Con Docker (todo en contenedores, un comando):** `scripts\docker.ps1`; ver [`docs/DOCKER.md`](docs/DOCKER.md).
 
 ## Requisitos
 

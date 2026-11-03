@@ -65,12 +65,14 @@ switch ($Accion) {
     }
     'iniciar' {
         if (-not (Tarea)) { throw 'El servicio no esta instalado. Usa: scripts\servicio.ps1 instalar' }
+        Enable-ScheduledTask -TaskName $Nombre | Out-Null   # docker.ps1 la desactiva mientras se usa Docker
         if (Responde) { Write-Host 'Ya esta corriendo: http://localhost:8000/panel'; break }
         Start-ScheduledTask -TaskName $Nombre
         if (Esperar-Sistema) { Write-Host 'Listo: http://localhost:8000/panel' } else { Write-Host "No respondio a tiempo. Revisa $Registro"; exit 1 }
     }
     'detener' { Detener-Sistema; Write-Host 'Sistema detenido.' }
     'reiniciar' {
+        Enable-ScheduledTask -TaskName $Nombre | Out-Null
         Detener-Sistema; Start-Sleep -Seconds 3
         Start-ScheduledTask -TaskName $Nombre
         if (Esperar-Sistema) { Write-Host 'Listo: http://localhost:8000/panel' } else { Write-Host "No respondio a tiempo. Revisa $Registro"; exit 1 }

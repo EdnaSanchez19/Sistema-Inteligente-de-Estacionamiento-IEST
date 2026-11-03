@@ -547,7 +547,7 @@ function pintarCamaras() {
       const img = h("img", { "data-camara": c.codigo, alt: "Video de " + c.codigo, onclick: () => abrirVideo(c.codigo) });
       cv.replaceChildren(h("div", { class: "video", onclick: () => abrirVideo(c.codigo) }, img, h("div", { class: "fuera", hidden: true }))); if (S.vista === "camaras") conectarVideo(img, c.codigo, img.nextElementSibling);
     } else if (!v && !cv.querySelector(".sinvideo")) {
-      cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: "Sin video configurado" }), h("span", { text: "Esta cámara todavía no tiene video conectado al modelo." })));
+      cv.replaceChildren(h("div", { class: "sinvideo" }, h("b", { text: S.estado.vision.length ? "Sin video configurado" : "Esperando al servidor de visión" }), h("span", { text: S.estado.vision.length ? "Esta cámara todavía no tiene video conectado al modelo." : "Está iniciando (al encender la computadora puede tardar unos minutos). Esta pantalla se actualiza sola." })));
     }
     const d = t.querySelector(".datos"); d.replaceChildren();
     if (v) for (const [k, val] of [["Vehículos", v.vehiculos], ["Vigilados", `${v.ocupados} ocupados · ${v.libres} libres` + (v.obstruidos ? ` · ${v.obstruidos} obstruidos` : "")], ["Latencia", `${v.latencia_ms.toFixed(0)} ms`], ["FPS video", v.fps_video]]) d.append(h("span", null, k + ": ", h("b", { text: String(val) })));

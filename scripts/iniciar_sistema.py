@@ -113,15 +113,7 @@ def main() -> None:
     ap.add_argument("--con-simulacion", action="store_true", help="agrega un simulador con datos inventados para el resto de los cajones")
     args = ap.parse_args()
 
-    asegurar_env()
-    faltan = [f"real_{x}.mp4" for x in "abc" if not (ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists()]
-    if faltan:
-        raise SystemExit("Faltan los videos de las cámaras en datasets/reales/: " + ", ".join(faltan) + " (ver docs/EJECUCION.md)")
-    config = "../camaras/camaras.json"
-    asegurar_base_de_datos(args.con_simulacion, config)
-    asegurar_modelo()
-
-    api = f"http://127.0.0.1:{args.puerto_api}"
+    t0 = time.time()
     procesos: list[subprocess.Popen] = []
     registro = None
     if args.oculto:
@@ -132,15 +124,34 @@ def main() -> None:
         (LOGS / "sistema.pid").write_text(str(os.getpid()), encoding="utf-8")
         sys.stdout = sys.stderr = registro  # con pythonw no hay consola: lo que se imprima queda en el registro
         print(f"\n=== {time.strftime('%Y-%m-%d %H:%M:%S')} arranque (API en {args.host}:{args.puerto_api}) ===", flush=True)
+
+    def paso(texto: str) -> None:
+        print(f"[{time.time() - t0:5.0f} s] {texto}", flush=True)
+
+    api = f"http://127.0.0.1:{args.puerto_api}"
+    paso("iniciando")
+    asegurar_env()
+    paso("entorno listo")
+    faltan = [f"real_{x}.mp4" for x in "abc" if not (ROOT / "datasets" / "reales" / f"real_{x}.mp4").exists()]
+    if faltan:
+        raise SystemExit("Faltan los videos de las cámaras en datasets/reales/: " + ", ".join(faltan) + " (ver docs/EJECUCION.md)")
+    config = "../camaras/camaras.json"
+    asegurar_base_de_datos(args.con_simulacion, config)
+    paso("base de datos lista")
+    asegurar_modelo()
+    paso("modelos listos; arrancando la API")
+
     try:
         procesos.append(lanzar([PY, "-m", "uvicorn", "app.main:app", "--host", args.host, "--port", str(args.puerto_api), "--log-level", "warning"], args.oculto, registro, cwd=ROOT / "api", env=ENV))
-        if not esperar(f"{api}/health"):
+        if not esperar(f"{api}/health", 300):
             raise SystemExit("La API no arrancó (¿el puerto está ocupado?)")
+        paso("API lista; arrancando el servidor de visión")
         procesos.append(lanzar([PY, "-m", "parking_vision.servidor", "--config", config, "--puerto", str(args.puerto_video)], args.oculto, registro, cwd=ROOT / "vision", env={**ENV, "API_URL": api}))
         if args.con_simulacion:
             print("ATENCIÓN: --con-simulacion llena el resto de los cajones con datos inventados.")
             procesos.append(lanzar([PY, str(ROOT / "scripts" / "simulacion" / "simulate_cameras.py"), "--api", api, "--interval", "3"], args.oculto, registro, silencio=True, env=ENV))
-        esperar(f"http://127.0.0.1:{args.puerto_video}/estado", 120)
+        esperar(f"http://127.0.0.1:{args.puerto_video}/estado", 600)
+        paso("servidor de visión listo")
         url = f"{api.replace('127.0.0.1', 'localhost')}/panel"
         print(f"\nSistema listo: {url}\nUsuario y clave: credenciales.txt\nCtrl+C para detener todo.\n")
         if not args.sin_navegador and not args.oculto:
