@@ -2,6 +2,9 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Fila 2 (CAM-01): 21 cajones** (`B-01` a `B-21`): se agregaron 4 pickups blancas del fondo de la isla que la auditoría de cobertura encontró fuera de
+  todo cajón. Auditoría: 45 coches estables en CAM-01 y 70 en CAM-02; quedan fuera de cajón los de la zona de la caseta, el SUV plateado del
+  extremo de la fila 1, dos coches del fondo de la fila 7 y los coches muy chicos del fondo derecho de CAM-02.
 - **Se retira el modo demostración.** Fuera: los videos de demostración y su configuración (`cameras_demo.json`, `cajones_cam0N.json`), las
   herramientas para dibujar cajones sobre ellos (`scripts/cajones/`, `preparar_demo.py`) y sus pruebas. `iniciar_sistema.py` ya no tiene
   alternativa: sin los videos reales de `datasets/reales/` avisa cuáles faltan. La carpeta `demo/` pasa a `camaras/` (`camaras.json` y los
