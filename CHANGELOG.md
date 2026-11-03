@@ -2,6 +2,9 @@
 
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
+- **Lateral del gimnasio (CAM-02): 18 cajones** (`GIM-01` a `GIM-18`) en la franja de asfalto junto al edificio "Bienvenidos", a la izquierda de la fila 7, perpendiculares al
+  bordillo amarillo y achicándose con la perspectiva; `GIM-01` es el más cercano a la cámara. Dibujados a ojo: no hay coches ni rayas visibles en el video. `GIM-01` y `GIM-02`
+  salen obstruidos ("soporte"): los caballetes amarillos de la entrada de la franja.
 - **Docker completo** (`scripts/docker.ps1`, `docs/DOCKER.md`): PostgreSQL + API con el panel + servidor de visión con GPU, con un solo comando. Prepara las claves,
   enciende Docker Desktop, construye y levanta. Los videos, los modelos y la configuración de las cámaras se montan desde el disco (no van en las imágenes).
   La API crea las tablas, los 391 cajones y el administrador al arrancar. Los puertos solo se abren en este equipo.

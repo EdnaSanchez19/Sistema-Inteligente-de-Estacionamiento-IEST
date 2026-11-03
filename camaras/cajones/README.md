@@ -10,5 +10,6 @@ en `camaras/camaras.json`, que es lo que lee el servidor de visión.
 | `motos_cajones.json` | Esquina de motos (`MOT-01` a `MOT-08`) |
 | `por_coche_isla2.json` | Fila 2 (isla B): un cajón por cada coche visible |
 | `isla_E_cajones.json`, `isla_F_cajones.json`, `isla_G_cajones.json`, `extremos_cam02.json` | Filas 5, 6 y 7 de la cámara general, y los cajones de los extremos |
+| `lateral_gimnasio.json` | Lateral del gimnasio, la franja junto al edificio (`GIM-01` a `GIM-18`; el 1 es el más cercano a la cámara) |
 | `biblioteca_cajones.json` | Lateral de la biblioteca (`BIB-01` a `BIB-18`) |
 | `propuesta_cam_a.json`, `propuesta_cam_b.json` | Cajones provisionales sacados de los coches estacionados (la fila 4 sale de aquí) |

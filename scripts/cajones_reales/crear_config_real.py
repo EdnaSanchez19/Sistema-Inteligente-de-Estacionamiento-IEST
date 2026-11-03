@@ -40,6 +40,8 @@ for letra in "FG":
 
 # lateral de la biblioteca: la hilera junto al bordillo de abajo de la cámara general, con vacíos incluidos (biblioteca_cam02.py)
 cajones_b += json.loads((ROOT / "camaras" / "cajones" / "biblioteca_cajones.json").read_text(encoding="utf-8"))
+# lateral del gimnasio: la franja junto al edificio, a la izquierda de la fila 7 (lateral_gimnasio.py)
+cajones_b += json.loads((ROOT / "camaras" / "cajones" / "lateral_gimnasio.json").read_text(encoding="utf-8"))
 
 comun = {"interval_s": 1.0, "conf": 0.35, "occupied_ratio": 0.3, "footprint": 0.6, "confirm_occupied": 2, "confirm_free": 5, "confirm_obstruido": 2}
 cfg = {
@@ -54,7 +56,8 @@ cfg = {
 }
 # cajones bloqueados por un objeto fijo que YOLO no reconoce: salen obstruidos mientras no haya un vehículo
 BLOQUEADOS = {"BIB-07": "soporte",  # soporte amarillo en medio del cajón
-              "BIB-23": "cono", "BIB-24": "cono", "BIB-25": "cono"}  # fila de conos en la boca de estos cajones
+              "BIB-23": "cono", "BIB-24": "cono", "BIB-25": "cono",
+              "GIM-01": "soporte", "GIM-02": "soporte"}  # caballetes amarillos a la entrada de la franja del gimnasio  # fila de conos en la boca de estos cajones
 for cam_ in cfg["cameras"]:
     for sp in cam_["spaces"]:
         if sp["id"] in BLOQUEADOS:
