@@ -17,6 +17,7 @@
         3,
         2
       ],
+      "mosaicos_solo_cajones": true,
       "conf_seguimiento": 0.2,
       "spaces": [
         {

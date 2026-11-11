@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, Field
 
 from .tiempo import segundos_desde
-from .models import Camara, Colgante, Espacio, Evento, Notificacion, Rol, TipoColgante, TipoEspacio, EstadoEspacio, Usuario, Vehiculo
+from .models import Alerta, Camara, Colgante, Espacio, Evento, Notificacion, Rol, TipoColgante, TipoEspacio, EstadoEspacio, Usuario, Vehiculo
 
 
 def _utc(dt: datetime | None) -> datetime | None:
@@ -115,6 +115,30 @@ class CamaraOut(BaseModel):
         return cls(id=c.id, camara=c.codigo, nombre=c.nombre, zona=c.zona.nombre, estado=c.estado.value, ultimaSenal=c.ultima_senal)
 
 
+class AlertaOut(BaseModel):
+    id: int
+    tipo: str
+    mensaje: str
+    espacio: str | None = None
+    zona: str | None = None
+    camara: str | None = None
+    activa: bool
+    creada: UtcDatetime
+    resuelta: UtcDatetime | None = None
+    atendida: UtcDatetime | None = None
+    atendidaPor: str | None = None
+    duracion_s: int | None = None  # cuánto lleva el cajón en el estado que disparó la alerta (solo mientras está activa)
+
+    @classmethod
+    def of(cls, a: Alerta) -> "AlertaOut":
+        e = a.espacio
+        return cls(
+            id=a.id, tipo=a.tipo, mensaje=a.mensaje, espacio=e.numero if e else None, zona=e.zona.rotulo if e else None, camara=a.camara.codigo if a.camara else None,
+            activa=a.activa, creada=a.creada_en, resuelta=a.resuelta_en, atendida=a.atendida_en, atendidaPor=a.atendida_por.nombre if a.atendida_por else None,
+            duracion_s=segundos_desde(e.estado_desde) if a.activa and e else None,
+        )
+
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -159,6 +183,9 @@ class ModeloIn(BaseModel):
     resolucion: str = Field(default="", max_length=20)
     umbral_confianza: float = Field(default=0, ge=0, le=1)
     ids: list[str] = Field(default_factory=list, max_length=500)  # cajones que vigila esta cámara
+    espera_gpu_ms: float = Field(default=0, ge=0, le=600000)  # cuánto esperó su turno en la GPU (no cuenta en la latencia)
+    errores: int = Field(default=0, ge=0)  # fotogramas que fallaron desde el arranque
+    luz: Literal["normal", "oscuro", "quemado", "lavado"] = "normal"  # cómo llega la imagen; si no es normal, se corrige antes de detectar
 
 
 class VehiculoSeguidoIn(BaseModel):

@@ -1,5 +1,5 @@
 """Cuánto lleva un cajón en su estado actual (para un coche: cuánto lleva estacionado sin moverse)."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 
 def _utc(d: datetime) -> datetime:
@@ -10,6 +10,16 @@ def segundos_desde(desde: datetime | None, ahora: datetime | None = None) -> int
     if desde is None:
         return None
     return max(0, int(((ahora or datetime.now(timezone.utc)) - _utc(desde)).total_seconds()))
+
+
+def a_local(d: datetime, utc_offset_h: int) -> datetime:
+    """La misma fecha en la hora local del campus (sin zona, lista para mostrar o agrupar por hora del día)."""
+    return (_utc(d) + timedelta(hours=utc_offset_h)).replace(tzinfo=None)
+
+
+def de_local(d: datetime, utc_offset_h: int) -> datetime:
+    """Una fecha escrita en hora local, en UTC."""
+    return (d - timedelta(hours=utc_offset_h)).replace(tzinfo=timezone.utc)
 
 
 def formatear(segundos: float) -> str:

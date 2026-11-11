@@ -49,7 +49,7 @@ cfg = {
     "model_extra": "models/yolov8s.pt",
     "imgsz": 1280,
     "cameras": [
-        {"id": "CAM-01", "source": "../datasets/reales/real_a.mp4", **{**comun, "occupied_ratio": 0.22, "mosaicos": [3, 2], "conf_seguimiento": 0.2}, "spaces": cajones_a},   # "Isla 1 y 2" (cajones provisionales)
+        {"id": "CAM-01", "source": "../datasets/reales/real_a.mp4", **{**comun, "occupied_ratio": 0.22, "mosaicos": [3, 2], "mosaicos_solo_cajones": True, "conf_seguimiento": 0.2}, "spaces": cajones_a},   # "Isla 1 y 2" (cajones provisionales)
         {"id": "CAM-02", "source": "../datasets/reales/real_b.mp4", **{**comun, "conf": 0.30, "occupied_ratio": 0.22, "asignar_por_punto": True, "obstaculo_grande": 0.4}, "mosaicos": [3, 2], "conf_seguimiento": 0.2, "spaces": cajones_b},          # "Estacionamiento" (aún sin cajones)
         {"id": "CAM-03", "source": "../datasets/reales/real_c.mp4", **comun, "spaces": []},          # "Entrada": flujo, no vigila cajones
     ],

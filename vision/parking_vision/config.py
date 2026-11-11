@@ -75,6 +75,8 @@ class CameraConfig:
     obstaculo_ratio: float = 0.50  # fracción de la base del objeto que debe quedar dentro del cajón
     confirm_obstruido: int = 6  # observaciones seguidas para pasar a obstruido (más que ocupado: alguien que solo cruza no cuenta)
     mosaicos: tuple[int, int] | list[int] = (1, 1)  # (columnas, filas) en que se parte la imagen para detectar los coches chicos (lejanos o del lateral); (1, 1) = sin partir
+    mosaicos_solo_cajones: bool = False  # salta los recortes que no tocan ningún cajón (la imagen completa los sigue viendo): menos latencia si parte de la imagen no tiene cajones
+    normalizar_luz: bool = True  # corrige el fotograma oscuro, quemado o lavado antes de detectar (ver iluminacion.py); con luz normal no hace nada
     offline_after_s: float = 30.0  # sin fotogramas durante este tiempo => cámara desconectada
     calentamiento_s: float = 20.0  # tras arrancar, los cambios de estado se toman como estado inicial (un auto tapando a otro, etc.)
 
@@ -88,6 +90,7 @@ class Config:
     model_extra: str | None = None  # un segundo modelo cuyas detecciones se suman a las del primero (ver DetectorCombinado)
     device: str | None = None  # None = automático (GPU si hay), "cpu", "0"
     imgsz: int = 960
+    media_precision: bool | None = None  # FP16 en la GPU: None = automático (sí con CUDA), False = precisión completa
     vehicle_classes: tuple[int, ...] = (2, 3, 5, 7)  # COCO: auto, moto, bus, camión
     obstacle_classes: tuple[int, ...] = tuple(OBSTACULOS_COCO)  # COCO: persona, bicicleta, maleta, mochila...
     pendant_model: str | None = None  # modelo YOLO propio que detecta colgantes (opcional)
@@ -121,7 +124,7 @@ def load_config(path: str | Path) -> Config:
     cfg.api_key = os.environ.get("INGEST_API_KEY", raw.get("api_key", ""))
     cfg.model = os.environ.get("YOLO_MODEL", raw.get("model", cfg.model))
     cfg.model_extra = raw.get("model_extra")
-    for key in ("device", "imgsz", "pendant_model", "pendant_code_regex", "save_low_confidence", "low_confidence_dir"):
+    for key in ("device", "imgsz", "media_precision", "pendant_model", "pendant_code_regex", "save_low_confidence", "low_confidence_dir"):
         if key in raw:
             setattr(cfg, key, raw[key])
     if "vehicle_classes" in raw:

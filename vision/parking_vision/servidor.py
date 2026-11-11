@@ -25,8 +25,9 @@ import cv2
 import numpy as np
 
 from .config import CameraConfig, Config, load_config, load_dotenv
-from .detector import DetectorCombinado, VehicleDetector
+from .detector import VehicleDetector, crear_detector
 from .draw import draw_result
+from .iluminacion import diagnostico
 from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, con_estado_confirmado
 from .publisher import ApiPublisher
 from .run import process_frame
@@ -36,6 +37,7 @@ log = logging.getLogger("demo")
 CAFE, NARANJA = (35, 47, 106), (40, 140, 242)  # BGR de los colores institucionales aproximados
 REAJUSTE_BUCLE_S = 10.0  # segundos de reajuste silencioso tras reiniciar un video en bucle
 FPS_EMISION = 15  # el video emitido va a este ritmo como máximo; la detección no depende de él
+ERRORES_PARA_DESCONECTAR = 5  # fotogramas seguidos que fallan para avisar a la API que la cámara no está dando datos
 
 
 class CamaraDemo:
@@ -55,6 +57,9 @@ class CamaraDemo:
         self._resultado: tuple[list[SpaceState], list[Detection]] = ([], [])
         self.stats: dict = {}
         self._lat: list[float] = []
+        self._espera: list[float] = []  # ms esperando a que otra cámara suelte la GPU
+        self.errores = 0  # fotogramas que fallaron desde el arranque
+        self.errores_seguidos = 0
         self._stop = threading.Event()
         self.fps_video = 25.0
         self.resolucion = ""
@@ -137,11 +142,26 @@ class CamaraDemo:
                 frame = None if self._frame is None else self._frame.copy()
             if frame is None:
                 continue
-            t0 = time.time()
-            with self.det_lock:
-                states, vehicles, todas = process_frame(cam, self.detector, frame, self.tracker.state)
-            ms = (time.time() - t0) * 1000
+            # Un fotograma que falla (video corrupto, GPU sin memoria) no debe matar el hilo: la cámara se quedaría congelada sin avisar.
+            try:
+                t_espera = time.time()
+                with self.det_lock:
+                    t0 = time.time()  # la latencia es la del modelo, sin contar la espera a que otra cámara suelte la GPU
+                    states, vehicles, todas = process_frame(cam, self.detector, frame, self.tracker.state)
+                    ms = (time.time() - t0) * 1000
+            except Exception:
+                self.errores += 1
+                self.errores_seguidos += 1
+                if self.errores_seguidos in (1, 10) or self.errores_seguidos % 100 == 0:
+                    log.exception("%s: fallo al procesar el fotograma (%d seguidos)", cam.id, self.errores_seguidos)
+                if self.errores_seguidos == ERRORES_PARA_DESCONECTAR and self.publisher:
+                    self.publisher.camera_status(cam.id, False)  # el panel la muestra desconectada en vez de congelada
+                continue
+            if self.errores_seguidos >= ERRORES_PARA_DESCONECTAR and self.publisher:
+                self.publisher.camera_status(cam.id, True)
+            self.errores_seguidos = 0
             self._lat = (self._lat + [ms])[-20:]
+            self._espera = (self._espera + [(t0 - t_espera) * 1000])[-20:]
             changes = self.tracker.update({s.id: s.estado for s in states})
             ahora_t = time.time()
             if self._reiniciar_seguidor:
@@ -163,6 +183,7 @@ class CamaraDemo:
                 "latencia_ms": round(sum(self._lat) / len(self._lat), 1), "vehiculos": len(self._seguidos), "libres": libres,
                 "ocupados": ocupados, "obstruidos": obstruidos, "espacios": len(confirmados), "resolucion": self.resolucion, "umbral_confianza": cam.conf,
                 "ids": [s.id for s in confirmados],  # cajones que esta cámara vigila de verdad
+                "espera_gpu_ms": round(sum(self._espera) / len(self._espera), 1), "errores": self.errores, "luz": diagnostico(frame),
             }
             for c in changes:
                 if c.estado_previo is not None:
@@ -295,11 +316,8 @@ def main() -> None:
     if publisher and not cfg.api_key:
         raise SystemExit("Falta INGEST_API_KEY (variable de entorno o .env)")
 
-    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
-    modelo = Path(cfg.model).stem.replace("yolov", "YOLOv")  # yolov8n -> YOLOv8n
-    if cfg.model_extra:
-        detector = DetectorCombinado([detector, VehicleDetector(cfg.model_extra, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)])
-        modelo += " + " + Path(cfg.model_extra).stem.replace("yolov", "YOLOv")
+    detector = crear_detector(cfg)
+    modelo = " + ".join(Path(m).stem.replace("yolov", "YOLOv") for m in (cfg.model, cfg.model_extra) if m)  # yolov8n -> YOLOv8n
     det_lock = threading.Lock()
     disponibles = []
     for c in cfg.cameras:

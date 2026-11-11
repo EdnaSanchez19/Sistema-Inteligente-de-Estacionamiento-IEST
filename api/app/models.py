@@ -192,6 +192,56 @@ class Evento(Base):
     colgante: Mapped[Colgante | None] = relationship()
 
 
+class MuestraOcupacion(Base):
+    """Cuántos cajones monitoreados de una zona estaban libres, ocupados u obstruidos en un instante.
+
+    Es la serie histórica de los reportes (ocupación por hora, horas pico). La gráfica en vivo del panel usa la serie en
+    memoria de `historial`; esta se guarda cada pocos minutos y sobrevive a los reinicios.
+    """
+
+    __tablename__ = "muestras_ocupacion"
+    __table_args__ = (Index("ix_muestras_fecha_zona", "tomada_en", "zona_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tomada_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    zona_id: Mapped[int] = mapped_column(ForeignKey("zonas.id", ondelete="CASCADE"))
+    libres: Mapped[int] = mapped_column(default=0)
+    ocupados: Mapped[int] = mapped_column(default=0)
+    obstruidos: Mapped[int] = mapped_column(default=0)
+    monitoreados: Mapped[int] = mapped_column(default=0)
+
+    zona: Mapped[Zona] = relationship()
+
+
+class Alerta(Base):
+    """Algo que un operador tiene que mirar: una estancia demasiado larga, un cajón obstruido mucho rato, una cámara caída.
+
+    La crea y la cierra el vigilante (`alertas.evaluar`): mientras la condición sigue, la alerta está `activa`; cuando deja
+    de cumplirse se marca resuelta. Un operador puede marcarla como atendida sin que deje de estar activa.
+
+    `tipo` es texto libre (no una enumeración con CHECK) para poder agregar reglas sin migrar la tabla.
+    """
+
+    __tablename__ = "alertas"
+    __table_args__ = (Index("ix_alertas_activa_clave", "activa", "clave"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tipo: Mapped[str] = mapped_column(String(30))
+    clave: Mapped[str] = mapped_column(String(80))  # identifica la condición ("estancia:A-03"): no se repite mientras esté activa
+    mensaje: Mapped[str] = mapped_column(Text)
+    espacio_id: Mapped[int | None] = mapped_column(ForeignKey("espacios.id", ondelete="SET NULL"))
+    camara_id: Mapped[int | None] = mapped_column(ForeignKey("camaras.id", ondelete="SET NULL"))
+    activa: Mapped[bool] = mapped_column(Boolean, default=True)
+    creada_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    resuelta_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    atendida_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    atendida_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))
+
+    espacio: Mapped[Espacio | None] = relationship()
+    camara: Mapped[Camara | None] = relationship()
+    atendida_por: Mapped[Usuario | None] = relationship()
+
+
 class Notificacion(Base):
     __tablename__ = "notificaciones"
 

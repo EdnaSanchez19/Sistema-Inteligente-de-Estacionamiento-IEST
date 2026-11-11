@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1c2c">
+<title>Estacionamiento IEST · Panel</title>
+<!-- El tema guardado se aplica antes de pintar para que no parpadee -->
+<script>try { var t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.tema = t; } catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/panel/css/base.css">
+<link rel="stylesheet" href="/panel/css/componentes.css">
+<link rel="stylesheet" href="/panel/css/vistas.css">
+</head>
+<body>
+<div id="app" class="login"></div>
+
+<div id="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-caja">
+    <button class="modal-cerrar" type="button" aria-label="Cerrar">×</button>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+
+<!-- Scripts clásicos, en orden: comparten el ámbito global, sin paso de compilación -->
+<script src="/panel/js/nucleo.js"></script>
+<script src="/panel/js/graficas.js"></script>
+<script src="/panel/js/cajones.js"></script>
+<script src="/panel/js/resumen.js"></script>
+<script src="/panel/js/croquis.js"></script>
+<script src="/panel/js/mapa.js"></script>
+<script src="/panel/js/camaras.js"></script>
+<script src="/panel/js/alertas.js"></script>
+<script src="/panel/js/eventos.js"></script>
+<script src="/panel/js/reportes.js"></script>
+<script src="/panel/js/admin.js"></script>
+<script src="/panel/js/sistema.js"></script>
+<script src="/panel/js/app.js"></script>
+</body>
+</html>

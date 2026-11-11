@@ -18,8 +18,9 @@ import numpy as np
 
 from .capture import CameraStream
 from .config import OBSTACULOS_COCO, CameraConfig, Config, load_config, load_dotenv
-from .detector import VehicleDetector
+from .detector import VehicleDetector, crear_detector, rectangulos_de_interes
 from .draw import draw_result
+from .iluminacion import normalizar
 from .occupancy import OBSTRUIDO, OCUPADO, Detection, OccupancyTracker, SpaceState, compute_occupancy, compute_states
 from .pendant import PendantInfo, PendantReader
 from .publisher import ApiPublisher
@@ -66,7 +67,14 @@ def process_frame(cam: CameraConfig, detector: VehicleDetector, frame, ocupados_
     detección más débil (`conf_baja`). Así un auto parcialmente tapado, que el modelo ve a ratos, no hace parpadear
     el cajón entre ocupado y libre ni genera entradas y salidas falsas.
     """
-    all_dets = detector.detect(frame, cam.mosaicos) if tuple(cam.mosaicos) != (1, 1) else detector.detect(frame)
+    if cam.normalizar_luz:
+        frame, _ = normalizar(frame)  # de día devuelve el mismo fotograma
+    if tuple(cam.mosaicos) == (1, 1):
+        all_dets = detector.detect(frame)
+    elif cam.mosaicos_solo_cajones and cam.spaces:
+        all_dets = detector.detect(frame, cam.mosaicos, interes=rectangulos_de_interes(cam.spaces))
+    else:
+        all_dets = detector.detect(frame, cam.mosaicos)
     es_obstaculo = lambda d: d.cls in OBSTACULOS_COCO  # noqa: E731
     vehicles = [d for d in all_dets if not es_obstaculo(d) and d.conf >= cam.conf]
     obstacles = [d for d in all_dets if es_obstaculo(d) and d.conf >= cam.conf_obstaculo] if cam.detectar_obstaculos else []
@@ -161,7 +169,7 @@ class CameraWorker(threading.Thread):
 
 
 def build(cfg: Config) -> tuple[VehicleDetector, PendantReader | None]:
-    detector = VehicleDetector(cfg.model, cfg.device, cfg.imgsz, cfg.vehicle_classes, obstacle_classes=cfg.obstacle_classes)
+    detector = crear_detector(cfg)
     pendants = PendantReader(cfg.pendant_model, cfg.pendant_code_regex, cfg.device) if cfg.pendant_model else None
     return detector, pendants
 

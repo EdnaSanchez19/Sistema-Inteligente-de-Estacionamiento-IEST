@@ -14,7 +14,7 @@ class Falso:
     def __init__(self, dets):
         self.dets = dets
 
-    def detect(self, frame, mosaicos=(1, 1), traslape=0.2):
+    def detect(self, frame, mosaicos=(1, 1), traslape=0.2, interes=None):
         return self.dets
 
 

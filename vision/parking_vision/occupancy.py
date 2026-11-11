@@ -50,6 +50,25 @@ def _intersection_area(a: np.ndarray, b: np.ndarray) -> float:
     return float(area)
 
 
+def _envolventes(spaces: list[Space]) -> np.ndarray:
+    """Rectángulo envolvente (x1, y1, x2, y2) de cada cajón, en una matriz de N x 4."""
+    return np.array([[s.polygon[:, 0].min(), s.polygon[:, 1].min(), s.polygon[:, 0].max(), s.polygon[:, 1].max()] for s in spaces], np.float32).reshape(-1, 4)
+
+
+def _solapes(spaces: list[Space], envolventes: np.ndarray, rect: np.ndarray) -> np.ndarray:
+    """Área que `rect` (un rectángulo de 4 esquinas) comparte con cada cajón.
+
+    La intersección exacta solo se calcula con los cajones cuyo rectángulo envolvente toca a `rect`: con 150 cajones y 80 detecciones
+    eso son unas decenas de cálculos por fotograma en vez de 12 000.
+    """
+    inter = np.zeros(len(spaces))
+    x1, y1, x2, y2 = float(rect[0][0]), float(rect[0][1]), float(rect[2][0]), float(rect[2][1])
+    cerca = (envolventes[:, 0] < x2) & (envolventes[:, 2] > x1) & (envolventes[:, 1] < y2) & (envolventes[:, 3] > y1)
+    for i in np.flatnonzero(cerca):
+        inter[i] = _intersection_area(spaces[i].polygon, rect)
+    return inter
+
+
 def compute_occupancy(
     spaces: list[Space],
     detections: list[Detection],
@@ -68,13 +87,14 @@ def compute_occupancy(
     y deja un coche en el cajón vecino. Si ningún cajón contiene el punto, se usa el solape como siempre.
     """
     states = [SpaceState(s.id, False) for s in spaces]
+    if not spaces:
+        return states
     areas = [max(cv2.contourArea(s.polygon.astype(np.float32)), 1e-6) for s in spaces]
+    envolventes = _envolventes(spaces)
 
     for di, det in enumerate(detections):
         foot = det.footprint(footprint)
-        inter = [_intersection_area(sp.polygon, foot) for sp in spaces]
-        if not inter:
-            continue
+        inter = _solapes(spaces, envolventes, foot)
         best = int(np.argmax(inter))
         if por_punto:
             punto = ((det.x1 + det.x2) / 2, det.y1 + 0.6 * (det.y2 - det.y1))
@@ -109,6 +129,9 @@ def compute_states(
     objeto asignado a un cajón con auto, o que apenas roza el cajón, no cuenta. Cada objeto se asigna a un solo cajón.
     """
     states = compute_occupancy(spaces, vehicles, occupied_ratio, footprint, por_punto)
+    if not spaces or not obstacles:
+        return states
+    envolventes = _envolventes(spaces)
     if obstaculo_grande is not None:
         # un "objeto" que cubre buena parte de un cajón no es una maleta: es un vehículo que el modelo no reconoció (p. ej. un sedán
         # oscuro visto desde arriba sale como "maleta"). Cuenta como ocupado y no como obstruido.
@@ -116,9 +139,9 @@ def compute_states(
         restantes = []
         for det in obstacles:
             caja = np.array([[det.x1, det.y1], [det.x2, det.y1], [det.x2, det.y2], [det.x1, det.y2]], np.float32)
-            inter = [_intersection_area(sp.polygon, caja) for sp in spaces]
-            mejor = int(np.argmax(inter)) if inter else -1
-            if mejor >= 0 and inter[mejor] / areas[mejor] >= obstaculo_grande:
+            inter = _solapes(spaces, envolventes, caja)
+            mejor = int(np.argmax(inter))
+            if inter[mejor] / areas[mejor] >= obstaculo_grande:
                 if not states[mejor].occupied:
                     states[mejor] = SpaceState(spaces[mejor].id, True, det.conf)
             else:
@@ -127,9 +150,7 @@ def compute_states(
     for det in obstacles:
         base = det.footprint(obstacle_footprint)
         base_area = max(cv2.contourArea(base), 1e-6)
-        inter = [_intersection_area(sp.polygon, base) for sp in spaces]
-        if not inter:
-            continue
+        inter = _solapes(spaces, envolventes, base)
         best = int(np.argmax(inter))
         st = states[best]
         if st.occupied or inter[best] / base_area < obstacle_ratio:

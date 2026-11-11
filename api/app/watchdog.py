@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .config import get_settings
-from . import historial
+from . import alertas, historial, reportes
 from .models import Camara, Espacio, EstadoCamara, EstadoEspacio, Evento, TipoEvento
 
 log = logging.getLogger("watchdog")
@@ -50,6 +50,30 @@ async def muestrear(session_factory, cada_s: int = 10) -> None:
                 muestrear_ocupacion(db)
         except Exception:
             log.exception("Falló el muestreo de ocupación")
+
+
+async def mantener(session_factory) -> None:
+    """Lo que alimenta los reportes y las alertas: guarda la ocupación por zona cada pocos minutos y revisa las reglas de alerta."""
+    s = get_settings()
+    paso = max(5, min(s.alertas_cada_s, s.muestra_ocupacion_s))
+    desde_muestra = desde_alertas = 0
+    while True:
+        await asyncio.sleep(paso)
+        desde_muestra, desde_alertas = desde_muestra + paso, desde_alertas + paso
+        try:
+            with session_factory() as db:
+                if desde_alertas >= s.alertas_cada_s:
+                    desde_alertas = 0
+                    creadas, cerradas = alertas.evaluar(db)
+                    if creadas or cerradas:
+                        log.info("Alertas: %d nuevas, %d cerradas", creadas, cerradas)
+                if desde_muestra >= s.muestra_ocupacion_s:
+                    desde_muestra = 0
+                    reportes.guardar_muestra(db)
+                    reportes.purgar_muestras(db, s.retencion_muestras_dias)
+                    alertas.purgar(db, s.retencion_muestras_dias)
+        except Exception:
+            log.exception("Falló el mantenimiento de reportes y alertas")
 
 
 async def vigilar(session_factory) -> None:
