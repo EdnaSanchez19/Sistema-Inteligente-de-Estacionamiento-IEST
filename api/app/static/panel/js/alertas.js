@@ -48,6 +48,7 @@ async function revisarAlertas(ev) {
   b.disabled = false;
 }
 async function atenderAlerta(a, boton) {
+  if (!(await confirmar("¿Marcar como atendida?", "Quedará registrado con tu nombre y la hora, y no se puede deshacer. La alerta se cierra sola cuando la condición termina.", "Sí, atendida"))) return;
   boton.disabled = true;
   try {
     const r = await post(`/alertas/${a.id}/atender`);

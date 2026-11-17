@@ -156,7 +156,21 @@ function abrirModal(contenido, ancha) {
   $("modal-contenido").replaceChildren(contenido);
   $("modal").hidden = false;
 }
+let _confirmacion = null;  // función que resuelve la confirmación abierta (si hay una)
+/** Pide confirmar una acción que no se puede deshacer. Devuelve una promesa: true si aceptan, false si cancelan o cierran. */
+function confirmar(titulo, texto, botonSi) {
+  return new Promise((resolver) => {
+    const responder = (valor) => { _confirmacion = null; cerrarModal(); resolver(valor); };
+    abrirModal(h("div", { class: "confirmar" },
+      h("h3", { text: titulo }), h("p", { text: texto }),
+      h("div", { class: "confirmar-acciones" },
+        h("button", { class: "btn", type: "button", text: "Cancelar", onClick: () => responder(false) }),
+        h("button", { class: "btn primario", type: "button", text: botonSi || "Aceptar", onClick: () => responder(true) }))));
+    _confirmacion = resolver;
+  });
+}
 function cerrarModal() {
+  if (_confirmacion) { const r = _confirmacion; _confirmacion = null; r(false); }  // cerrar sin elegir cuenta como cancelar
   if ($("modal").hidden) return;
   const img = $("modal-contenido").querySelector("img.video");
   if (img) desconectarVideo(img);  // quitar el nodo no corta un MJPEG: hay que cambiarle la fuente

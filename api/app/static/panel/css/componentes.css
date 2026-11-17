@@ -172,3 +172,8 @@ button.kpi:hover { border-color: var(--borde-fuerte); }
 .toast.ok { border-left-color: var(--ok); }
 .toast.mal { border-left-color: var(--critico); }
 @media (max-width: 900px) { #toasts { bottom: 78px; } .cajon { height: 42px; } .buscar input { width: 130px; } }
+
+/* Confirmación de acciones que no se pueden deshacer */
+.confirmar h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; padding-right: 30px; }
+.confirmar p { color: var(--texto-2); line-height: 1.55; }
+.confirmar-acciones { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }

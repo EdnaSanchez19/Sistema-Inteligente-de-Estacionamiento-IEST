@@ -15,11 +15,6 @@
 .login-portada .marca { padding: 0; }
 .login-portada .marca b { color: #fff; }
 .login-portada .marca span { color: rgba(255, 255, 255, .7); }
-.login-lema h1 { font-size: clamp(30px, 3.6vw, 46px); font-weight: 700; letter-spacing: -.03em; line-height: 1.08; max-width: 14ch; }
-.login-lema p { margin-top: 14px; font-size: 15px; line-height: 1.55; color: rgba(255, 255, 255, .78); max-width: 46ch; }
-.login-datos { display: flex; gap: 34px; margin-top: 30px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
-.login-datos b { display: block; font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
-.login-datos span { font-size: 12.5px; color: rgba(255, 255, 255, .65); }
 .login-acceso { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; background: var(--fondo); }
 .login-acceso > #tema { position: absolute; top: 22px; right: 22px; }
 .login-form { width: min(360px, 100%); display: flex; flex-direction: column; gap: 14px; }
@@ -166,7 +161,6 @@ div.video.grande { aspect-ratio: auto; height: min(74vh, 620px); }
   .nav-item { width: auto; text-align: center; }
   #app.login { grid-template-columns: minmax(0, 1fr); }
   .login-portada { padding: 22px 22px 26px; min-height: 250px; gap: 26px; }
-  .login-datos { display: none; }
   .login-acceso { padding: 34px 22px 64px; justify-content: flex-start; }
   .kpis, .alerta-cuentas, .rep-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .hero { flex-direction: column; align-items: flex-start; gap: 16px; padding: 18px; }

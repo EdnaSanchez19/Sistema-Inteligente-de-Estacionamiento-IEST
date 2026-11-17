@@ -1,5 +1,18 @@
 # Cambios
 
+## Sin versión — documentación final y verificación (17/11/2026)
+
+- **Documento de gestión y documento técnico** (`docs/Documento_de_Gestion.docx` y `docs/Documento_Tecnico.docx`): acta, EDT, cronograma, seguimiento, riesgos y cierre;
+  planteamiento, requisitos con identificador, diagramas, casos de prueba con resultados y referencias en formato APA 7. Aclaran que los 186 cajones sin monitoreo se deben a que
+  el equipo trabajó con las grabaciones de las tres cámaras que proporcionó el IEST.
+- **Verificación completa**: 154 pruebas automáticas aprobadas (72 de API, 61 de visión y 21 de extremo a extremo); 391 cajones, 205 con cámara.
+- **Login sin el texto de la portada** y campos de acceso que el navegador ya no rellena; se retiró el CSS y la función que ya no se usaban.
+- `docs/DOCKER.md` explica cómo restablecer la contraseña del administrador (el sistema solo la crea la primera vez) y el choque de puertos con el servicio de Windows.
+- README: la ruta del panel es `app/static/panel/`.
+- **Confirmación al marcar una alerta como atendida** (acción que no se puede deshacer): cuadro con «Cancelar» y «Sí, atendida»; cerrar con Escape cuenta como cancelar. Probado de punta a punta.
+- **Documentos**: sección de alcances preliminares (qué se cumplió y qué no, con razones), presupuesto simulado, cronograma con responsables, interlineado doble (APA 7) y la liga del repositorio de GitHub en portada, entregables y referencias. Sin textos pendientes ni páginas en blanco.
+- Se retiró `panel.html`, el panel anterior que ya nada usaba.
+
 ## Sin versión — cámaras reales del IEST (02/11/2026)
 
 - **Lateral del gimnasio (CAM-02): 18 cajones** (`GIM-01` a `GIM-18`) en la franja de asfalto junto al edificio "Bienvenidos", a la izquierda de la fila 7, perpendiculares al
@@ -31,7 +44,7 @@
   `parking_vision.servidor`. El simulador de datos inventados (`--con-simulacion`) se conserva.
 - **Proyecto reordenado.** `scripts/` queda con lo de uso diario y tres subcarpetas (`etiquetado/`, `cajones_reales/`, `cajones/`, `simulacion/`; ver
   `scripts/README.md`); los polígonos de los cajones reales pasan a `demo/cajones_reales/`; las exportaciones de diseño que estaban sueltas en la
-  raíz (`index.tsx`, `tailwind.*`, `tokens/`) pasan a `docs/diseno/`; el README principal trae el mapa de carpetas. Se retiró lo que no se
+  raíz (`index.tsx`, `tailwind.*`, `tokens/`) pasan a `docs/diseño/`; el README principal trae el mapa de carpetas. Se retiró lo que no se
   versionaba y se podía regenerar (`salida/`, videos y datos de la época de demostración en `datasets/`, parches de una sola vez, imágenes de trabajo).
 - **Lateral de la biblioteca reajustada (18 cajones, `BIB-01` a `BIB-18`)**: los bordes de los cajones se anclaron a los coches (los míos salían
   corridos ~40 px); `BIB-19` a `BIB-42` quedan sin monitoreo. Además, `obstaculo_grande` (CAM-02): un "objeto" que cubre al menos 40 % de un cajón se

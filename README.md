@@ -24,14 +24,14 @@ Cámaras ──RTSP/LAN──▶ vision/ (YOLOv8 + OpenCV) ──▶ api/ (FastA
 
 | Carpeta | Qué hay |
 |---|---|
-| `api/` | API (FastAPI), base de datos y el panel web (`app/static/panel.html`) |
+| `api/` | API (FastAPI), base de datos y el panel web (`app/static/panel/`) |
 | `vision/` | Servidor de visión: detección con YOLO, estado de cada cajón y seguimiento de coches |
 | `mobile/` | App móvil (Expo / React Native) |
 | `db/` | Esquema SQL y migraciones |
 | `camaras/` | Configuración de las 3 cámaras reales (`camaras.json`) y los polígonos de sus cajones (`cajones/`) |
 | `scripts/` | Arranque y servicio (`iniciar_sistema.py`, `servicio.ps1`) y herramientas por tema; ver `scripts/README.md` |
 | `tests/` | Pruebas de integración (las de cada parte están en su carpeta) |
-| `docs/` | Documentación: ejecución, Docker, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |
+| `docs/` | Documentación: documento de gestión y documento técnico (`.docx`), ejecución, Docker, simulación, etiquetado, dataset de Kaggle y exportaciones de diseño |
 | `evidencias/` | Evidencias de pruebas y resultados |
 | `datasets/` | **No se sube a Git.** Videos reales de las cámaras (`reales/`), fotogramas para etiquetar (`etiquetado/`) y ejemplos |
 | `herramientas_externas/` | **No se sube a Git.** `mediamtx`, para la prueba de cámara RTSP simulada |

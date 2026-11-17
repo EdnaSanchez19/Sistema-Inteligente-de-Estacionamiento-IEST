@@ -38,12 +38,22 @@ minutos más en cargar los modelos; el panel lo muestra solo.
 
 ## Servicio de Windows o Docker
 **`scripts\docker.ps1` desactiva el inicio automático del servicio de Windows** (si no, la tarea se reinicia sola y vuelve a ocupar los puertos). Para volver al servicio:
-`scripts\docker.ps1 detener` y luego `scripts\servicio.ps1 iniciar` (lo reactiva). El acceso directo del Escritorio (`scriptsbrir_panel.bat`) funciona en los dos modos: en modo
+`scripts\docker.ps1 detener` y luego `scripts\servicio.ps1 iniciar` (lo reactiva). El acceso directo del Escritorio (`scripts\abrir_panel.bat`) funciona en los dos modos: en modo
 Docker enciende Docker Desktop y los contenedores si estaban apagados. Docker Desktop **no** arranca solo al iniciar sesión (Settings → General → *Start Docker Desktop when you sign in* lo activa).
 
 Hacen lo mismo y **no pueden correr a la vez**. El servicio de Windows (`scripts\servicio.ps1`) arranca solo al iniciar sesión; Docker se
 levanta con `scripts\docker.ps1` (y con `restart: unless-stopped` vuelve solo si Docker Desktop está abierto). Docker sirve para llevar el sistema a
 otro equipo o a un servidor sin instalar Python ni dependencias.
+
+## Restablecer la contraseña del administrador
+La API crea al administrador **solo la primera vez**. Si la contraseña del archivo de credenciales ya no coincide con la base de datos, el panel responde
+«Correo o contraseña incorrectos». Para fijar una nueva (mínimo 12 caracteres), con la base de datos encendida:
+
+```
+docker compose run --rm --no-deps -e NUEVA='tu-clave-nueva' --entrypoint python api -c "import os; from sqlalchemy import select; from sqlalchemy.orm import Session; from app.db import engine; from app.models import Usuario; from app.security import hash_password; s=Session(engine); u=s.scalar(select(Usuario).where(Usuario.correo=='admin@iest.edu.mx')); u.password_hash=hash_password(os.environ['NUEVA']); s.commit(); print('listo')"
+```
+
+Debe imprimir `listo`. Si el puerto 8000 está ocupado, el servicio de Windows sigue corriendo: deténlo (`scripts\servicio.ps1 detener`) antes de levantar Docker.
 
 ## Notas
 - La API crea las tablas y carga los 391 cajones, las cámaras y el administrador en cada arranque (es idempotente).

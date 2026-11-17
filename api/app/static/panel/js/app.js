@@ -29,8 +29,8 @@ const infoVista = (id) => vistasPermitidas().find((v) => v.id === id);
 function vistaLogin(mensaje) {
   timers.forEach(clearInterval); timers = [];
   const app = $("app"); app.className = "login"; app.replaceChildren();
-  const correo = h("input", { class: "entrada", type: "email", placeholder: "nombre@iest.edu.mx", required: true, autocomplete: "username" });
-  const clave = h("input", { class: "entrada", type: "password", placeholder: "Contraseña", required: true, autocomplete: "current-password" });
+  const correo = h("input", { class: "entrada", type: "email", placeholder: "nombre@iest.edu.mx", required: true, autocomplete: "off", name: "correo-panel" });
+  const clave = h("input", { class: "entrada", type: "password", placeholder: "Contraseña", required: true, autocomplete: "new-password", name: "clave-panel" });
   const error = h("div", { class: "login-error", role: "alert", text: mensaje || "" });
   const boton = h("button", { class: "btn primario", type: "submit", text: "Entrar" });
   const form = h("form", { class: "login-form" },
@@ -44,13 +44,9 @@ function vistaLogin(mensaje) {
       token = (await r.json()).access_token; sessionStorage.setItem("token", token); iniciar();
     } catch (e) { error.textContent = e.message; boton.disabled = false; }
   });
-  const dato = (valor, texto) => h("div", null, h("b", { text: valor }), h("span", { text: texto }));
   app.append(
     h("div", { class: "login-portada" },
-      h("div", { class: "marca" }, h("div", { class: "marca-logo", text: "P" }), h("div", null, h("b", { text: "IEST Anáhuac" }), h("span", { text: "Sistema inteligente de estacionamiento" }))),
-      h("div", { class: "login-lema" }, h("h1", { text: "Encuentra tu lugar antes de llegar" }),
-        h("p", { text: "Cámaras y visión por computadora que muestran en tiempo real qué cajones están libres, ocupados u obstruidos." }),
-        h("div", { class: "login-datos" }, dato("2 s", "entre cada actualización"), dato("24/7", "monitoreo continuo"), dato("En vivo", "cajón por cajón")))),
+      h("div", { class: "marca" }, h("div", { class: "marca-logo", text: "P" }), h("div", null, h("b", { text: "IEST Anáhuac" }), h("span", { text: "Sistema inteligente de estacionamiento" })))),
     h("div", { class: "login-acceso" },
       h("button", { class: "icono-btn", id: "tema", type: "button", title: "Cambiar tema", "aria-label": "Cambiar entre modo claro y oscuro", onClick: alternarTema }, icono(temaOscuro() ? "sol" : "luna")),
       form, h("p", { class: "login-pie", text: "IEST Anáhuac · Tampico" })));
