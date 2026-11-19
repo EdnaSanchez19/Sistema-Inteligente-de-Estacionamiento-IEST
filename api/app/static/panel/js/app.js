@@ -6,7 +6,7 @@ const MENU = [
   ["Operación", [
     { id: "resumen", nombre: "Resumen", corto: "Inicio", icono: "resumen", sub: "Estado del estacionamiento en este momento" },
     { id: "mapa", nombre: "Mapa de cajones", corto: "Mapa", icono: "mapa", sub: "Cada cajón en vivo: libre, ocupado, obstruido y tiempo transcurrido" },
-    { id: "camaras", nombre: "Cámaras", corto: "Cámaras", icono: "camara", sub: "Video en vivo con las detecciones del modelo" },
+    { id: "camaras", nombre: "Cámaras", corto: "Cámaras", icono: "camara", sub: "Video en vivo con las detecciones del modelo", admin: true },
   ]],
   ["Supervisión", [
     { id: "alertas", nombre: "Alertas", corto: "Alertas", icono: "alerta", sub: "Lo que pide atención: estancias excedidas, obstrucciones y cámaras caídas", admin: true },
@@ -15,14 +15,16 @@ const MENU = [
   ]],
   ["Configuración", [
     { id: "admin", nombre: "Administración", corto: "Admin", icono: "admin", sub: "Usuarios, vehículos y colgantes", admin: true },
-    { id: "sistema", nombre: "Sistema", corto: "Sistema", icono: "sistema", sub: "Componentes y modelo de visión" },
+    { id: "sistema", nombre: "Sistema", corto: "Sistema", icono: "sistema", sub: "Componentes y modelo de visión", admin: true },
   ]],
 ];
 const VISTA = {
-  resumen: [vistaResumen, pintarResumen], mapa: [vistaMapa, pintarMapa], camaras: [vistaCamaras, pintarCamaras], alertas: [vistaAlertas, pintarAlertas],
+  resumen: [() => (esAdmin() ? vistaResumen() : vistaInicio()), () => (esAdmin() ? pintarResumen() : pintarInicio())], mapa: [vistaMapa, pintarMapa], camaras: [vistaCamaras, pintarCamaras], alertas: [vistaAlertas, pintarAlertas],
   eventos: [vistaEventos, pintarEventos], reportes: [vistaReportes, () => {}], admin: [vistaAdmin, () => {}], sistema: [vistaSistema, pintarSistema],
 };  // Reportes y Administración no se repintan en cada ciclo: se pintan al entrar y cuando llegan sus datos
-const vistasPermitidas = () => MENU.flatMap(([, items]) => items).filter((v) => !v.admin || esAdmin());
+const nombreVista = (v) => (v.id === "resumen" && !esAdmin() ? "Inicio" : v.nombre);  // quien no es administrador ve su Inicio en lugar del Resumen
+const vistasPermitidas = () => MENU.flatMap(([, items]) => items).filter((v) => !v.admin || esAdmin())
+  .map((v) => (v.id === "resumen" && !esAdmin() ? { ...v, nombre: "Inicio", sub: "La disponibilidad del estacionamiento y lo tuyo" } : v));
 const infoVista = (id) => vistasPermitidas().find((v) => v.id === id);
 
 /* ── Inicio de sesión ── */
@@ -54,7 +56,7 @@ function vistaLogin(mensaje) {
 }
 function cerrarSesion() {
   token = null; sessionStorage.removeItem("token");
-  Object.assign(S, { yo: null, estado: null, espacios: [], eventos: null, camaras: null, alertas: null, historialAlertas: null, primera: true });
+  Object.assign(S, { yo: null, estado: null, espacios: [], eventos: null, camaras: null, alertas: null, historialAlertas: null, horas: null, misCoches: null, primera: true });
   S.reporte.datos = null;
   vistaLogin();
 }
@@ -67,20 +69,20 @@ function armarEstructura() {
     const visibles = items.filter((v) => !v.admin || esAdmin()); if (!visibles.length) continue;
     nav.append(h("div", { class: "nav-titulo", text: grupo }));
     for (const v of visibles) nav.append(h("button", { type: "button", class: "nav-item", "data-vista": v.id, onClick: () => ir(v.id) },
-      icono(v.icono, 18), h("span", { class: "nav-largo", text: v.nombre }), h("span", { class: "nav-corto", text: v.corto }),
+      icono(v.icono, 18), h("span", { class: "nav-largo", text: nombreVista(v) }), h("span", { class: "nav-corto", text: v.corto }),
       v.id === "alertas" || v.id === "eventos" ? h("span", { class: "nav-badge", id: "badge-" + v.id, hidden: true }) : null));
   }
   const inicial = (S.yo.nombre || "?").trim().charAt(0).toUpperCase();
   app.append(
     h("aside", { class: "lado" },
       h("div", { class: "marca" }, h("div", { class: "marca-logo", text: "P" }), h("div", null, h("b", { text: "IEST Anáhuac" }), h("span", { text: "Estacionamiento" }))),
-      nav, h("div", { class: "lado-pie", id: "lado-pie" })),
+      nav, h("div", { class: "lado-pie", id: "lado-pie", text: esAdmin() ? null : "IEST Anáhuac · Tampico" })),
     h("main", { class: "principal" },
       h("header", { class: "barra" },
         h("div", { class: "barra-titulo" }, h("h1", { id: "titulo" }), h("p", { id: "subtitulo" })),
         h("div", { class: "barra-acc" },
           h("span", { class: "vivo", id: "vivo" }, h("i"), h("span", { text: "En vivo" })),
-          h("button", { class: "pildora", id: "salud", type: "button", title: "Ver el estado del sistema", onClick: () => ir("sistema") }, h("i"), h("span")),
+          esAdmin() ? h("button", { class: "pildora", id: "salud", type: "button", title: "Ver el estado del sistema", onClick: () => ir("sistema") }, h("i"), h("span")) : null,
           esAdmin() ? h("button", { class: "icono-btn", id: "campana", type: "button", title: "Alertas", "aria-label": "Ver alertas", onClick: () => ir("alertas") }, icono("alerta"), h("span", { class: "punto", hidden: true })) : null,
           h("button", { class: "icono-btn", id: "tema", type: "button", title: "Cambiar tema", "aria-label": "Cambiar entre modo claro y oscuro", onClick: alternarTema }, icono(temaOscuro() ? "sol" : "luna")),
           h("div", { class: "usuario" }, h("div", { class: "avatar", text: inicial }), h("div", null, h("b", { text: S.yo.nombre }), h("span", { text: esAdmin() ? "Administrador" : S.yo.rol })),
@@ -100,7 +102,7 @@ function ir(vista) {
   gestionarVideos(); pintar();
   if (vista === "reportes") { pintarReportes(); cargarReportes(); }
   if (vista === "eventos" && S.eventos) S.eventos.forEach((e) => S.vistos.add(e.id));  // se pintan como nuevos una vez; después ya cuentan como vistos
-  if (vista === "resumen") pintarSerieResumen();
+  if (vista === "resumen" && esAdmin()) pintarSerieResumen();
   window.scrollTo(0, 0);
 }
 
@@ -119,7 +121,7 @@ function pintarComun() {
   const be = $("badge-eventos"); if (be) { const nuevos = S.eventos ? S.eventos.filter((x) => !S.vistos.has(x.id)).length : 0; be.hidden = !(nuevos && S.vista !== "eventos"); be.textContent = nuevos; }
 }
 function pintar() {
-  if (!S.estado) return;
+  if (!S.estado && esAdmin()) return;  // quien no es administrador no tiene estado del sistema que esperar
   pintarComun();
   const v = VISTA[S.vista]; if (v) v[1]();
 }
@@ -130,6 +132,11 @@ function conexion(ok) {
 
 /* ── Ciclos ── */
 async function cicloRapido() {
+  if (!esAdmin()) {  // quien no es administrador solo consulta la disponibilidad de los cajones
+    S.espacios = (await api("/espacios")) || []; S.porNumero = new Map(S.espacios.map((e) => [e.numero, e]));
+    pintar(); S.previo = new Map(S.espacios.map((e) => [e.numero, e.estado + e.monitoreado])); S.primera = false; conexion(true);
+    return;
+  }
   const [estado, espacios, estancias, coches] = await Promise.all([api("/sistema/estado"), api("/espacios"), api("/sistema/estancias?limite=8"), api("/sistema/vehiculos?limite=8").catch(() => null)]);
   S.estado = estado; S.espacios = espacios || []; S.estancias = estancias || []; S.coches = coches;
   S.porNumero = new Map(S.espacios.map((e) => [e.numero, e]));
@@ -138,6 +145,11 @@ async function cicloRapido() {
   S.previo = new Map(S.espacios.map((e) => [e.numero, e.estado + e.monitoreado])); S.primera = false; conexion(true);
 }
 async function cicloLento() {
+  if (!esAdmin()) {  // lo suyo: avisos, vehículos y su cajón asignado
+    const [avisos, coches, yo] = await Promise.all([api("/notificaciones"), api("/vehiculos/mios"), api("/auth/me")]);
+    S.avisos = avisos || []; S.misCoches = coches || []; if (yo) S.yo = yo; pintar();
+    return;
+  }
   const [avisos, eventos, camaras, alertas] = await Promise.all([api("/notificaciones"), api("/eventos?limit=200"), api("/camaras"), esAdmin() ? api("/alertas?estado=activas&limite=100").catch(() => null) : null]);
   S.avisos = avisos || []; S.camaras = camaras;
   if (alertas) {
@@ -155,12 +167,18 @@ async function cicloLento() {
   pintar();
   if (eventos && S.vista === "eventos") eventos.forEach((e) => S.vistos.add(e.id));
 }
-async function cicloSerie() { S.serie = (await api("/sistema/historial?minutos=60")) || []; pintarSerieResumen(); }
+async function cicloSerie() {
+  if (!esAdmin()) {  // la ocupación típica por hora cambia poco: se pide cada 5 minutos
+    if (!S.horas || Date.now() - S.horasEn > 300000) { S.horas = (await api("/disponibilidad/por-hora")) || []; S.horasEn = Date.now(); pintar(); }
+    return;
+  }
+  S.serie = (await api("/sistema/historial?minutos=60")) || []; pintarSerieResumen();
+}
 
 let redibujo = 0;
 function alCambiarTamano() {
   clearTimeout(redibujo);
-  redibujo = setTimeout(() => { if (!S.yo) return; if (S.vista === "resumen") pintarSerieResumen(); if (S.vista === "reportes") pintarReportes(); }, 150);
+  redibujo = setTimeout(() => { if (!S.yo) return; if (S.vista === "resumen" && esAdmin()) pintarSerieResumen(); if (S.vista === "reportes") pintarReportes(); }, 150);
 }
 
 async function iniciar() {

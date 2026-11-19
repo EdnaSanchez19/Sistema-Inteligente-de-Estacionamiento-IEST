@@ -22,7 +22,7 @@ def reporte(camara="CAM-02", **extra):
 
 def test_los_coches_reportados_aparecen_ordenados_por_tiempo_quieto(client):
     assert client.post("/ingest/vehiculos", headers=KEY, json=reporte()).json() == {"recibidos": 3}
-    h = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    h = login(client, "admin@iest.edu.mx", "admin-pass-123")
     d = client.get("/sistema/vehiculos", headers=h).json()
     assert (d["total"], d["quietos"], d["en_movimiento"], d["fuera_de_cajon"]) == (3, 2, 1, 1)
     assert [v["id"] for v in d["mas_tiempo_quietos"]] == [1, 3]  # el que lleva más quieto, primero; el que se mueve no aparece
@@ -33,7 +33,7 @@ def test_los_coches_reportados_aparecen_ordenados_por_tiempo_quieto(client):
 def test_suma_las_camaras_y_olvida_la_que_dejo_de_reportar(client):
     client.post("/ingest/vehiculos", headers=KEY, json=reporte("CAM-01"))
     client.post("/ingest/vehiculos", headers=KEY, json=reporte("CAM-02"))
-    h = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    h = login(client, "admin@iest.edu.mx", "admin-pass-123")
     assert client.get("/sistema/vehiculos", headers=h).json()["total"] == 6
     seguimiento._datos["CAM-01"]["_t"] -= seguimiento.CADUCA_S + 5  # CAM-01 dejó de reportar hace rato
     d = client.get("/sistema/vehiculos", headers=h).json()

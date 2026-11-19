@@ -9,14 +9,14 @@ const M = { firma: "", bloques: new Map() };
 function vistaMapa() {
   M.firma = ""; M.bloques = new Map();
   M.segModo = segmentado([["croquis", "Croquis"], ["plano", "Esquema"], ["filas", "Por fila"]], S.mapa.modo, (v) => { S.mapa.modo = v; pintarMapa(); });
-  M.chips = h("div", { class: "chips" }, FILTROS_MAPA.map(([valor, texto, marca]) =>
+  M.chips = h("div", { class: "chips" }, FILTROS_MAPA.filter(([valor]) => esAdmin() || valor !== "largo").map(([valor, texto, marca]) =>
     h("button", { type: "button", class: "chip", "data-f": valor, onClick: () => { S.mapa.filtro = valor; pintarMapa(); } }, marca ? h("i", { class: marca }) : null, texto + " ", h("b"))));
   M.selFila = h("div", { class: "chips", style: "margin-bottom:14px" });
   return h("section", { class: "vista", id: "v-mapa" },
     h("div", { class: "tarjeta mapa-barra" },
       h("div", { class: "mapa-controles" },
         M.segModo,
-        segmentado([["numero", "Número"], ["tiempo", "Tiempo"]], S.mapa.rotulo, (v) => { S.mapa.rotulo = v; pintarMapa(); }),
+        esAdmin() ? segmentado([["numero", "Número"], ["tiempo", "Tiempo"]], S.mapa.rotulo, (v) => { S.mapa.rotulo = v; pintarMapa(); }) : null,
         h("label", { class: "buscar", style: "margin-left:auto" }, icono("buscar", 15),
           h("input", { class: "entrada", type: "search", placeholder: "Buscar cajón, p. ej. C-12", "aria-label": "Buscar cajón", value: S.mapa.buscar, onInput: (e) => { S.mapa.buscar = e.target.value; pintarMapa(); } }))),
       M.chips),
@@ -73,5 +73,5 @@ function pintarMapa() {
     pintarCajones(b.cajones, z.lista, { filtrar: true, tiempo: S.mapa.rotulo === "tiempo" });
   }
   const total = S.espacios.length, vigilados = S.espacios.filter((e) => e.monitoreado).length;
-  M.nota.textContent = (modo === "croquis" ? "Croquis aproximado de la distribución real; el orden de los cajones dentro de cada fila está por confirmar en sitio. " : modo === "plano" ? "Esquema: la posición de cada bloque es aproximada y no está a escala. " : "") + `${total} cajones, ${vigilados} con cámara. El punto amarillo marca una estancia de más de 4 h. Toca un cajón para ver su detalle.`;
+  M.nota.textContent = (modo === "croquis" ? "Croquis aproximado de la distribución real; el orden de los cajones dentro de cada fila está por confirmar en sitio. " : modo === "plano" ? "Esquema: la posición de cada bloque es aproximada y no está a escala. " : "") + `${total} cajones, ${vigilados} con cámara. ${esAdmin() ? "El punto amarillo marca una estancia de más de 4 h. " : ""}Toca un cajón para ver su detalle.`;
 }

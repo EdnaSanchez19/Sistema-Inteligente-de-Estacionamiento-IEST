@@ -1,5 +1,17 @@
 # Cambios
 
+## Sin versión — panel para quien no es administrador (19/11/2026)
+
+- **Inicio propio para estudiantes, docentes y demás usuarios** (`inicio.js`): disponibilidad ahora, fila con más lugar, su cajón asignado, sus vehículos con colgante, avisos y
+  la ocupación típica por hora (para elegir cuándo llegar). Ya no ven alertas, cámaras ni datos del sistema.
+- **Solo dos vistas** para quien no es administrador: Inicio y Mapa de cajones. Cámaras, Sistema, Alertas, Eventos, Reportes y Administración quedan para administradores,
+  y entrar por la liga (`#camaras`, `#sistema`...) los devuelve al Inicio. En el Mapa se ocultan «Estancia larga» y «Tiempo».
+- **La API lo exige, no solo el menú**: `/sistema/*` pasa a ser solo para administradores (antes lo veía cualquier sesión), y `/espacios` ya no entrega a los demás cuánto lleva
+  estacionado cada coche (`desde`, `duracion_s`). Nuevo `GET /disponibilidad/por-hora` (cualquier sesión): solo promedios por hora.
+- Pruebas: 3 nuevas en la API (75) y las que consultaban `/sistema` con un estudiante ahora usan un administrador. Probado con una cuenta real de estudiante.
+- **Pendiente**: el video de las cámaras lo emite el servidor de visión (puerto 8100) sin autenticación y solo es alcanzable desde este equipo; ocultarlo en el panel no lo
+  protege de quien conozca la dirección.
+
 ## Sin versión — documentación final y verificación (17/11/2026)
 
 - **Documento de gestión y documento técnico** (`docs/Documento_de_Gestion.docx` y `docs/Documento_Tecnico.docx`): acta, EDT, cronograma, seguimiento, riesgos y cierre;

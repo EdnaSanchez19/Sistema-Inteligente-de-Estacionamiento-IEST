@@ -145,7 +145,7 @@ def test_el_estado_del_sistema_cuenta_solo_cajones_monitoreados(client):
     from app import historial
 
     historial.limpiar()
-    h = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    h = login(client, "admin@iest.edu.mx", "admin-pass-123")
     e = client.get("/sistema/estado", headers=h).json()["espacios"]
     assert e["total"] == 391 and e["monitoreados"] == 0 and e["sin_monitoreo"] == 391 and e["libre"] == 0 and e["ocupado"] == 0
     establecer(client, "CAM-01", [f"A-{i:02d}" for i in range(1, 11)])
@@ -159,7 +159,7 @@ def test_la_serie_de_ocupacion_se_muestrea_y_se_consulta(client):
     from app.watchdog import muestrear_ocupacion
 
     historial.limpiar()
-    h = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    h = login(client, "admin@iest.edu.mx", "admin-pass-123")
     establecer(client, "CAM-01", ["A-01", "A-02"])
     establecer(client, "CAM-01", ["A-02"], ocupado=True)
     db = next(app.dependency_overrides[get_db]())

@@ -1,4 +1,4 @@
-"""Estado general del sistema para el panel: API, base de datos, modelo de visión y cámaras."""
+"""Estado general del sistema para el panel de administración: API, base de datos, modelo de visión y cámaras (solo administradores)."""
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query
@@ -6,7 +6,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from .. import estado_vision, historial, seguimiento
-from ..auth import get_current_user
+from ..auth import require_admin
 from ..db import get_db
 from ..models import Camara, Espacio, EstadoCamara, EstadoEspacio, Evento, Usuario, Zona
 from ..schemas import _utc
@@ -18,7 +18,7 @@ VISION_ACTIVA_S = 15  # un reporte más viejo que esto se considera "sin conexi�
 
 
 @router.get("/estado")
-def estado(_: Usuario = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+def estado(_: Usuario = Depends(require_admin), db: Session = Depends(get_db)) -> dict:
     try:
         db.execute(text("SELECT 1"))
         bd = "ok"
@@ -47,7 +47,7 @@ def estado(_: Usuario = Depends(get_current_user), db: Session = Depends(get_db)
 
 
 @router.get("/estancias")
-def estancias(estado: EstadoEspacio = EstadoEspacio.ocupado, limite: int = Query(10, ge=1, le=100), _: Usuario = Depends(get_current_user), db: Session = Depends(get_db)) -> list[dict]:
+def estancias(estado: EstadoEspacio = EstadoEspacio.ocupado, limite: int = Query(10, ge=1, le=100), _: Usuario = Depends(require_admin), db: Session = Depends(get_db)) -> list[dict]:
     """Los cajones que llevan más tiempo en un estado (por defecto, los coches que llevan más tiempo estacionados).
 
     Solo cajones que una cámara observa. `desde_observado` False significa que la duración es un mínimo: la cámara empezó
@@ -59,7 +59,7 @@ def estancias(estado: EstadoEspacio = EstadoEspacio.ocupado, limite: int = Query
 
 
 @router.get("/vehiculos")
-def vehiculos(limite: int = Query(8, ge=1, le=50), _: Usuario = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+def vehiculos(limite: int = Query(8, ge=1, le=50), _: Usuario = Depends(require_admin), db: Session = Depends(get_db)) -> dict:
     """Seguimiento de coches en vivo: cuántos hay, cuáles se mueven y cuáles están quietos (y los que llevan más tiempo quietos).
 
     Cuenta cada coche una vez por cámara: uno que ven dos cámaras a la vez se suma dos veces. Es información en vivo (no se
@@ -79,6 +79,6 @@ def vehiculos(limite: int = Query(8, ge=1, le=50), _: Usuario = Depends(get_curr
 
 
 @router.get("/historial")
-def serie_de_ocupacion(minutos: int = Query(60, ge=1, le=480), _: Usuario = Depends(get_current_user)) -> list[dict]:
+def serie_de_ocupacion(minutos: int = Query(60, ge=1, le=480), _: Usuario = Depends(require_admin)) -> list[dict]:
     """Puntos {t, libres, ocupados, obstruidos, monitoreados} de los últimos minutos (en memoria; se reinicia con la API)."""
     return historial.ultimos(minutos)

@@ -193,3 +193,15 @@ div.video.grande { aspect-ratio: auto; height: min(74vh, 620px); }
 .cq-cajones .cajon:hover { transform: none; box-shadow: 0 0 0 2px var(--texto); }
 .cq-bloque.angosto .cq-et { flex-direction: column; gap: 0; white-space: normal; line-height: 1.25; width: 100%; padding-bottom: 4px; }
 .cq-et { line-height: 1.2; padding-bottom: 5px; }
+
+/* Inicio de quien no es administrador */
+.inicio-abajo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.horas-barras { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 6px; align-items: end; height: 200px; }
+.hb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; font-size: 11px; color: var(--tenue); }
+.hb-col { width: 100%; border-radius: 4px 4px 0 0; background: var(--ok); }
+.hb-col.aviso { background: var(--aviso); }
+.hb-col.critico { background: var(--critico); }
+.hb-col.vacia { background: var(--rejilla); }
+.hb.ahora { color: var(--texto); font-weight: 700; }
+.hb.ahora .hb-col { outline: 2px solid var(--texto); outline-offset: 1px; }
+@media (max-width: 900px) { .inicio-abajo { grid-template-columns: minmax(0, 1fr); } .horas-barras { gap: 3px; } }

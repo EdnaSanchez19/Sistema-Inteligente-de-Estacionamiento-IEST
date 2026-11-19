@@ -131,7 +131,7 @@ def test_el_modelo_reporta_luz_errores_y_espera(client):
     estado_vision.limpiar()
     base = {"camara": "CAM-01", "modelo": "YOLOv8n + YOLOv8s"}
     assert client.post("/ingest/modelo", headers=KEY, json={**base, "luz": "oscuro", "errores": 2, "espera_gpu_ms": 41.5}).status_code == 200
-    v = client.get("/sistema/estado", headers=login(client, *DEMO)).json()["vision"][0]
+    v = client.get("/sistema/estado", headers=login(client, *ADMIN)).json()["vision"][0]
     assert (v["luz"], v["errores"], v["espera_gpu_ms"]) == ("oscuro", 2, 41.5)
     assert client.post("/ingest/modelo", headers=KEY, json={**base, "luz": "raro"}).status_code == 422
     estado_vision.limpiar()

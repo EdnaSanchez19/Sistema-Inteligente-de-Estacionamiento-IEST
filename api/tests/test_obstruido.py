@@ -60,7 +60,7 @@ def test_un_auto_que_llega_donde_habia_un_objeto_es_una_entrada(client):
 
 
 def test_un_cajon_obstruido_no_cuenta_como_libre(client):
-    demo = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    demo = login(client, "admin@iest.edu.mx", "admin-pass-123")
     publicar(client, "CAM-01", A_01="libre", A_02="libre")
     publicar(client, "CAM-01", A_02=("obstruido", "persona"))
     e = client.get("/sistema/estado", headers=demo).json()["espacios"]
@@ -93,7 +93,7 @@ def test_un_cajon_sin_monitoreo_no_tiene_duracion(client):
 
 
 def test_la_primera_observacion_da_una_duracion_minima(client):
-    demo = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    demo = login(client, "admin@iest.edu.mx", "admin-pass-123")  # la duración de la estancia es solo para administradores
     publicar(client, "CAM-01", A_01="ocupado")
     c = cajon(client, demo, "A-01")
     assert c["desde_observado"] is False and 0 <= c["duracion_s"] < 5  # empezó a verse ahora: no se sabe cuánto llevaba antes
@@ -130,7 +130,7 @@ def test_si_no_se_vio_la_llegada_la_estancia_es_un_minimo(client):
 
 
 def test_ranking_de_los_que_llevan_mas_tiempo(client):
-    demo = login(client, "demo@iest.edu.mx", "demo-pass-123")
+    demo = login(client, "admin@iest.edu.mx", "admin-pass-123")
     publicar(client, "CAM-01", A_01="ocupado", A_02="ocupado", A_03="libre")
     _retroceder(client, "A-02", 7200)
     _retroceder(client, "A-01", 600)

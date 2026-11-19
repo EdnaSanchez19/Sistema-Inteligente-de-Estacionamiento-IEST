@@ -177,7 +177,7 @@ def test_un_objeto_que_se_queda_en_un_cajon_vacio_lo_deja_obstruido(api, escena)
         det.dets = [Detection(40, 220, 90, 390, 0.9, cls=0)]  # persona con los pies dentro de A-01
         wait_until(lambda: api.estados(demo)["A-01"] == "obstruido", timeout=15)
         assert api.estados(demo)["A-02"] == "libre"
-        espacio = next(e for e in api.get("/espacios?zona=A", demo) if e["numero"] == "A-01")
+        espacio = next(e for e in api.get("/espacios?zona=A", admin) if e["numero"] == "A-01")  # cuánto lleva en ese estado solo lo ve el administrador
         assert espacio["objeto"] == "persona" and espacio["desde_observado"] is True
         assert any(e["tipo"] == "obstruccion" and "A-01" in e["descripcion"] for e in api.get("/eventos", admin))
         assert not any(e["tipo"] == "entrada" and "A-01" in e["descripcion"] for e in api.get("/eventos", admin))  # no es un vehículo
